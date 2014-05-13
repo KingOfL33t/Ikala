@@ -3,6 +3,7 @@ package com.ikalagaming.core;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
+import java.util.ResourceBundle;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -19,8 +20,11 @@ import javax.swing.text.DefaultCaret;
  */
 public class Console extends WindowAdapter{
 
-	private String windowTitle = "Console";
-	private int width = 300; 
+	private ResourceBundle resourceBundle = 
+			ResourceBundle.getBundle("com.ikalagaming.core.resources.Console", 
+					Localization.getLocale());
+	private String windowTitle = resourceBundle.getString("title");
+	private int width = 300;
 	private int height = 200;
 	private int maxLineCount = 150;
 	private Color background = new Color(2,3,2);
@@ -30,16 +34,6 @@ public class Console extends WindowAdapter{
 	private JTextArea textArea;
 	private JTextField inputArea;
 
-	/**
-	 * A main method for testing.
-	 * 
-	 * @param args Arguments used in creation of the program
-	 */
-	public static void main(String[] args) {
-		Console testConsole = new Console();
-		testConsole.appendMessage("This is a test");
-		testConsole.appendMessage("Test line 2");
-	}
 	/**
 	 * Sets up the console.
 	 * Constructs a new console and sets up components.
@@ -65,7 +59,8 @@ public class Console extends WindowAdapter{
 		inputArea.setForeground(foreground);
 
 		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(new JScrollPane(textArea),BorderLayout.CENTER);
+		frame.getContentPane().add(new JScrollPane(textArea),
+				BorderLayout.CENTER);
 		frame.getContentPane().add(inputArea, BorderLayout.SOUTH);
 
 		frame.setVisible(true);

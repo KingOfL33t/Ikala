@@ -6,7 +6,7 @@ public class Localization {
 
 	private static Localization instance;
 	private Locale locale = new Locale("en", "US");
-	
+
 	/**
 	 * Returns the static instance.
 	 * Creates one if it does not exist.
@@ -19,7 +19,7 @@ public class Localization {
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Sets the current locale to the given locale.
 	 * 
@@ -28,7 +28,7 @@ public class Localization {
 	public static void setLocale(Locale locale){
 		getInstance().locale = locale;
 	}
-	
+
 	/**
 	 * Returns the current locale. If no 
 	 * locale was set, defaults to "en_US".

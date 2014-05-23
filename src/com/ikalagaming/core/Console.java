@@ -52,7 +52,7 @@ public class Console extends WindowAdapter{
 		textArea.setForeground(foreground);
 		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		
+
 		inputArea = new JTextField();
 		inputArea.setEditable(true);
 		inputArea.setBackground(background);

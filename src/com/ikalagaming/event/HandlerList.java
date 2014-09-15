@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * Stores handlers per event. 
+ * Stores handlers per event.
  * Based on lahwran's fevents.
  */
 public class HandlerList {
@@ -26,7 +26,7 @@ public class HandlerList {
 
 	/**
 	 * Unregister a specific listener from the handler list.
-	 * 
+	 *
 	 * @param listener The listener to unregister
 	 */
 	public static void unregisterAll(Listener listener) {
@@ -45,7 +45,7 @@ public class HandlerList {
 
 	/**
 	 * Register a new listener in this handler list.
-	 * 
+	 *
 	 * @param listener The listener to register
 	 * @throws IllegalStateException if the listener is already registered
 	 */
@@ -60,7 +60,7 @@ public class HandlerList {
 
 	/**
 	 * Register a collection of new listeners in this handler list.
-	 * 
+	 *
 	 * @param listeners The collection to register
 	 */
 	public void registerAll(Collection<EventListener> listeners) {
@@ -71,7 +71,7 @@ public class HandlerList {
 
 	/**
 	 * Remove a listener from a specific order slot.
-	 * 
+	 *
 	 * @param listener The listener to unregister
 	 */
 	public synchronized void unregister(EventListener listener) {
@@ -80,10 +80,11 @@ public class HandlerList {
 
 
 	/**
-	 * Remove a specific listener from this handler 
+	 * Remove a specific listener from this handler
+	 * @param listener the Listener to unregister
 	 */
 	public synchronized void unregister(Listener listener) {
-		//loop through and unregister a listener from the list if it 
+		//loop through and unregister a listener from the list if it
 		//matches the param
 		for (Iterator<EventListener> i = handlerslots.iterator(); i.hasNext();)
 		{
@@ -95,10 +96,10 @@ public class HandlerList {
 
 	/**
 	 * Get the baked registered listeners associated with this handler list
-	 * 
+	 *
 	 * @return The listeners registered
 	 */
-	public EventListener[] getRegisteredListeners() {        
+	public EventListener[] getRegisteredListeners() {
 		return handlerslots.toArray(new EventListener[handlerslots.size()]);
 	}
 

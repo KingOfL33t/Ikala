@@ -13,6 +13,13 @@ public class EventManager {
 
 	private static EventManager instance;
 
+	//TODO get rid of this in favor of having multiple instances possible
+	/**
+	 * Returns the static instance.
+	 * Creates one if it does not exist.
+	 *
+	 * @return The current instance of the class
+	 */
 	public static synchronized EventManager getInstance(){
 		if (instance == null){
 			instance = new EventManager();
@@ -21,12 +28,12 @@ public class EventManager {
 	}
 	/**
 	 * Registers event listeners in the supplied listener.
-	 * 
+	 *
 	 * @param listener The listener to register
 	 * @throws Exception If there is an exception registering
 	 */
 	public void registerEventListeners(Listener listener) throws Exception {
-		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry : 
+		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry :
 			createRegisteredListeners(listener).entrySet()) {
 			getEventListeners(getRegistrationClass(
 					entry.getKey())).registerAll(entry.getValue());
@@ -35,7 +42,7 @@ public class EventManager {
 
 	/**
 	 * Returns a {@link HandlerList} for a give event type
-	 * 
+	 *
 	 * @param type The type of event to find handlers for
 	 * @throws Exception If an exception occurred
 	 */
@@ -53,9 +60,9 @@ public class EventManager {
 	}
 
 	/**
-	 * Returns the class that has the handler list for 
+	 * Returns the class that has the handler list for
 	 * the supplied {@link Event}.
-	 * 
+	 *
 	 * @param eventClass The class to find handlers for
 	 * @throws Exception If a handler list cannot be found
 	 */
@@ -83,7 +90,7 @@ public class EventManager {
 
 	/**
 	 * Sends the {@link Event event} to all of its listeners.
-	 * 
+	 *
 	 * @param event The event to fire
 	 * @throws EventException if an error occurs while firing
 	 */
@@ -100,21 +107,21 @@ public class EventManager {
 	}
 
 	/**
-	 * Creates {@link EventListener EventListeners} for a given 
+	 * Creates {@link EventListener EventListeners} for a given
 	 * {@link Listener listener}.
-	 * 
+	 *
 	 * @param listener The listener to create EventListenrs for
 	 * @return A map of events to a set of EventListeners belonging to it
 	 */
-	public Map<Class<? extends Event>, Set<EventListener>> 
+	public Map<Class<? extends Event>, Set<EventListener>>
 	createRegisteredListeners(Listener listener) {
 
-		Map<Class<? extends Event>, Set<EventListener>> toReturn = 
+		Map<Class<? extends Event>, Set<EventListener>> toReturn =
 				new HashMap<Class<? extends Event>, Set<EventListener>>();
 		Set<Method> methods;
 		try {
 			Method[] publicMethods = listener.getClass().getMethods();
-			methods = new HashSet<Method>(publicMethods.length, 
+			methods = new HashSet<Method>(publicMethods.length,
 					Float.MAX_VALUE);
 			for (Method method : publicMethods) {
 				methods.add(method);
@@ -128,17 +135,17 @@ public class EventManager {
 
 		//search the methods for listeners
 		for (final Method method : methods) {
-			final EventHandler handlerAnnotation = 
+			final EventHandler handlerAnnotation =
 					method.getAnnotation(EventHandler.class);
 			if (handlerAnnotation == null)
 				continue;
 			final Class<?> checkClass;
 			if (method.getParameterTypes().length != 1
-					|| !Event.class.isAssignableFrom(checkClass = 
+					|| !Event.class.isAssignableFrom(checkClass =
 					method.getParameterTypes()[0])) {
 				continue;
 			}
-			final Class<? extends Event> eventClass = 
+			final Class<? extends Event> eventClass =
 					checkClass.asSubclass(Event.class);
 			method.setAccessible(true);
 			Set<EventListener> eventSet = toReturn.get(eventClass);

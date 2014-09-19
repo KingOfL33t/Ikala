@@ -23,15 +23,6 @@ public interface Node {
 	public String getType();
 
 	/**
-	 * Returns an ID which is assigned to this specific node upon
-	 * being loaded into memory.
-	 * This should be unique for each node.
-	 *
-	 * @return the unique id of this node instance
-	 */
-	public int getID();
-
-	/**
 	 * Returns this classes version number. This changes periodically for each
 	 * node subclass as they are changed and updated.
 	 *

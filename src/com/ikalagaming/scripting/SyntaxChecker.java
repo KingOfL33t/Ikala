@@ -375,4 +375,62 @@ public class SyntaxChecker {
 
 		return true;
 	}
+
+	/**
+	 * Returns true if the given char is an operator (that is, a character
+	 * used by the scripting language such as a semicolon or comma).
+	 *
+	 * @param c the char to check
+	 * @return true if it is an operator, false otherwise
+	 */
+	private boolean isOperator(char c){
+		if (c == ScriptingSettings.ARGUMENT_BEGIN){
+			return true;
+		}
+		else if (c == ScriptingSettings.ARGUMENT_END){
+			return true;
+		}
+		else if (c == ScriptingSettings.ARGUMENT_SEPARATOR){
+			return true;
+		}
+		else if (c == ScriptingSettings.COMMENT_CHAR){
+			return true;
+		}
+		else if (c == ScriptingSettings.COMPILER_CHAR){
+			return true;
+		}
+		else if (c == ScriptingSettings.METHOD_INDICATOR){
+			return true;
+		}
+		else if (c == ScriptingSettings.STRING_CHAR){
+			return true;
+		}
+		else if (c == ScriptingSettings.TRAILING_CHAR){
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Takes the given command and creates a command object.
+	 * @deprecated this will be moved to isValidCommand soon
+	 *
+	 * @param command
+	 * @return
+	 */
+	public boolean isValidCmd(String command){
+		//easy checks
+		if (command == null){
+			return false;//can't be null and also valid
+		}
+		if (command.isEmpty()){
+			return false;//no command to check
+		}
+
+
+		String trimmed = command.trim();
+
+		return true;
+	}
 }

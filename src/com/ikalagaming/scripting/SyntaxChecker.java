@@ -5,7 +5,7 @@ import java.util.LinkedList;
 /**
  * Provides methods for checking syntax of scripting commands to ensure they
  * are valid.
- *
+ *s
  * @author Ches Burks
  *
  */
@@ -370,7 +370,6 @@ public class SyntaxChecker {
 				repeatFlag = false;//resets the flag from a comma
 
 			}
-			//TODO closing chars cases to handle nested methods
 		}
 
 		return true;
@@ -383,7 +382,7 @@ public class SyntaxChecker {
 	 * @param c the char to check
 	 * @return true if it is an operator, false otherwise
 	 */
-	private boolean isOperator(char c){
+	private static boolean isOperator(char c){
 		if (c == ScriptingSettings.ARGUMENT_BEGIN){
 			return true;
 		}
@@ -414,23 +413,59 @@ public class SyntaxChecker {
 
 	/**
 	 * Takes the given command and creates a command object.
-	 * @deprecated this will be moved to isValidCommand soon
 	 *
-	 * @param command
-	 * @return
+	 * @param command the command to use
+	 * @return the function group created
 	 */
-	public boolean isValidCmd(String command){
-		//easy checks
-		if (command == null){
-			return false;//can't be null and also valid
+	public static FunctionGroup splitIntoFunction(String command){
+		command = command.trim();//remove leading and trailing whitespace
+		int i = 0;
+		int lastIndex = 0;//when the string opened
+		String buffer = "";
+		LinkedList<CommandElement> sections
+		= new LinkedList<CommandElement>();
+
+		boolean insideString = false;
+		String text = "";
+		System.out.println(sections);
+		for (i = 0; i < command.length(); ++i){
+			if (!isOperator(command.charAt(i))){
+				buffer += command.charAt(i);
+			}
+			else{
+				sections.add(new CommandString(buffer));
+				sections.add(new Operator(command.charAt(i)));
+				buffer = "";
+			}
 		}
-		if (command.isEmpty()){
-			return false;//no command to check
+		//strings get collapsed here
+		for (i = 0; i < sections.size(); ++i){
+			if (sections.get(i).getType() == CmdComponentType.OPERATOR){
+				if (sections.get(i).toString().contains(
+						ScriptingSettings.STRING_CHAR+"")){
+
+					if (insideString){
+						text += sections.get(i).toString();
+						insideString = false;
+						sections.remove(i);
+						--i;
+						sections.add(lastIndex, new CommandString(text));
+
+						text = "";
+					}
+					else{
+						lastIndex = i;
+						insideString = true;
+					}
+				}
+			}
+			if (insideString){
+				text += sections.get(i).toString();
+				sections.remove(i);
+				--i;
+			}
 		}
 
-
-		String trimmed = command.trim();
-
-		return true;
+		return new FunctionGroup();
 	}
 }

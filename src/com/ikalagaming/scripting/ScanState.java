@@ -5,7 +5,7 @@ package com.ikalagaming.scripting;
  * currently scanning
  *
  * @author Ches Burks
- *
+ *@deprecated will be removed
  */
 public enum ScanState {
 	/**

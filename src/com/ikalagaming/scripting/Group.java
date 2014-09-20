@@ -37,6 +37,15 @@ public class Group extends CommandElement{
 	}
 
 	/**
+	 * Adds the given item to the end of the list.
+	 *
+	 * @param toAdd the element to add
+	 */
+	public void addItem(CommandElement toAdd){
+		contents.add(toAdd);
+	}
+
+	/**
 	 * Returns true if this is a valid group and follows the syntax rules
 	 * that apply to it.
 	 *

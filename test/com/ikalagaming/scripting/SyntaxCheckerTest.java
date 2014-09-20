@@ -12,6 +12,16 @@ import org.junit.Test;
  */
 public class SyntaxCheckerTest {
 
+
+	/**
+	 * Tests the splitter
+	 */
+	@Test
+	public void testSplitter(){
+		assertNotNull(SyntaxChecker.splitIntoFunction("Node.test('g,e',a);"));
+		assertNotNull(SyntaxChecker.splitIntoFunction("Node.test(g,e,a);"));
+		assertNotNull(SyntaxChecker.splitIntoFunction("Node.test('g,e','a');"));
+	}
 	/**
 	 * Tests a variety of possible commands to ensure the checker is
 	 * functioning properly.
@@ -268,7 +278,6 @@ public class SyntaxCheckerTest {
 					if (arg1 >= errorPoint
 							|| arg2 >= errorPoint
 							|| arg3 >= errorPoint){
-						System.out.println(arg1+" "+arg2+" "+arg3+" "+toCheck);
 						assertFalse(toCheck,
 								SyntaxChecker.isValidCommand(toCheck));
 					}

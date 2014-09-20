@@ -54,4 +54,15 @@ public class CommandString extends CommandElement{
 	public String toString(){
 		return contents;
 	}
+
+	/**
+	 * Returns true if this is a valid element and follows the syntax rules
+	 * that apply to it.
+	 *
+	 * @return true if this is valid
+	 */
+	@Override
+	public boolean isValid(){
+		return true;
+	}
 }

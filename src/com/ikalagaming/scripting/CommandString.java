@@ -6,7 +6,7 @@ package com.ikalagaming.scripting;
  * @author Ches Burks
  *
  */
-public class CommandString extends CommandElement{
+public class CommandString extends ScriptToken{
 	private String contents = "";
 
 	/**
@@ -38,12 +38,12 @@ public class CommandString extends CommandElement{
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
-		return CmdComponentType.STRING;
+	public TokenType getType(){
+		return TokenType.STRING;
 	}
 
 	/**

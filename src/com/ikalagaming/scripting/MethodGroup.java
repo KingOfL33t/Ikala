@@ -14,8 +14,8 @@ public class MethodGroup extends Group{
 	/**
 	 * The list of elements this group contains
 	 */
-	private LinkedList<CommandElement> contents =
-			new LinkedList<CommandElement>();
+	private LinkedList<ScriptToken> contents =
+			new LinkedList<ScriptToken>();
 
 	/**
 	 * Returns true if this is a valid group and follows the syntax rules
@@ -29,13 +29,13 @@ public class MethodGroup extends Group{
 		if (contents.size() != 3){
 			return false;//not three elements
 		}
-		if (!(contents.get(0).getType() == CmdComponentType.STRING
-				&& contents.get(1).getType() == CmdComponentType.OPERATOR
-				&& contents.get(2).getType() == CmdComponentType.STRING)){
+		if (!(contents.get(0).getType() == TokenType.STRING
+				&& contents.get(1).getType() == TokenType.OPERATOR
+				&& contents.get(2).getType() == TokenType.STRING)){
 			//does not have a valid layout
 			return false;
 		}
-		else if (contents.get(1).toString() != "" +
+		else if (contents.get(1).toString() !=
 				ScriptingSettings.METHOD_INDICATOR){
 			return false;//wrong operator
 		}
@@ -43,11 +43,11 @@ public class MethodGroup extends Group{
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
-		return CmdComponentType.METHOD_GROUP;
+	public TokenType getType(){
+		return TokenType.METHOD_GROUP;
 	}
 }

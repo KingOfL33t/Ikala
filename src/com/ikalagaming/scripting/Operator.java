@@ -5,8 +5,8 @@ package com.ikalagaming.scripting;
  * @author Ches Burks
  *
  */
-public class Operator extends CommandElement{
-	private char contents = ' ';
+public class Operator extends ScriptToken{
+	private String contents = " ";
 	/**
 	 * Constructs a new command string with no content.
 	 */
@@ -15,7 +15,7 @@ public class Operator extends CommandElement{
 	 * Constructs a new command string with the supplied text
 	 * @param value the content of the string
 	 */
-	public Operator(char value){
+	public Operator(String value){
 		contents = value;
 	}
 
@@ -23,7 +23,7 @@ public class Operator extends CommandElement{
 	 * Return the contents of this string.
 	 * @return the string
 	 */
-	public char getContents(){
+	public String getContents(){
 		return contents;
 	}
 	/**
@@ -31,17 +31,17 @@ public class Operator extends CommandElement{
 	 *
 	 * @param newOperator the new operator
 	 */
-	public void setContents(char newOperator){
+	public void setContents(String newOperator){
 		contents = newOperator;
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
-		return CmdComponentType.OPERATOR;
+	public TokenType getType(){
+		return TokenType.OPERATOR;
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class Operator extends CommandElement{
 	 */
 	@Override
 	public String toString(){
-		return contents+"";
+		return contents;
 	}
 
 	/**

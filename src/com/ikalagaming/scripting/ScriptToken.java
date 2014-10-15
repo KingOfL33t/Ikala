@@ -6,13 +6,13 @@ package com.ikalagaming.scripting;
  * @author Ches Burks
  *
  */
-public class CommandElement {
+public class ScriptToken {
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
-	public CmdComponentType getType(){
-		return CmdComponentType.NULL;
+	public TokenType getType(){
+		return TokenType.NULL;
 	}
 
 	/**

@@ -10,12 +10,12 @@ import java.util.LinkedList;
  * @author Ches Burks
  *
  */
-public class Group extends CommandElement{
+public class Group extends ScriptToken{
 	/**
 	 * The list of elements this group contains
 	 */
-	private LinkedList<CommandElement> contents =
-			new LinkedList<CommandElement>();
+	private LinkedList<ScriptToken> contents =
+			new LinkedList<ScriptToken>();
 
 	/**
 	 * Returns the current contents of this group.
@@ -23,7 +23,7 @@ public class Group extends CommandElement{
 	 *
 	 * @return this group's contents
 	 */
-	public LinkedList<CommandElement> getContents(){
+	public LinkedList<ScriptToken> getContents(){
 		return contents;
 	}
 
@@ -41,7 +41,7 @@ public class Group extends CommandElement{
 	 *
 	 * @param toAdd the element to add
 	 */
-	public void addItem(CommandElement toAdd){
+	public void addItem(ScriptToken toAdd){
 		contents.add(toAdd);
 	}
 
@@ -54,7 +54,7 @@ public class Group extends CommandElement{
 	@Override
 	public boolean isValid(){
 		boolean valid = true;
-		for (CommandElement element : contents){
+		for (ScriptToken element : contents){
 			//if one is not valid then this is not valid
 			valid = valid && element.isValid();
 		}
@@ -69,7 +69,7 @@ public class Group extends CommandElement{
 	@Override
 	public String toString(){
 		String output = "";
-		for (CommandElement element : contents){
+		for (ScriptToken element : contents){
 			output += element.toString();
 		}
 		return output;

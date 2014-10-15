@@ -32,6 +32,7 @@ public interface Node {
 
 	/**
 	 * Activates the node and enables it to perform its normal functions.
+	 * Calls {@link #onEnable()}.
 	 *
 	 * @return true if the node was successfully enabled
 	 */
@@ -39,7 +40,7 @@ public interface Node {
 
 	/**
 	 * Deactivates the node and halts all of its operations. The node is still
-	 * loaded in memory but not active.
+	 * loaded in memory but not active. Calls {@link #onDisable()}.
 	 *
 	 * @return true if the node has been successfully disabled
 	 */

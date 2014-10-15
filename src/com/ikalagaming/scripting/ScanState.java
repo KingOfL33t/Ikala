@@ -5,7 +5,7 @@ package com.ikalagaming.scripting;
  * currently scanning
  *
  * @author Ches Burks
- *@deprecated will be removed
+ *
  */
 public enum ScanState {
 	/**
@@ -13,17 +13,21 @@ public enum ScanState {
 	 */
 	NOT_STARTED,
 	/**
-	 * Currently reading in characters of a node name.
+	 * String of text.
 	 */
-	NODE_NAME,
+	STRING,
 	/**
-	 * Currently reading in characters of a method name.
+	 * A number. May or may not have a decimal point.
 	 */
-	METHOD_NAME,
+	NUMBER,
 	/**
-	 * Currently reading in an argument for a method.
+	 * An operator.
 	 */
-	METHOD_ARGS,
+	OPERATOR,
+	/**
+	 * A space, tab, enter or other character.
+	 */
+	WHITESPACE,
 	/**
 	 * Has completed scanning the given command.
 	 */

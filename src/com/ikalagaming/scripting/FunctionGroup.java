@@ -13,8 +13,8 @@ public class FunctionGroup extends Group{
 	/**
 	 * The list of elements this group contains
 	 */
-	private LinkedList<CommandElement> contents =
-			new LinkedList<CommandElement>();
+	private LinkedList<ScriptToken> contents =
+			new LinkedList<ScriptToken>();
 
 	/**
 	 * Returns true if this is a valid group and follows the syntax rules
@@ -28,13 +28,13 @@ public class FunctionGroup extends Group{
 		if (contents.size() < 2 || contents.size() > 3){
 			return false;//not three elements
 		}
-		if (!(contents.get(0).getType() == CmdComponentType.METHOD_GROUP
+		if (!(contents.get(0).getType() == TokenType.METHOD_GROUP
 				&& contents.get(1).getType()
-				== CmdComponentType.ARGUMENT_GROUP)){
+				== TokenType.ARGUMENT_GROUP)){
 			//does not have a valid layout
 			return false;
 		}
-		for (CommandElement element : contents){
+		for (ScriptToken element : contents){
 			if (!element.isValid()){
 				return false;//one of the groups is not valid
 			}
@@ -43,11 +43,11 @@ public class FunctionGroup extends Group{
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
-		return CmdComponentType.FUNCTION;
+	public TokenType getType(){
+		return TokenType.FUNCTION;
 	}
 }

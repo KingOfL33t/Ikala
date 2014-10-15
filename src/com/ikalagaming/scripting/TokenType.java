@@ -7,7 +7,7 @@ package com.ikalagaming.scripting;
  * @author Ches Burks
  *
  */
-public enum CmdComponentType {
+public enum TokenType {
 	/**
 	 * An integer, float, or similar numerical constant.
 	 */

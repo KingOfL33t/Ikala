@@ -4,28 +4,23 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
+
+import com.ikalagaming.core.Localization;
+import com.ikalagaming.core.Node;
 
 /**
  * Manages events and listeners.
  */
-public class EventManager {
+public class EventManager implements Node{
 
-	private static EventManager instance;
-
-	//TODO get rid of this in favor of having multiple instances possible
-	/**
-	 * Returns the static instance.
-	 * Creates one if it does not exist.
-	 *
-	 * @return The current instance of the class
-	 */
-	public static synchronized EventManager getInstance(){
-		if (instance == null){
-			instance = new EventManager();
-		}
-		return instance;
-	}
+	private EventDispatcher dispatcher;
+	private ResourceBundle resourceBundle =
+			ResourceBundle.getBundle(
+					"com.ikalagaming.event.resources.EventManager",
+					Localization.getLocale());
+	private boolean enabled = false;
 	/**
 	 * Registers event listeners in the supplied listener.
 	 *
@@ -92,17 +87,18 @@ public class EventManager {
 	 * Sends the {@link Event event} to all of its listeners.
 	 *
 	 * @param event The event to fire
-	 * @throws EventException if an error occurs while firing
+	 * @throws IllegalStateException if the element cannot be added at this
+	 * time due to capacity restrictions
 	 */
-	public void fireEvent(Event event) throws EventException {
-		HandlerList handlers = event.getHandlers();
-		EventListener[] listeners = handlers.getRegisteredListeners();
-		for (EventListener registration : listeners) {
-			try {
-				registration.callEvent(event);
-			} catch (EventException e) {
-				throw e;
-			}
+	public void fireEvent(Event event) throws IllegalStateException{
+		try{
+			dispatcher.dispatchEvent(event);
+		}
+		catch(IllegalStateException illegalState){
+			throw illegalState;
+		}
+		catch (Exception e){
+			System.err.println(e.toString());
 		}
 	}
 
@@ -177,5 +173,92 @@ public class EventManager {
 
 		}
 		return toReturn;
+	}
+
+	@Override
+	public String getType() {
+		return resourceBundle.getString("nodeType");
+	}
+
+	@Override
+	public double getVersion() {
+		return 0.1;
+	}
+
+	@Override
+	public boolean enable() {
+		this.enabled = true;
+		try{
+			this.onEnable();
+		}
+		catch (Exception e){
+			System.err.print(e.toString());
+			//TODO error handling
+			//better safe than sorry (probably did not initialize correctly)
+			this.enabled = false;
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean disable() {
+		this.enabled = false;
+		try{
+			this.onDisable();
+		}
+		catch (Exception e){
+			System.err.print(e.toString());
+			//TODO error handling
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean reload() {
+		if (this.enabled){
+			this.disable();
+		}
+		this.enable();
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void onEnable() {
+		dispatcher = new EventDispatcher();
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onDisable() {
+		// TODO Auto-generated method stub
+		dispatcher.terminate();
+
+		try {
+			dispatcher.join();
+		} catch (InterruptedException e) {
+			//TODO error handling
+			System.err.println(e.toString());
+		}
+
+	}
+
+	@Override
+	public void onLoad() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onUnload() {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -6,8 +6,8 @@ package com.ikalagaming.scripting;
  * @author Ches Burks
  *
  */
-public class Argument extends CommandElement{
-	private CommandElement contents;
+public class Argument extends ScriptToken{
+	private ScriptToken contents;
 	/**
 	 * Constructs a new command string with no content.
 	 */
@@ -16,7 +16,7 @@ public class Argument extends CommandElement{
 	 * Constructs a new command string with the supplied argument
 	 * @param value the argument
 	 */
-	public Argument(CommandElement value){
+	public Argument(ScriptToken value){
 		contents = value;
 	}
 
@@ -24,7 +24,7 @@ public class Argument extends CommandElement{
 	 * Return the contents of this argument.
 	 * @return the string
 	 */
-	public CommandElement getContents(){
+	public ScriptToken getContents(){
 		return contents;
 	}
 	/**
@@ -32,16 +32,16 @@ public class Argument extends CommandElement{
 	 *
 	 * @param newContents the new argument
 	 */
-	public void setContents(CommandElement newContents){
+	public void setContents(ScriptToken newContents){
 		contents = newContents;
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this argument
+	 * Returns the {@link TokenType type} of this argument
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
+	public TokenType getType(){
 		return contents.getType();
 	}
 

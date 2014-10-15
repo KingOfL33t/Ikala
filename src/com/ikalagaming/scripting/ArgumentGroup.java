@@ -14,8 +14,8 @@ public class ArgumentGroup extends Group{
 	/**
 	 * The list of elements this group contains
 	 */
-	private LinkedList<CommandElement> contents =
-			new LinkedList<CommandElement>();
+	private LinkedList<ScriptToken> contents =
+			new LinkedList<ScriptToken>();
 
 	/**
 	 * Returns true if this is a valid group and follows the syntax rules
@@ -27,10 +27,9 @@ public class ArgumentGroup extends Group{
 	@Override
 	public boolean isValid(){
 		if (contents.size() == 2){
-			if (contents.get(0).toString() == ""
-					+ ScriptingSettings.ARGUMENT_BEGIN
-					&& contents.get(1).toString() == ""
-							+ ScriptingSettings.ARGUMENT_END){
+			if (contents.get(0).toString() == ScriptingSettings.ARGUMENT_BEGIN
+					&& contents.get(1).toString() ==
+					ScriptingSettings.ARGUMENT_END){
 				return true;//its empty and therefore valid
 			}
 		}
@@ -43,15 +42,15 @@ public class ArgumentGroup extends Group{
 			if (!contents.get(i).isValid()){
 				return false;//one of the elements is invalid
 			}
-			if (contents.get(i).getType() == CmdComponentType.OPERATOR){
+			if (contents.get(i).getType() == TokenType.OPERATOR){
 				tmp = contents.get(i).toString();
-				if (tmp == "" +	ScriptingSettings.ARGUMENT_BEGIN){
+				if (tmp == ScriptingSettings.ARGUMENT_BEGIN){
 					++parenCount;
 				}
-				else if (tmp == "" + ScriptingSettings.ARGUMENT_END){
+				else if (tmp == ScriptingSettings.ARGUMENT_END){
 					--parenCount;
 				}
-				else if (tmp == "" + ScriptingSettings.ARGUMENT_SEPARATOR){
+				else if (tmp == ScriptingSettings.ARGUMENT_SEPARATOR){
 					if (lastWasAComma){
 						return false;//two commas in a row
 					}
@@ -61,7 +60,7 @@ public class ArgumentGroup extends Group{
 					return false;//misc operator
 				}
 			}
-			else if (contents.get(i).getType() == CmdComponentType.ARGUMENT){
+			else if (contents.get(i).getType() == TokenType.ARGUMENT){
 				if (lastWasAComma){
 					lastWasAComma = false;
 				}
@@ -79,11 +78,11 @@ public class ArgumentGroup extends Group{
 	}
 
 	/**
-	 * Returns the {@link CmdComponentType type} of this element
+	 * Returns the {@link TokenType type} of this element
 	 * @return the type of element this is
 	 */
 	@Override
-	public CmdComponentType getType(){
-		return CmdComponentType.ARGUMENT_GROUP;
+	public TokenType getType(){
+		return TokenType.ARGUMENT_GROUP;
 	}
 }

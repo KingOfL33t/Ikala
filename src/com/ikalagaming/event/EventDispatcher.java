@@ -1,0 +1,97 @@
+package com.ikalagaming.event;
+
+import java.util.NoSuchElementException;
+
+/**
+ * Holds an EventQueue and dispatches the events in order when possible.
+ *
+ * @author Ches Burks
+ *
+ */
+public class EventDispatcher extends Thread{
+
+	private EventQueue queue = new EventQueue();
+
+	private Event currentEvent;
+	private HandlerList handlers;
+	private EventListener[] listeners;
+
+	private boolean running;
+	private boolean hasEvents;
+
+	/**
+	 * Creates and starts the thread. It will begin attempting to dispatch
+	 * events immediately if there are any available.
+	 */
+	public EventDispatcher(){
+		this.hasEvents = false;
+		this.running = true;
+	}
+
+	/**
+	 * Adds the {@link Event event} to the queue pending dispatch.
+	 *
+	 * @param event The event to send out
+	 * @throws IllegalStateException if the element cannot be added at this
+	 * time due to capacity restrictions
+	 */
+	public synchronized void dispatchEvent(Event event)
+			throws IllegalStateException{
+		try{
+			queue.add(event);
+			this.hasEvents = true;
+		}
+		catch(IllegalStateException illegalState){
+			throw illegalState;
+		}
+		catch(NullPointerException nullPointer){
+			;//do nothing since its a null event
+		}
+		catch(Exception e){
+			System.err.println(e.toString());//TODO error reporting
+		}
+	}
+
+	/**
+	 * Checks for events in the queue, and dispatches them if possible.
+	 * Does not do anything if {@link #terminate()} has been called.
+	 */
+	public void run() {
+		if (!running){
+			return;
+		}
+		while (running){
+			if (hasEvents){
+				try{
+					currentEvent = queue.remove();
+					handlers = currentEvent.getHandlers();
+					listeners = handlers.getRegisteredListeners();
+					for (EventListener registration : listeners) {
+						try {
+							registration.callEvent(currentEvent);
+						} catch (EventException e) {
+							throw e;
+						}
+					}
+				}
+				catch(NoSuchElementException noElement){
+					//the queue is empty
+					hasEvents = false;
+					continue;
+				}
+				catch(Exception e){
+					System.err.println(e.toString());
+					//TODO error handling
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stops the thread from executing its run method in preparation for
+	 * shutting down the thread.
+	 */
+	public synchronized void terminate(){
+		running = false;
+	}
+}

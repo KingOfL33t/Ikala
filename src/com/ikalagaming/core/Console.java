@@ -14,14 +14,14 @@ import javax.swing.text.DefaultCaret;
 
 /**
  * A simple console.
- * 
+ *
  * @author Ches Burks
  *
  */
 public class Console extends WindowAdapter{
 
-	private ResourceBundle resourceBundle = 
-			ResourceBundle.getBundle("com.ikalagaming.core.resources.Console", 
+	private ResourceBundle resourceBundle =
+			ResourceBundle.getBundle(ResourceLocation.Console,
 					Localization.getLocale());
 	private String windowTitle = resourceBundle.getString("title");
 	private int width = 300;
@@ -69,7 +69,7 @@ public class Console extends WindowAdapter{
 	/**
 	 * Returns window width.
 	 * This is the width of the frame the console is in.
-	 * 
+	 *
 	 * @return the width of the frame
 	 */
 	public synchronized int getWidth() {
@@ -79,7 +79,7 @@ public class Console extends WindowAdapter{
 	/**
 	 * Sets the frame width.
 	 * This is the width of the frame the console is in.
-	 * 
+	 *
 	 * @param width The new width
 	 */
 	public synchronized void setWidth(int width) {
@@ -90,7 +90,7 @@ public class Console extends WindowAdapter{
 	/**
 	 * Returns the window height.
 	 * This is the height of the frame the console is in.
-	 * 
+	 *
 	 * @return the height of the frame
 	 */
 	public synchronized int getHeight() {
@@ -100,7 +100,7 @@ public class Console extends WindowAdapter{
 	/**
 	 * Sets the frame height.
 	 * This is the height of the frame the console is in.
-	 * 
+	 *
 	 * @param height The new height
 	 */
 	public synchronized void setHeight(int height) {
@@ -109,9 +109,9 @@ public class Console extends WindowAdapter{
 	}
 
 	/**
-	 * Returns the maximum number of lines that are 
+	 * Returns the maximum number of lines that are
 	 * stored in the window.
-	 * 
+	 *
 	 * @return the max number of lines
 	 */
 	public synchronized int getMaxLineCount() {
@@ -120,7 +120,7 @@ public class Console extends WindowAdapter{
 
 	/**
 	 * Sets the maximum number of lines stored in the window.
-	 * 
+	 *
 	 * @param maxLineCount the maximum number of lines to store
 	 */
 	public synchronized void setMaxLineCount(int maxLineCount) {
@@ -129,7 +129,7 @@ public class Console extends WindowAdapter{
 
 	/**
 	 * Returns the window title.
-	 * 
+	 *
 	 * @return the String that is used as the title
 	 */
 	public synchronized String getWindowTitle() {
@@ -138,7 +138,7 @@ public class Console extends WindowAdapter{
 
 	/**
 	 * Sets the title of the window.
-	 * 
+	 *
 	 * @param windowTitle the String to use as the title
 	 */
 	public synchronized void setWindowTitle(String windowTitle) {
@@ -149,11 +149,11 @@ public class Console extends WindowAdapter{
 	/**
 	 * Adds a String to the bottom of the console.
 	 * Removes the top lines if/while they exceed the maximum line count.
-	 * 
+	 *
 	 * @param message The message to append
 	 */
 	public synchronized void appendMessage(String message){
-		this.textArea.append(message+"\n");
+		this.textArea.append(message+System.lineSeparator());
 
 		while (this.textArea.getLineCount() >= maxLineCount){
 			int end;

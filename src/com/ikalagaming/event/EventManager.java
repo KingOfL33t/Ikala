@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.Node;
+import com.ikalagaming.core.ResourceLocation;
 
 /**
  * Manages events and listeners.
@@ -18,7 +19,7 @@ public class EventManager implements Node{
 	private EventDispatcher dispatcher;
 	private ResourceBundle resourceBundle =
 			ResourceBundle.getBundle(
-					"com.ikalagaming.event.resources.EventManager",
+					ResourceLocation.EventManager,
 					Localization.getLocale());
 	private boolean enabled = false;
 	/**

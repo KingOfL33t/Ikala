@@ -1,6 +1,7 @@
 package com.ikalagaming.core;
 
 import java.util.HashMap;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import com.ikalagaming.core.events.NodeEvent;
@@ -42,7 +43,7 @@ public class NodeManager {
 	 */
 	public boolean loadNode(Node toLoad){
 		//if the node exists and is older than toLoad, unload
-		if (loadedNodes.containsKey(toLoad.getType())){
+		if (isLoaded(toLoad)){
 			if (loadedNodes.get(toLoad.getType()).getVersion()
 					< toLoad.getVersion()){
 				unloadNode(loadedNodes.get(toLoad.getType()));
@@ -56,35 +57,41 @@ public class NodeManager {
 		//store the new node
 		loadedNodes.put(toLoad.getType(), toLoad);
 
-		String eventNodeType = "";//name of the event node
-
-
 		//load it
 		if (NodeSettings.USE_EVENTS_FOR_ACCESS
 				&& NodeSettings.USE_EVENTS_FOR_ON_LOAD){
-			if (eventNodeType.isEmpty()){
-				eventNodeType = ResourceBundle.getBundle(
-						ResourceLocation.EventManager,
-						Localization.getLocale()).getString("nodeType");
-			}
-			if (isLoaded(eventNodeType)){
-				//build a new event from the manager to the event manager
-				//telling it to call its onLoad method
-				NodeEvent tmpEvent = new NodeEvent(
-						resourceBundle.getString("NODE_MANAGER_NAME"),
-						eventNodeType,
-						resourceBundle.getString("CMD_CALL")
+			String toSend = "";
+			boolean messageValid = true;
+			try {
+				toSend = resourceBundle.getString("CMD_CALL")
 						+ " "
-						+ resourceBundle.getString("ARG_ON_LOAD"));
+						+ resourceBundle.getString("ARG_ON_LOAD");
+			}
+			catch (MissingResourceException missingResource){
+				//TODO error
+				messageValid = false;
+			}
+			catch (ClassCastException classCast){
+				//TODO error
+				messageValid = false;
+			}
 
-				((EventManager)getNode(eventNodeType)).fireEvent(tmpEvent);
+			if (messageValid){
+				/*
+				 * Tries to send the event. If the return value is false,
+				 * it failed and therefore we must load manually
+				 */
+				if (!fireEvent(toLoad.getType(), toSend)){
+					toLoad.onLoad();
+				}
 			}
 			else {
-				//direct call since the event system is down
+				//errors creating message so the event would not work
 				toLoad.onLoad();
 			}
 		}
 		else{
+			//not using events for onload, or not using events at all
 			toLoad.onLoad();
 		}
 
@@ -92,28 +99,96 @@ public class NodeManager {
 		if (NodeSettings.ENABLE_ON_LOAD){
 			if (NodeSettings.USE_EVENTS_FOR_ACCESS
 					&& NodeSettings.USE_EVENTS_FOR_ENABLE){
-				if (eventNodeType.isEmpty()){
-					eventNodeType = ResourceBundle.getBundle(
-							ResourceLocation.EventManager,
-							Localization.getLocale()).getString("nodeType");
-				}
-				if (isLoaded(eventNodeType)){
-					NodeEvent tmpEvent = new NodeEvent(
-							resourceBundle.getString("NODE_MANAGER_NAME"),
-							eventNodeType,
-							resourceBundle.getString("CMD_CALL")
+				String toSend = "";
+				boolean messageValid = true;
+				try {
+					toSend = resourceBundle.getString("CMD_CALL")
 							+ " "
-							+ resourceBundle.getString("ARG_ENABLE"));
-					((EventManager)getNode(eventNodeType)).fireEvent(tmpEvent);
+							+ resourceBundle.getString("ARG_ENABLE");
 				}
-				else{
-					//no event system is loaded. load via direct call.
+				catch (MissingResourceException missingResource){
+					//TODO error
+					messageValid = false;
+				}
+				catch (ClassCastException classCast){
+					//TODO error
+					messageValid = false;
+				}
+
+				if (messageValid){
+					/*
+					 * Tries to send the event. If the return value is false,
+					 * it failed and therefore we must load manually
+					 */
+					if (!fireEvent(toLoad.getType(), toSend)){
+						toLoad.enable();
+					}
+				}
+				else {
+					//errors creating message so the event would not work
 					toLoad.enable();
 				}
 			}
 			else{
+				//not using events for enable, or not using events at all
 				toLoad.enable();
 			}
+		}
+		return true;
+	}
+
+	/**
+	 * Fires an event with a message to a node type from the node manager.
+	 * If an error occurs, this will return false. The event should not have
+	 * been sent if false was returned.
+	 *
+	 * @param to the node to send the message to
+	 * @param content the message to transfer
+	 * @return true if the event was fired correctly
+	 */
+	private boolean fireEvent(String to, String content){
+		String eventNodeType;
+		try {
+			eventNodeType = ResourceBundle.getBundle(
+					ResourceLocation.EventManager,
+					Localization.getLocale()).getString("nodeType");
+		}
+		catch (MissingResourceException missingRes){
+			//TODO error
+			return false;
+		}
+
+		if (!isLoaded(eventNodeType)){
+			//TODO error
+			return false;
+		}
+
+		if (!getNode(eventNodeType).isEnabled()){
+			//TODO error
+			return false;
+		}
+
+		NodeEvent tmpEvent;
+		try {
+			tmpEvent = new NodeEvent(
+					resourceBundle.getString("NODE_MANAGER_NAME"),
+					to,
+					content);
+		}
+		catch (MissingResourceException missingRes){
+			//TODO error
+			return false;
+		}
+		try{
+			if (tmpEvent!= null){//just in case the assignment failed
+				((EventManager)getNode(eventNodeType)).fireEvent(tmpEvent);
+
+			}
+		}
+		catch (IllegalStateException illegalState){
+			//the queue was full
+			//TODO error
+			return false;
 		}
 		return true;
 	}
@@ -126,6 +201,18 @@ public class NodeManager {
 	 */
 	public boolean isLoaded(String type){
 		return loadedNodes.containsKey(type);
+	}
+
+
+	/**
+	 * Returns true if a node exists that has the same type as the provided
+	 * node (for example: "Graphics"). This is the same as calling
+	 * <code>{@link #isLoaded(String) isLoaded}(Node.getType())</code>
+	 * @param type the node type
+	 * @return true if the node is loaded in memory, false if it does not exist
+	 */
+	public boolean isLoaded(Node type){
+		return loadedNodes.containsKey(type.getType());
 	}
 
 	/**
@@ -155,26 +242,38 @@ public class NodeManager {
 		if (!isLoaded(toUnload)){
 			return false;
 		}
+
 		if (NodeSettings.DISABLE_ON_UNLOAD){
 			if (loadedNodes.get(toUnload).isEnabled()){
 				if (NodeSettings.USE_EVENTS_FOR_ACCESS &&
 						NodeSettings.USE_EVENTS_FOR_DISABLE){
-					String eventNodeType = ResourceBundle.getBundle(
-							ResourceLocation.EventManager,
-							Localization.getLocale()).getString("nodeType");
-
-					if (isLoaded(eventNodeType)){
-						NodeEvent tmpEvent = new NodeEvent(
-								resourceBundle.getString("NODE_MANAGER_NAME"),
-								eventNodeType,
-								resourceBundle.getString("CMD_CALL")
+					String toSend = "";
+					boolean messageValid = true;
+					try {
+						toSend = resourceBundle.getString("CMD_CALL")
 								+ " "
-								+ resourceBundle.getString("ARG_ON_UNLOAD"));
-						((EventManager)
-								getNode(eventNodeType)).fireEvent(tmpEvent);
+								+ resourceBundle.getString("ARG_ON_DISABLE");
 					}
-					else{
-						//no event system is loaded. unload via direct call.
+					catch (MissingResourceException missingResource){
+						//TODO error
+						messageValid = false;
+					}
+					catch (ClassCastException classCast){
+						//TODO error
+						messageValid = false;
+					}
+
+					if (messageValid){
+						/*
+						 * Tries to send the event. If the return value is false,
+						 * it failed and therefore we must load manually
+						 */
+						if (!fireEvent(toUnload, toSend)){
+							loadedNodes.get(toUnload).disable();
+						}
+					}
+					else {
+						//errors creating message so the event would not work
 						loadedNodes.get(toUnload).disable();
 					}
 				}
@@ -183,17 +282,55 @@ public class NodeManager {
 				}
 			}
 		}
-		unloadNode(loadedNodes.get(toUnload));
+
+		if (NodeSettings.USE_EVENTS_FOR_ACCESS &&
+				NodeSettings.USE_EVENTS_FOR_ON_UNLOAD){
+			String toSend = "";
+			boolean messageValid = true;
+			try {
+				toSend = resourceBundle.getString("CMD_CALL")
+						+ " "
+						+ resourceBundle.getString("ARG_DISABLE");
+			}
+			catch (MissingResourceException missingResource){
+				//TODO error
+				messageValid = false;
+			}
+			catch (ClassCastException classCast){
+				//TODO error
+				messageValid = false;
+			}
+
+			if (messageValid){
+				/*
+				 * Tries to send the event. If the return value is false,
+				 * it failed and therefore we must load manually
+				 */
+				if (!fireEvent(toUnload, toSend)){
+					loadedNodes.get(toUnload).onUnload();
+				}
+			}
+			else {
+				//errors creating message so the event would not work
+				loadedNodes.get(toUnload).onUnload();
+			}
+		}
+		else{
+			loadedNodes.get(toUnload).onUnload();
+		}
+
+		loadedNodes.remove(toUnload);
 		return true;
 	}
 
 	/**
 	 * Attempts to unload the node from memory. Does nothing if the node is
-	 * not loaded. Nodes are disabled before unloading.
+	 * not loaded. Nodes are disabled before unloading. This calls
+	 * {@link #unloadNode(String)} using the node type.
+	 *
 	 * @param toUnload The type of node to unload
 	 */
 	public void unloadNode(Node toUnload){
-		//TODO just call the unloadNOde(String) method. no need to repeat code
 		/* using a string the nodes type to ensure
 		 * the node that is stored in this class is modified and not just
 		 * the node passed to the method.
@@ -202,34 +339,6 @@ public class NodeManager {
 		if (!isLoaded(type)){
 			return;
 		}
-		if (NodeSettings.DISABLE_ON_UNLOAD){
-			if (loadedNodes.get(type).isEnabled()){
-				if (NodeSettings.USE_EVENTS_FOR_ACCESS &&
-						NodeSettings.USE_EVENTS_FOR_DISABLE){
-					String eventNodeType = ResourceBundle.getBundle(
-							ResourceLocation.EventManager,
-							Localization.getLocale()).getString("nodeType");
-					if (isLoaded(eventNodeType)){
-						NodeEvent tmpEvent = new NodeEvent(
-								resourceBundle.getString("NODE_MANAGER_NAME"),
-								eventNodeType,
-								resourceBundle.getString("CMD_CALL")
-								+ " "
-								+ resourceBundle.getString("ARG_ON_UNLOAD"));
-						((EventManager)
-								getNode(eventNodeType)).fireEvent(tmpEvent);
-					}
-					else{
-						//no event system is loaded. unload via direct call.
-						loadedNodes.get(type).disable();
-					}
-				}
-				else{
-					loadedNodes.get(type).disable();
-				}
-			}
-		}
-		loadedNodes.get(type).onUnload();
-		loadedNodes.remove(type);
+		unloadNode(type);
 	}
 }

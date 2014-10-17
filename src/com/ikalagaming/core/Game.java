@@ -34,5 +34,14 @@ public class Game {
 		nodeMgr.loadNode(new EventManager());
 	}
 
+	/**
+	 * Returns the game's node manager.
+	 *
+	 * @return The node manager
+	 */
+	public NodeManager getNodeManager(){
+		return this.nodeMgr;
+	}
+
 
 }

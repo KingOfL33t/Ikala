@@ -3,6 +3,7 @@ package com.ikalagaming.core;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.JFrame;
@@ -20,10 +21,8 @@ import javax.swing.text.DefaultCaret;
  */
 public class Console extends WindowAdapter{
 
-	private ResourceBundle resourceBundle =
-			ResourceBundle.getBundle(ResourceLocation.Console,
-					Localization.getLocale());
-	private String windowTitle = resourceBundle.getString("title");
+	private ResourceBundle resourceBundle;
+	private String windowTitle;
 	private int width = 300;
 	private int height = 200;
 	private int maxLineCount = 150;
@@ -40,6 +39,22 @@ public class Console extends WindowAdapter{
 	 */
 	public Console(){
 
+		try {
+			resourceBundle = ResourceBundle.getBundle(ResourceLocation.Console,
+					Localization.getLocale());
+		}
+		catch (MissingResourceException missingResource){
+			//TODO error
+		}
+		try{
+			windowTitle = resourceBundle.getString("title");
+		}
+		catch (MissingResourceException missingResource){
+			//TODO error
+		}
+		catch (ClassCastException classCast){
+			//TODO error
+		}
 		frame = new JFrame(windowTitle);
 		frame.setSize(width, height);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

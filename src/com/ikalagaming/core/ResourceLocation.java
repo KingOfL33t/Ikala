@@ -23,4 +23,22 @@ public class ResourceLocation {
 	 */
 	public static String NodeManager
 	= "com.ikalagaming.core.resources.NodeManager";
+
+	/**
+	 * The classpath for the ErrorReportNode resources
+	 */
+	public static String LoggingNode
+	= "com.ikalagaming.logging.resources.LoggingNode";
+
+	/**
+	 * The path for the Error code resources
+	 */
+	public static String ErrorCodes
+	= "com.ikalagaming.logging.resources.ErrorCodes";
+
+	/**
+	 * The path for the logging level resources
+	 */
+	public static String LoggingLevel
+	= "com.ikalagaming.logging.resources.LoggingLevel";
 }

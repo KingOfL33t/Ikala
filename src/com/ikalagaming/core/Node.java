@@ -15,8 +15,24 @@ public interface Node {
 	final double version = 0.0;
 
 	/**
-	 * Returns the type of node this is. This is a string that describes
-	 * the node, such as "Graphics" or "AI".
+	 * Deactivates the node and halts all of its operations. The node is still
+	 * loaded in memory but not active. Calls {@link #onDisable()}.
+	 *
+	 * @return true if the node has been successfully disabled
+	 */
+	public boolean disable();
+
+	/**
+	 * Activates the node and enables it to perform its normal functions. Calls
+	 * {@link #onEnable()}.
+	 *
+	 * @return true if the node was successfully enabled
+	 */
+	public boolean enable();
+
+	/**
+	 * Returns the type of node this is. This is a string that describes the
+	 * node, such as "Graphics" or "AI".
 	 *
 	 * @return a string descriptor of the node
 	 */
@@ -31,20 +47,33 @@ public interface Node {
 	public double getVersion();
 
 	/**
-	 * Activates the node and enables it to perform its normal functions.
-	 * Calls {@link #onEnable()}.
+	 * Returns true if the node is enabled, and false otherwise.
 	 *
-	 * @return true if the node was successfully enabled
+	 * @return true if the node is enabled
 	 */
-	public boolean enable();
+	public boolean isEnabled();
 
 	/**
-	 * Deactivates the node and halts all of its operations. The node is still
-	 * loaded in memory but not active. Calls {@link #onDisable()}.
-	 *
-	 * @return true if the node has been successfully disabled
+	 * This method is called when the node is disabled.
 	 */
-	public boolean disable();
+	public void onDisable();
+
+	/**
+	 * This method is called when the node is enabled. Initialization tends to
+	 * be performed here.
+	 */
+	public void onEnable();
+
+	/**
+	 * Called when the node is loaded into memory. The node may or may not be
+	 * enabled at this time.
+	 */
+	public void onLoad();
+
+	/**
+	 * Called when the node is unloaded from memory.
+	 */
+	public void onUnload();
 
 	/**
 	 * Disables and then enables the node.
@@ -54,31 +83,9 @@ public interface Node {
 	public boolean reload();
 
 	/**
-	 * Returns true if the node is enabled, and false otherwise.
+	 * Stores a reference to the NodeManager that is handling this node.
 	 *
-	 * @return true if the node is enabled
+	 * @param parent the parent node manager
 	 */
-	public boolean isEnabled();
-
-	/**
-	 * This method is called when the node is enabled. Initialization tends
-	 * to be performed here.
-	 */
-	public void onEnable();
-
-	/**
-	 * This method is called when the node is disabled.
-	 */
-	public void onDisable();
-
-	/**
-	 * Called when the node is loaded into memory. The node may or may not
-	 * be enabled at this time.
-	 */
-	public void onLoad();
-
-	/**
-	 * Called when the node is unloaded from memory.
-	 */
-	public void onUnload();
+	public void setNodeManager(NodeManager parent);
 }

@@ -6,6 +6,9 @@ import java.util.ResourceBundle;
 
 import com.ikalagaming.core.events.NodeEvent;
 import com.ikalagaming.event.EventManager;
+import com.ikalagaming.logging.ErrorCode;
+import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.LoggingNode;
 
 /**
  * Handles loading, unloading and storage of nodes.
@@ -68,11 +71,15 @@ public class NodeManager {
 						+ resourceBundle.getString("ARG_ON_LOAD");
 			}
 			catch (MissingResourceException missingResource){
-				//TODO error
+				getLogger().logError(ErrorCode.locale_resource_not_found,
+						LoggingLevel.WARNING,
+						"NodeManager.loadNode(Node) load");
 				messageValid = false;
 			}
 			catch (ClassCastException classCast){
-				//TODO error
+				getLogger().logError(ErrorCode.locale_resource_wrong_type,
+						LoggingLevel.WARNING,
+						"NodeManager.loadNode(Node) load");
 				messageValid = false;
 			}
 
@@ -107,11 +114,15 @@ public class NodeManager {
 							+ resourceBundle.getString("ARG_ENABLE");
 				}
 				catch (MissingResourceException missingResource){
-					//TODO error
+					getLogger().logError(ErrorCode.locale_resource_not_found,
+							LoggingLevel.WARNING,
+							"NodeManager.loadNode(Node) enable");
 					messageValid = false;
 				}
 				catch (ClassCastException classCast){
-					//TODO error
+					getLogger().logError(ErrorCode.locale_resource_wrong_type,
+							LoggingLevel.WARNING,
+							"NodeManager.loadNode(Node) enable");
 					messageValid = false;
 				}
 
@@ -154,17 +165,19 @@ public class NodeManager {
 					Localization.getLocale()).getString("nodeType");
 		}
 		catch (MissingResourceException missingRes){
-			//TODO error
+			getLogger().logError(ErrorCode.locale_resource_not_found,
+					LoggingLevel.WARNING,
+					"NodeManager.fireEvent(String, String)");
 			return false;
 		}
 
 		if (!isLoaded(eventNodeType)){
-			//TODO error
+			//TODO log
 			return false;
 		}
 
 		if (!getNode(eventNodeType).isEnabled()){
-			//TODO error
+			//TODO log
 			return false;
 		}
 
@@ -176,7 +189,9 @@ public class NodeManager {
 					content);
 		}
 		catch (MissingResourceException missingRes){
-			//TODO error
+			getLogger().logError(ErrorCode.locale_resource_not_found,
+					LoggingLevel.WARNING,
+					"NodeManager.fireEvent(String, String)");
 			return false;
 		}
 		try{
@@ -187,7 +202,9 @@ public class NodeManager {
 		}
 		catch (IllegalStateException illegalState){
 			//the queue was full
-			//TODO error
+			getLogger().logError(ErrorCode.event_queue_full,
+					LoggingLevel.WARNING,
+					"NodeManager.fireEvent(String, String)");
 			return false;
 		}
 		return true;
@@ -255,11 +272,15 @@ public class NodeManager {
 								+ resourceBundle.getString("ARG_ON_DISABLE");
 					}
 					catch (MissingResourceException missingResource){
-						//TODO error
+						getLogger().logError(ErrorCode.locale_resource_not_found,
+								LoggingLevel.WARNING,
+								"NodeManager.unloadNode(String) disable");
 						messageValid = false;
 					}
 					catch (ClassCastException classCast){
-						//TODO error
+						getLogger().logError(ErrorCode.locale_resource_wrong_type,
+								LoggingLevel.WARNING,
+								"NodeManager.unloadNode(String) disable");
 						messageValid = false;
 					}
 
@@ -290,14 +311,18 @@ public class NodeManager {
 			try {
 				toSend = resourceBundle.getString("CMD_CALL")
 						+ " "
-						+ resourceBundle.getString("ARG_DISABLE");
+						+ resourceBundle.getString("ARG_UNLOAD");
 			}
 			catch (MissingResourceException missingResource){
-				//TODO error
+				getLogger().logError(ErrorCode.locale_resource_not_found,
+						LoggingLevel.WARNING,
+						"NodeManager.unloadNode(String) unload");
 				messageValid = false;
 			}
 			catch (ClassCastException classCast){
-				//TODO error
+				getLogger().logError(ErrorCode.locale_resource_wrong_type,
+						LoggingLevel.WARNING,
+						"NodeManager.unloadNode(String) unload");
 				messageValid = false;
 			}
 
@@ -340,5 +365,49 @@ public class NodeManager {
 			return;
 		}
 		unloadNode(type);
+	}
+
+	/**
+	 * Returns a logger for the system. If one does not exist, it will
+	 * be created.
+	 *
+	 * @return a logger for the engine
+	 */
+	public LoggingNode getLogger(){
+		String loggingNodeName = "";
+		try {
+			loggingNodeName = ResourceBundle.getBundle(
+					ResourceLocation.LoggingNode, Localization.getLocale())
+					.getString("nodeType");
+		} catch (Exception excep) {
+			// we are sort of screwed here, so just
+			// dump as much as we can into the error stream and print any
+			// Additional details to the error stream as well
+			System.err.println("Could not load logger from "
+					+ ResourceLocation.LoggingNode
+					+ Localization.getLocale()
+					+ " using string nodeType");
+			excep.printStackTrace(System.err);
+		}
+
+		if (!loadedNodes.containsKey(loggingNodeName)){
+			if (loggingNodeName == ""){
+				//it could have screwed up loading the name
+				loggingNodeName = "Logging";
+			}
+			LoggingNode node = new LoggingNode();
+			//store the new node
+			loadedNodes.put(loggingNodeName, node);
+			//we don't know if there is an event system.
+			//this has to work properly
+			node.onLoad();
+			//enable the node
+			if (NodeSettings.ENABLE_ON_LOAD){
+				node.enable();
+			}
+		}
+		//safe cast since we know its a LoggingNode
+		return (LoggingNode)loadedNodes.get(loggingNodeName);
+
 	}
 }

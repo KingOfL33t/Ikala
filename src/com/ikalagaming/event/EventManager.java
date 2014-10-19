@@ -14,7 +14,6 @@ import com.ikalagaming.core.NodeManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.LoggingNode;
 
 /**
  * Manages events and listeners.
@@ -36,7 +35,8 @@ public class EventManager implements Node {
 	 *             If there is an exception registering
 	 */
 	public void registerEventListeners(Listener listener) throws Exception {
-		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry : createRegisteredListeners(
+		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry
+				: createRegisteredListeners(
 				listener).entrySet()) {
 			getEventListeners(getRegistrationClass(entry.getKey()))
 			.registerAll(entry.getValue());
@@ -109,7 +109,10 @@ public class EventManager implements Node {
 		} catch (IllegalStateException illegalState) {
 			throw illegalState;
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			nodeManager.getLogger().logError(
+					ErrorCode.event_queue_full,
+					LoggingLevel.WARNING,
+					"EventManager.fireEvent(Event)");
 		}
 	}
 
@@ -185,47 +188,19 @@ public class EventManager implements Node {
 		return toReturn;
 	}
 
-	private void reportError(ErrorCode code, LoggingLevel level,
-			String details) {
-		String loggingNodeName = "";
-		try {
-			loggingNodeName = ResourceBundle.getBundle(
-					ResourceLocation.LoggingNode, Localization.getLocale())
-					.getString("nodeType");
-		} catch (Exception excep) {
-			// we are sort of screwed here, so just
-			// dump as much as we can into the error stream and print any
-			// Additional details to the error stream as well
-			System.err.println(details);
-			excep.printStackTrace(System.err);
-			return;
-		}
-		if (nodeManager.isLoaded(loggingNodeName)){
-			LoggingNode logger = (LoggingNode)
-					nodeManager.getNode(loggingNodeName);
-			logger.logError(code, level, details);
-		}
-		else {
-			// we are sort of screwed here, so just
-			// dump as much as we can into the error stream and print any
-			// Additional details to the error stream as well
-			System.err.println(code.getName());
-			System.err.println(level.getName());
-			System.err.println(details);
-		}
-	}
-
 	@Override
 	public String getType() {
 		String type = "";
 		try {
 			type = resourceBundle.getString("nodeType");
 		} catch (MissingResourceException missingResource) {
-			reportError(ErrorCode.locale_resource_not_found,
+			nodeManager.getLogger().logError(
+					ErrorCode.locale_resource_not_found,
 					LoggingLevel.WARNING,
 					"EventManager.getType()");
 		} catch (ClassCastException classCast) {
-			reportError(ErrorCode.locale_resource_wrong_type,
+			nodeManager.getLogger().logError(
+					ErrorCode.locale_resource_wrong_type,
 					LoggingLevel.WARNING,
 					"EventManager.getType()");
 		}
@@ -243,8 +218,7 @@ public class EventManager implements Node {
 		try {
 			this.onEnable();
 		} catch (Exception e) {
-			System.err.print(e.toString());
-			reportError(ErrorCode.node_enable_fail,
+			nodeManager.getLogger().logError(ErrorCode.node_enable_fail,
 					LoggingLevel.SEVERE,
 					"EventManager.enable()");
 			// better safe than sorry (probably did not initialize correctly)
@@ -260,8 +234,7 @@ public class EventManager implements Node {
 		try {
 			this.onDisable();
 		} catch (Exception e) {
-			System.err.print(e.toString());
-			reportError(ErrorCode.node_disable_fail,
+			nodeManager.getLogger().logError(ErrorCode.node_disable_fail,
 					LoggingLevel.SEVERE,
 					"EventManager.disable()");
 			return false;
@@ -294,10 +267,9 @@ public class EventManager implements Node {
 		try {
 			dispatcher.join();
 		} catch (InterruptedException e) {
-			reportError(ErrorCode.thread_interrupted,
+			nodeManager.getLogger().logError(ErrorCode.thread_interrupted,
 					LoggingLevel.WARNING,
 					"EventManager.onDisable()");
-			System.err.println(e.toString());
 		}
 
 	}
@@ -308,7 +280,8 @@ public class EventManager implements Node {
 			resourceBundle = ResourceBundle.getBundle(
 					ResourceLocation.EventManager, Localization.getLocale());
 		} catch (MissingResourceException missingResource) {
-			reportError(ErrorCode.locale_resource_not_found,
+			nodeManager.getLogger().logError(
+					ErrorCode.locale_resource_not_found,
 					LoggingLevel.SEVERE,
 					"EventManager.onLoad()");
 		}

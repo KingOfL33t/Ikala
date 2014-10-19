@@ -1,6 +1,7 @@
 package com.ikalagaming.core;
 
 import com.ikalagaming.event.EventManager;
+import com.ikalagaming.logging.LoggingNode;
 
 
 /**
@@ -31,6 +32,7 @@ public class Game {
 	 * event system.
 	 */
 	private void loadCoreNodes(){
+		nodeMgr.loadNode(new LoggingNode());
 		nodeMgr.loadNode(new EventManager());
 	}
 

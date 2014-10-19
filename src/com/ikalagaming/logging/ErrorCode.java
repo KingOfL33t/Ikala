@@ -17,6 +17,10 @@ public enum ErrorCode {
 	 * A thread was busy and got interrupted
 	 */
 	thread_interrupted(nextIndex(), "thread_interrupt"),
+	/**
+	 * The event queue could not add more items because it is full
+	 */
+	event_queue_full(nextIndex(), "evt_queue_full"),
 
 	//localization errors
 	/**

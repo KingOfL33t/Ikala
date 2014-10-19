@@ -36,6 +36,11 @@ public class LoggingNode implements Node {
 	 */
 	public void logError(ErrorCode eCode, LoggingLevel level, String details) {
 		if (!enabled){
+			System.err.println(eCode.getName()
+					+ " "
+					+ level.getName()
+					+ " "
+					+ details);
 			return;
 		}
 		if (level.intValue() < threshold.intValue()) {
@@ -61,6 +66,36 @@ public class LoggingNode implements Node {
 			e.printStackTrace(System.err);//we need to know what broke the log
 		}
 		System.err.println(details);
+	}
+
+	/**
+	 * Logs the provided error. Attempts to use localized names for the
+	 * logging level. This only logs information that is above
+	 * or equal to the logging threshold.
+	 *
+	 * @param level what level is the requested log
+	 * @param details what to log
+	 */
+	public void log(LoggingLevel level, String details) {
+		if (!enabled){
+			System.out.println(level.getName() + " " + details);
+			return;
+		}
+		if (level.intValue() < threshold.intValue()) {
+			return;
+		}
+		//TODO print to console or files
+		try {
+			System.out.println(resourceBundle.getString("level_prefix")
+					+ level.getLocalizedName()
+					+ resourceBundle.getString("level_postfix")
+					+ " "
+					+details);
+		}
+		catch (Exception e){
+			System.err.println(level.getName());
+			e.printStackTrace(System.err);//we need to know what broke the log
+		}
 	}
 
 	@Override
@@ -132,13 +167,11 @@ public class LoggingNode implements Node {
 	@Override
 	public void onEnable() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

@@ -15,6 +15,7 @@ public class EventDispatcher extends Thread{
 	private Event currentEvent;
 	private HandlerList handlers;
 	private EventListener[] listeners;
+	private EventManager manager;
 
 	private boolean running;
 	private boolean hasEvents;
@@ -22,8 +23,10 @@ public class EventDispatcher extends Thread{
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
+	 * @param manager the event manager that this dispatcher belongs to
 	 */
-	public EventDispatcher(){
+	public EventDispatcher(EventManager manager){
+		this.manager = manager;
 		this.hasEvents = false;
 		this.running = true;
 	}
@@ -64,7 +67,7 @@ public class EventDispatcher extends Thread{
 			if (hasEvents){
 				try{
 					currentEvent = queue.remove();
-					handlers = currentEvent.getHandlers();
+					handlers = manager.getHandlers(currentEvent);
 					listeners = handlers.getRegisteredListeners();
 					for (EventListener registration : listeners) {
 						try {
@@ -93,5 +96,6 @@ public class EventDispatcher extends Thread{
 	 */
 	public synchronized void terminate(){
 		running = false;
+		manager = null;//stop memory freeing from being stopped
 	}
 }

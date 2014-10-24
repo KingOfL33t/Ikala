@@ -8,7 +8,7 @@ public abstract class Event {
 
 	/**
 	 * Returns the name of the event.
-	 * 
+	 *
 	 * @return The events name (simple class name if no name is specified)
 	 */
 	public String getEventName() {
@@ -17,13 +17,5 @@ public abstract class Event {
 		}
 		return name;
 	}
-	
-	/**
-	 * Returns the {@link HandlerList handler list}.
-	 * 
-	 * @return The handler list.
-	 * 
-	 */
-	public abstract HandlerList getHandlers();
 
 }

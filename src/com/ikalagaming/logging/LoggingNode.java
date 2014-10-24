@@ -20,6 +20,7 @@ public class LoggingNode implements Node {
 	private boolean enabled = false;
 	private final double version = 0.1;
 	private NodeManager nodeManager;
+	private String nodeName = "logging";
 	/**
 	 * Only logs events that are of this level or higher
 	 */
@@ -100,19 +101,7 @@ public class LoggingNode implements Node {
 
 	@Override
 	public String getType() {
-		String type = "";
-		try {
-			type = resourceBundle.getString("nodeType");
-		} catch (MissingResourceException missingResource) {
-			logError(ErrorCode.locale_resource_not_found,
-					LoggingLevel.WARNING,
-					"LoggingNode.getType()");
-		} catch (ClassCastException classCast) {
-			logError(ErrorCode.locale_resource_wrong_type,
-					LoggingLevel.WARNING,
-					"LoggingNode.getType()");
-		}
-		return type;
+		return nodeName;
 	}
 
 	@Override

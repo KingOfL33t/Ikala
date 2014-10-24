@@ -1,7 +1,6 @@
 package com.ikalagaming.core.events;
 
 import com.ikalagaming.event.Event;
-import com.ikalagaming.event.HandlerList;
 
 /**
  * An event that relates to nodes.
@@ -9,7 +8,6 @@ import com.ikalagaming.event.HandlerList;
  *
  */
 public class NodeEvent extends Event {
-	private static final HandlerList handlers = new HandlerList();
 
 	/**
 	 * The name of the node that sent the event, if any.
@@ -63,17 +61,6 @@ public class NodeEvent extends Event {
 	 */
 	public String getMessage(){
 		return this.message;
-	}
-
-	/**
-	 * Returns the {@link HandlerList handler list}.
-	 *
-	 * @return The handler list.
-	 *
-	 */
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 
 

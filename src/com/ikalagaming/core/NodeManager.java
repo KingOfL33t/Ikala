@@ -22,6 +22,7 @@ public class NodeManager {
 					Localization.getLocale());
 	/**maps strings to nodes loaded in memory*/
 	private HashMap<String, Node> loadedNodes;
+	private String nodeName = "node-manager";
 
 	/**
 	 * Constructs a new {@link NodeManager} and initializes variables.
@@ -158,18 +159,7 @@ public class NodeManager {
 	 * @return true if the event was fired correctly
 	 */
 	private boolean fireEvent(String to, String content){
-		String eventNodeType;
-		try {
-			eventNodeType = ResourceBundle.getBundle(
-					ResourceLocation.EventManager,
-					Localization.getLocale()).getString("nodeType");
-		}
-		catch (MissingResourceException missingRes){
-			getLogger().logError(ErrorCode.locale_resource_not_found,
-					LoggingLevel.WARNING,
-					"NodeManager.fireEvent(String, String)");
-			return false;
-		}
+		String eventNodeType = "event-manager";
 
 		if (!isLoaded(eventNodeType)){
 			//TODO log
@@ -182,18 +172,11 @@ public class NodeManager {
 		}
 
 		NodeEvent tmpEvent;
-		try {
-			tmpEvent = new NodeEvent(
-					resourceBundle.getString("NODE_MANAGER_NAME"),
-					to,
-					content);
-		}
-		catch (MissingResourceException missingRes){
-			getLogger().logError(ErrorCode.locale_resource_not_found,
-					LoggingLevel.WARNING,
-					"NodeManager.fireEvent(String, String)");
-			return false;
-		}
+
+		tmpEvent = new NodeEvent(
+				nodeName,
+				to,
+				content);
 		try{
 			if (tmpEvent!= null){//just in case the assignment failed
 				((EventManager)getNode(eventNodeType)).fireEvent(tmpEvent);
@@ -374,27 +357,9 @@ public class NodeManager {
 	 * @return a logger for the engine
 	 */
 	public LoggingNode getLogger(){
-		String loggingNodeName = "";
-		try {
-			loggingNodeName = ResourceBundle.getBundle(
-					ResourceLocation.LoggingNode, Localization.getLocale())
-					.getString("nodeType");
-		} catch (Exception excep) {
-			// we are sort of screwed here, so just
-			// dump as much as we can into the error stream and print any
-			// Additional details to the error stream as well
-			System.err.println("Could not load logger from "
-					+ ResourceLocation.LoggingNode
-					+ Localization.getLocale()
-					+ " using string nodeType");
-			excep.printStackTrace(System.err);
-		}
+		String loggingNodeName = "logging";
 
 		if (!loadedNodes.containsKey(loggingNodeName)){
-			if (loggingNodeName == ""){
-				//it could have screwed up loading the name
-				loggingNodeName = "Logging";
-			}
 			LoggingNode node = new LoggingNode();
 			//store the new node
 			loadedNodes.put(loggingNodeName, node);

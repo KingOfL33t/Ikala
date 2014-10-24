@@ -4,14 +4,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Set;
 
-import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.Node;
 import com.ikalagaming.core.NodeManager;
-import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 
@@ -21,10 +17,26 @@ import com.ikalagaming.logging.LoggingLevel;
 public class EventManager implements Node {
 
 	private EventDispatcher dispatcher;
-	private ResourceBundle resourceBundle;
+	//private ResourceBundle resourceBundle;
 	private boolean enabled = false;
 	private final double version = 0.1;
 	private NodeManager nodeManager;
+	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
+	private HashMap<Class<? extends Event>,
+	Class<? extends Event>> registration;
+	private String nodeName = "event-manager";
+
+	//private static final HandlerList handlers = new HandlerList();
+	///**
+	// * Returns the {@link HandlerList handler list}.
+	// *
+	// * @return The handler list.
+	// *
+	// */
+	//@Override
+	//public HandlerList getHandlers() {
+	//	return handlers;
+	//}
 
 	/**
 	 * Registers event listeners in the supplied listener.
@@ -37,7 +49,7 @@ public class EventManager implements Node {
 	public void registerEventListeners(Listener listener) throws Exception {
 		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry
 				: createRegisteredListeners(
-				listener).entrySet()) {
+						listener).entrySet()) {
 			getEventListeners(getRegistrationClass(entry.getKey()))
 			.registerAll(entry.getValue());
 		}
@@ -54,11 +66,14 @@ public class EventManager implements Node {
 	private HandlerList getEventListeners(Class<? extends Event> type)
 			throws Exception {
 		try {
-			Method method = getRegistrationClass(type).getDeclaredMethod(
+			return handlerMap.get(type);
+
+			/*Method method = getRegistrationClass(type).getDeclaredMethod(
 					"getHandlerList");
 			method.setAccessible(true);
 			// get the handler list from the class
 			return (HandlerList) method.invoke(null);
+			 */
 		} catch (Exception e) {
 			throw new Exception(e.getMessage(), e.getCause());
 		}
@@ -75,23 +90,32 @@ public class EventManager implements Node {
 	 */
 	private Class<? extends Event> getRegistrationClass(
 			Class<? extends Event> eventClass) throws Exception {
-		try {
+		/*try {
 			eventClass.getDeclaredMethod("getHandlerList");
 			return eventClass;
-		} catch (NoSuchMethodException e) {
-			if (eventClass.getSuperclass() != null
-					&& !eventClass.getSuperclass().equals(Event.class)
-					&& Event.class.isAssignableFrom(eventClass.getSuperclass())) {
+		} catch (NoSuchMethodException e) {\
+		if (eventClass.getSuperclass() != null
+				&& !eventClass.getSuperclass().equals(Event.class)
+				&& Event.class.isAssignableFrom(eventClass.getSuperclass())) {
 
-				return getRegistrationClass(eventClass.getSuperclass()
-						.asSubclass(Event.class));
-			} else {
-				Exception excep = new Exception(
-						"Unable to find handler list for event "
-								+ eventClass.getName());
-				throw excep;
-			}
+			return getRegistrationClass(eventClass.getSuperclass()
+					.asSubclass(Event.class));
+		} else {
+			Exception excep = new Exception(
+					"Unable to find handler list for event "
+							+ eventClass.getName());
+			throw excep;
 		}
+		}*/
+		if (registration.containsKey(eventClass)){
+			return registration.get(eventClass);
+		} else {
+			Exception excep = new Exception(
+					"Unable to find handler list for event "
+							+ eventClass.getName());
+			throw excep;
+		}
+
 	}
 
 	/**
@@ -124,14 +148,16 @@ public class EventManager implements Node {
 	 *            The listener to create EventListenrs for
 	 * @return A map of events to a set of EventListeners belonging to it
 	 */
-	public Map<Class<? extends Event>, Set<EventListener>> createRegisteredListeners(
-			Listener listener) {
+	public Map<Class<? extends Event>, Set<EventListener>>
+	createRegisteredListeners(Listener listener) {
 
-		Map<Class<? extends Event>, Set<EventListener>> toReturn = new HashMap<Class<? extends Event>, Set<EventListener>>();
+		Map<Class<? extends Event>, Set<EventListener>> toReturn =
+				new HashMap<Class<? extends Event>, Set<EventListener>>();
 		Set<Method> methods;
 		try {
 			Method[] publicMethods = listener.getClass().getMethods();
-			methods = new HashSet<Method>(publicMethods.length, Float.MAX_VALUE);
+			methods =
+					new HashSet<Method>(publicMethods.length, Float.MAX_VALUE);
 			for (Method method : publicMethods) {
 				methods.add(method);
 			}
@@ -188,23 +214,25 @@ public class EventManager implements Node {
 		return toReturn;
 	}
 
+	/**
+	 * Returns the handlerlist for the given event. If none exists, returns
+	 * a new blank handlerlist.
+	 *
+	 * @param event the class to find handlers for
+	 * @return the handlerlist for that class
+	 */
+	public HandlerList getHandlers(Event event){
+		if (handlerMap.containsKey(event)){
+			return handlerMap.get(event);
+		}
+		else{
+			return new HandlerList();
+		}
+	}
+
 	@Override
 	public String getType() {
-		String type = "";
-		try {
-			type = resourceBundle.getString("nodeType");
-		} catch (MissingResourceException missingResource) {
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_not_found,
-					LoggingLevel.WARNING,
-					"EventManager.getType()");
-		} catch (ClassCastException classCast) {
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_wrong_type,
-					LoggingLevel.WARNING,
-					"EventManager.getType()");
-		}
-		return type;
+		return nodeName;
 	}
 
 	@Override
@@ -258,11 +286,20 @@ public class EventManager implements Node {
 
 	@Override
 	public void onEnable() {
-		dispatcher = new EventDispatcher();
+		dispatcher = new EventDispatcher(this);
+		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
+		registration = new HashMap<Class<? extends Event>,
+				Class<? extends Event>>();
 	}
 
 	@Override
 	public void onDisable() {
+		for (HandlerList l : handlerMap.values()){
+			l.unregisterAll();
+		}
+		registration.clear();
+		handlerMap.clear();
+
 		dispatcher.terminate();
 		try {
 			dispatcher.join();
@@ -276,7 +313,7 @@ public class EventManager implements Node {
 
 	@Override
 	public void onLoad() {
-		try {
+		/*try {
 			resourceBundle = ResourceBundle.getBundle(
 					ResourceLocation.EventManager, Localization.getLocale());
 		} catch (MissingResourceException missingResource) {
@@ -284,12 +321,12 @@ public class EventManager implements Node {
 					ErrorCode.locale_resource_not_found,
 					LoggingLevel.SEVERE,
 					"EventManager.onLoad()");
-		}
+		}*/
 	}
 
 	@Override
 	public void onUnload() {
-		this.resourceBundle = null;
+		//this.resourceBundle = null;
 		this.nodeManager = null;
 	}
 

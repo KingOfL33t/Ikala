@@ -13,12 +13,12 @@ public class HandlerList {
 	 * Handler list. This changes when register() and unregister() are called.
 	 * This is a HashSet for speed.
 	 */
-	private static HashSet<EventListener> handlerslots;
+	private HashSet<EventListener> handlerslots;
 
 	/**
 	 * Unregisters all handlers.
 	 */
-	public static void unregisterAll() {
+	public void unregisterAll() {
 		synchronized (handlerslots) {
 			handlerslots.clear();
 		}
@@ -29,7 +29,7 @@ public class HandlerList {
 	 *
 	 * @param listener The listener to unregister
 	 */
-	public static void unregisterAll(Listener listener) {
+	public void unregisterAll(Listener listener) {
 		synchronized (handlerslots) {
 			handlerslots.remove(listener);
 		}

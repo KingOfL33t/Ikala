@@ -2,6 +2,9 @@ package com.ikalagaming.event;
 
 import java.util.NoSuchElementException;
 
+import com.ikalagaming.logging.ErrorCode;
+import com.ikalagaming.logging.LoggingLevel;
+
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
  *
@@ -51,7 +54,14 @@ public class EventDispatcher extends Thread{
 			;//do nothing since its a null event
 		}
 		catch(Exception e){
-			System.err.println(e.toString());//TODO error reporting
+			if (manager.getNodeManager() != null){
+				manager.getNodeManager().getLogger().logError(
+						ErrorCode.exception, LoggingLevel.WARNING,
+						e.toString());
+			}
+			else {
+				System.err.println(e.toString());
+			}
 		}
 	}
 
@@ -83,8 +93,14 @@ public class EventDispatcher extends Thread{
 					continue;
 				}
 				catch(Exception e){
-					System.err.println(e.toString());
-					//TODO error handling
+					if (manager.getNodeManager() != null){
+						manager.getNodeManager().getLogger().logError(
+								ErrorCode.exception, LoggingLevel.WARNING,
+								e.toString());
+					}
+					else {
+						System.err.println(e.toString());
+					}
 				}
 			}
 		}

@@ -21,6 +21,10 @@ public enum ErrorCode {
 	 * The event queue could not add more items because it is full
 	 */
 	event_queue_full(nextIndex(), "evt_queue_full"),
+	/**
+	 * An Exception occurred, but the type is unknown
+	 */
+	exception(nextIndex(), "exception"),
 
 	//localization errors
 	/**
@@ -53,7 +57,15 @@ public enum ErrorCode {
 	/**
 	 * A node did not get unloaded properly.
 	 */
-	node_unload_fail(nextIndex(), "node_unload_fail");
+	node_unload_fail(nextIndex(), "node_unload_fail"),
+	/**
+	 * Someone tried to communicate with a node that is not loaded
+	 */
+	node_not_loaded(nextIndex(), "node_not_loaded"),
+	/**
+	 * Someone tried to communicate with a node that is not enabled
+	 */
+	node_not_enabled(nextIndex(), "node_not_enabled");
 
 
 	/*

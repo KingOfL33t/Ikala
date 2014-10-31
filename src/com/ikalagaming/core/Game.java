@@ -13,16 +13,9 @@ public class Game {
 	private NodeManager nodeMgr;
 
 	/**
-	 * Constructs a new {@link Game} and initializes variables.
-	 */
-	public Game(){
-		initSubsystems();
-	}
-
-	/**
 	 * Initializes main subsystems.
 	 */
-	private void initSubsystems(){
+	public void init(){
 		nodeMgr = new NodeManager();
 		loadCoreNodes();
 	}

@@ -155,12 +155,10 @@ public class LoggingNode implements Node {
 
 	@Override
 	public void onEnable() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void onDisable() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -184,6 +182,11 @@ public class LoggingNode implements Node {
 	@Override
 	public void setNodeManager(NodeManager parent) {
 		this.nodeManager = parent;
+	}
+
+	@Override
+	public NodeManager getNodeManager(){
+		return this.nodeManager;
 	}
 
 }

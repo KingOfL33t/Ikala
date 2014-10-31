@@ -334,4 +334,9 @@ public class EventManager implements Node {
 	public void setNodeManager(NodeManager parent) {
 		this.nodeManager = parent;
 	}
+
+	@Override
+	public NodeManager getNodeManager(){
+		return this.nodeManager;
+	}
 }

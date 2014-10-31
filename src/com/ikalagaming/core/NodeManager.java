@@ -162,12 +162,14 @@ public class NodeManager {
 		String eventNodeType = "event-manager";
 
 		if (!isLoaded(eventNodeType)){
-			//TODO log
+			getLogger().logError(ErrorCode.node_not_loaded,
+					LoggingLevel.WARNING, to);
 			return false;
 		}
 
 		if (!getNode(eventNodeType).isEnabled()){
-			//TODO log
+			getLogger().logError(ErrorCode.node_not_enabled,
+					LoggingLevel.WARNING, to);
 			return false;
 		}
 
@@ -195,7 +197,7 @@ public class NodeManager {
 
 	/**
 	 * Returns true if a node exists with the given type
-	 *  (for example: "Graphics")
+	 *  (for example: "Graphics")'
 	 * @param type the node type
 	 * @return true if the node is loaded in memory, false if it does not exist
 	 */

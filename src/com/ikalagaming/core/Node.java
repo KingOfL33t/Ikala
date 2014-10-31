@@ -88,4 +88,10 @@ public interface Node {
 	 * @param parent the parent node manager
 	 */
 	public void setNodeManager(NodeManager parent);
+
+	/**
+	 * Returns the current node manager reference, if it exists.
+	 * @return the parent node manager
+	 */
+	public NodeManager getNodeManager();
 }

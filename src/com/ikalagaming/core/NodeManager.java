@@ -46,14 +46,21 @@ public class NodeManager {
 	 * @return true if the node was loaded properly, false otherwise
 	 */
 	public boolean loadNode(Node toLoad){
+		getLogger().log(LoggingLevel.FINE, "Loading node " + toLoad.getType()
+				+ " (V"+toLoad.getVersion()+ ")"+"...");
 		//if the node exists and is older than toLoad, unload
 		if (isLoaded(toLoad)){
+			getLogger().log(LoggingLevel.FINE, "Node " + toLoad.getType()
+					+ " is already loaded. (V" + toLoad.getVersion() + ")");
 			if (loadedNodes.get(toLoad.getType()).getVersion()
 					< toLoad.getVersion()){
 				unloadNode(loadedNodes.get(toLoad.getType()));
 				//unload the old node and continue loading the new one
 			}
 			else{
+				getLogger().log(LoggingLevel.FINE, "Node " + toLoad.getType()
+						+ " (V"+toLoad.getVersion()+ ")"+" was outdated. "
+						+ "Aborting.");
 				return false;
 			}
 		}
@@ -85,20 +92,29 @@ public class NodeManager {
 			}
 
 			if (messageValid){
+				getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+						+ toLoad.getType()
+						+ " using event system.");
 				/*
 				 * Tries to send the event. If the return value is false,
 				 * it failed and therefore we must load manually
 				 */
 				if (!fireEvent(toLoad.getType(), toSend)){
+					getLogger().log(LoggingLevel.FINER, "Event failed"
+							+ "calling method directly.");
 					toLoad.onLoad();
 				}
 			}
 			else {
+				getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+						+ toLoad.getType());
 				//errors creating message so the event would not work
 				toLoad.onLoad();
 			}
 		}
 		else{
+			getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+					+ toLoad.getType());
 			//not using events for onload, or not using events at all
 			toLoad.onLoad();
 		}
@@ -128,24 +144,35 @@ public class NodeManager {
 				}
 
 				if (messageValid){
+					getLogger().log(LoggingLevel.FINER, "Calling onEnable of "
+							+ toLoad.getType()
+							+ " using event system.");
 					/*
 					 * Tries to send the event. If the return value is false,
 					 * it failed and therefore we must load manually
 					 */
 					if (!fireEvent(toLoad.getType(), toSend)){
+						getLogger().log(LoggingLevel.FINER, "Event failed"
+								+ "calling method directly.");
 						toLoad.enable();
 					}
 				}
 				else {
+					getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+							+ toLoad.getType());
 					//errors creating message so the event would not work
 					toLoad.enable();
 				}
 			}
 			else{
+				getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+						+ toLoad.getType());
 				//not using events for enable, or not using events at all
 				toLoad.enable();
 			}
 		}
+		getLogger().log(LoggingLevel.FINE, "Node " + toLoad.getType()
+				+ " (V"+toLoad.getVersion()+ ")"+" loaded!");
 		return true;
 	}
 
@@ -159,15 +186,14 @@ public class NodeManager {
 	 * @return true if the event was fired correctly
 	 */
 	private boolean fireEvent(String to, String content){
-		String eventNodeType = "event-manager";
 
-		if (!isLoaded(eventNodeType)){
+		if (!isLoaded(nodeName)){
 			getLogger().logError(ErrorCode.node_not_loaded,
 					LoggingLevel.WARNING, to);
 			return false;
 		}
 
-		if (!getNode(eventNodeType).isEnabled()){
+		if (!getNode(nodeName).isEnabled()){
 			getLogger().logError(ErrorCode.node_not_enabled,
 					LoggingLevel.WARNING, to);
 			return false;
@@ -181,7 +207,7 @@ public class NodeManager {
 				content);
 		try{
 			if (tmpEvent!= null){//just in case the assignment failed
-				((EventManager)getNode(eventNodeType)).fireEvent(tmpEvent);
+				((EventManager)getNode(nodeName)).fireEvent(tmpEvent);
 
 			}
 		}
@@ -241,7 +267,11 @@ public class NodeManager {
 	 * @return true if the node was unloaded properly
 	 */
 	public boolean unloadNode(String toUnload){
+		getLogger().log(LoggingLevel.FINE, "Unloading node " + toUnload
+				+"...");
 		if (!isLoaded(toUnload)){
+			getLogger().log(LoggingLevel.FINE, "Node " + toUnload
+					+" is not loaded. Aborting.");
 			return false;
 		}
 
@@ -270,20 +300,29 @@ public class NodeManager {
 					}
 
 					if (messageValid){
+						getLogger().log(LoggingLevel.FINER, "Calling disable "
+								+ "method of " + toUnload + " using events.");
 						/*
 						 * Tries to send the event. If the return value is false,
 						 * it failed and therefore we must load manually
 						 */
 						if (!fireEvent(toUnload, toSend)){
+							getLogger().log(LoggingLevel.FINER,
+									"Events failed, "
+											+ "calling method instead.");
 							loadedNodes.get(toUnload).disable();
 						}
 					}
 					else {
+						getLogger().log(LoggingLevel.FINER, "Calling disable "
+								+ "method of " + toUnload);
 						//errors creating message so the event would not work
 						loadedNodes.get(toUnload).disable();
 					}
 				}
 				else{
+					getLogger().log(LoggingLevel.FINER, "Calling disable "
+							+ "method of " + toUnload);
 					loadedNodes.get(toUnload).disable();
 				}
 			}
@@ -312,24 +351,36 @@ public class NodeManager {
 			}
 
 			if (messageValid){
+				getLogger().log(LoggingLevel.FINER, "Calling onUnload "
+						+ "method of " + toUnload + " using events.");
 				/*
 				 * Tries to send the event. If the return value is false,
 				 * it failed and therefore we must load manually
 				 */
 				if (!fireEvent(toUnload, toSend)){
+					getLogger().log(LoggingLevel.FINER,
+							"Events failed, "
+									+ "calling method instead.");
 					loadedNodes.get(toUnload).onUnload();
 				}
 			}
 			else {
+				getLogger().log(LoggingLevel.FINER, "Calling onUnload "
+						+ "method of " + toUnload);
 				//errors creating message so the event would not work
 				loadedNodes.get(toUnload).onUnload();
 			}
 		}
 		else{
+			getLogger().log(LoggingLevel.FINER, "Calling onUnload "
+					+ "method of " + toUnload);
 			loadedNodes.get(toUnload).onUnload();
 		}
 
 		loadedNodes.remove(toUnload);
+
+		getLogger().log(LoggingLevel.FINE, "Node " + toUnload
+				+" unloaded!");
 		return true;
 	}
 
@@ -347,6 +398,8 @@ public class NodeManager {
 		 */
 		String type = toUnload.getType();
 		if (!isLoaded(type)){
+			getLogger().log(LoggingLevel.FINE, "Node " + toUnload.getType()
+					+" is not loaded. Aborting.");
 			return;
 		}
 		unloadNode(type);

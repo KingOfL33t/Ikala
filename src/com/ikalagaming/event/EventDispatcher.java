@@ -44,7 +44,7 @@ public class EventDispatcher extends Thread{
 	public synchronized void dispatchEvent(Event event)
 			throws IllegalStateException{
 		try{
-			queue.add(event);
+			queue.add(event);//FIXME does not add to queue correctly
 			this.hasEvents = true;
 		}
 		catch(IllegalStateException illegalState){
@@ -74,22 +74,38 @@ public class EventDispatcher extends Thread{
 			return;
 		}
 		while (running){
-			if (hasEvents){
+			if (hasEvents()){
+
 				try{
-					currentEvent = queue.remove();
-					handlers = manager.getHandlers(currentEvent);
-					listeners = handlers.getRegisteredListeners();
-					for (EventListener registration : listeners) {
-						try {
-							registration.callEvent(currentEvent);
-						} catch (EventException e) {
-							throw e;
+					if (queue.peek() != null){
+						currentEvent = queue.remove();
+						System.out.println();
+						handlers = manager.getHandlers(currentEvent);
+						listeners = handlers.getRegisteredListeners();
+						for (EventListener registration : listeners) {
+							try {
+								registration.callEvent(currentEvent);
+							} catch (EventException e) {
+								throw e;
+							}
 						}
+					}
+					else{
+						Object[] debug = queue.toArray();
+						System.out.print("[");
+						for (int i = 0; i < debug.length; ++i){
+							System.out.print(debug[i]);
+							if (i< debug.length - 1){
+								System.out.print(", ");
+							}
+						}
+						System.out.println("]");
+						break;
 					}
 				}
 				catch(NoSuchElementException noElement){
 					//the queue is empty
-					hasEvents = false;
+					//hasEvents = false;
 					continue;
 				}
 				catch(Exception e){
@@ -104,6 +120,10 @@ public class EventDispatcher extends Thread{
 				}
 			}
 		}
+	}
+
+	private boolean hasEvents(){
+		return hasEvents;
 	}
 
 	/**

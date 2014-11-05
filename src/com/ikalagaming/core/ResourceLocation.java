@@ -16,7 +16,7 @@ public class ResourceLocation {
 	 * The classpath for the Console resources
 	 */
 	public static String Console
-	= "com.ikalagaming.core.resources.Console";
+	= "com.ikalagaming.gui.resources.Console";
 
 	/**
 	 * The classpath for the NodeManager resources

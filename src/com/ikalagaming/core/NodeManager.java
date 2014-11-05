@@ -17,9 +17,8 @@ import com.ikalagaming.logging.LoggingNode;
  */
 public class NodeManager {
 
-	private ResourceBundle resourceBundle =
-			ResourceBundle.getBundle(ResourceLocation.NodeManager,
-					Localization.getLocale());
+	private ResourceBundle resourceBundle;
+
 	/**maps strings to nodes loaded in memory*/
 	private HashMap<String, Node> loadedNodes;
 	private String nodeName = "node-manager";
@@ -29,6 +28,22 @@ public class NodeManager {
 	 */
 	public NodeManager() {
 		loadedNodes = new HashMap<String, Node>();
+		try{
+			resourceBundle = ResourceBundle.getBundle(ResourceLocation.NodeManager,
+					Localization.getLocale());
+		}
+		catch(MissingResourceException e){
+			e.printStackTrace(System.err);
+		}
+	}
+
+	/**
+	 * Returns the resource bundle for the node manager. This
+	 * is not safe and could be null.
+	 * @return
+	 */
+	public ResourceBundle getResourceBundle(){
+		return resourceBundle;
 	}
 
 	/**
@@ -67,6 +82,7 @@ public class NodeManager {
 
 		//store the new node
 		loadedNodes.put(toLoad.getType(), toLoad);
+		toLoad.setNodeManager(this);
 
 		//load it
 		if (NodeSettings.USE_EVENTS_FOR_ACCESS
@@ -100,7 +116,7 @@ public class NodeManager {
 				 * it failed and therefore we must load manually
 				 */
 				if (!fireEvent(toLoad.getType(), toSend)){
-					getLogger().log(LoggingLevel.FINER, "Event failed"
+					getLogger().log(LoggingLevel.FINER, "Event failed, "
 							+ "calling method directly.");
 					toLoad.onLoad();
 				}
@@ -152,7 +168,7 @@ public class NodeManager {
 					 * it failed and therefore we must load manually
 					 */
 					if (!fireEvent(toLoad.getType(), toSend)){
-						getLogger().log(LoggingLevel.FINER, "Event failed"
+						getLogger().log(LoggingLevel.FINER, "Event failed, "
 								+ "calling method directly.");
 						toLoad.enable();
 					}
@@ -187,13 +203,13 @@ public class NodeManager {
 	 */
 	private boolean fireEvent(String to, String content){
 
-		if (!isLoaded(nodeName)){
+		if (!isLoaded("event-manager")){
 			getLogger().logError(ErrorCode.node_not_loaded,
 					LoggingLevel.WARNING, to);
 			return false;
 		}
 
-		if (!getNode(nodeName).isEnabled()){
+		if (!getNode("event-manager").isEnabled()){
 			getLogger().logError(ErrorCode.node_not_enabled,
 					LoggingLevel.WARNING, to);
 			return false;
@@ -206,8 +222,8 @@ public class NodeManager {
 				to,
 				content);
 		try{
-			if (tmpEvent!= null){//just in case the assignment failed
-				((EventManager)getNode(nodeName)).fireEvent(tmpEvent);
+			if (tmpEvent != null){//just in case the assignment failed
+				((EventManager)getNode("event-manager")).fireEvent(tmpEvent);
 
 			}
 		}
@@ -287,13 +303,15 @@ public class NodeManager {
 								+ resourceBundle.getString("ARG_ON_DISABLE");
 					}
 					catch (MissingResourceException missingResource){
-						getLogger().logError(ErrorCode.locale_resource_not_found,
+						getLogger().logError(
+								ErrorCode.locale_resource_not_found,
 								LoggingLevel.WARNING,
 								"NodeManager.unloadNode(String) disable");
 						messageValid = false;
 					}
 					catch (ClassCastException classCast){
-						getLogger().logError(ErrorCode.locale_resource_wrong_type,
+						getLogger().logError(
+								ErrorCode.locale_resource_wrong_type,
 								LoggingLevel.WARNING,
 								"NodeManager.unloadNode(String) disable");
 						messageValid = false;

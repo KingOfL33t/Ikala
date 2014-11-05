@@ -287,6 +287,7 @@ public class EventManager implements Node {
 	@Override
 	public void onEnable() {
 		dispatcher = new EventDispatcher(this);
+		dispatcher.start();
 		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
 		registration = new HashMap<Class<? extends Event>,
 				Class<? extends Event>>();

@@ -24,7 +24,7 @@ public class LoggingNode implements Node {
 	/**
 	 * Only logs events that are of this level or higher
 	 */
-	private LoggingLevel threshold;
+	private LoggingLevel threshold = LoggingLevel.FINEST;
 //TODO add log to queue, fire later? that prevents lockups when logging. -CB
 	/**
 	 * Logs the provided error. Attempts to use localized names for the

@@ -14,7 +14,7 @@ import java.util.Queue;
 public class EventQueue implements Queue<Event>{
 
 	/**Contains all of the data used in the queue**/
-	private Event[] array;
+	private Event[] array = new Event[0];
 	/**How many events are in the queue**/
 	private int size = 0;
 	/**Index of the next item that will be fetched**/
@@ -34,130 +34,48 @@ public class EventQueue implements Queue<Event>{
 	private final int maxArraySize = 8192;
 
 	/**
-	 * Doubles the size of the array and copies the new values over
-	 * to the new array. If the array has a size of zero, it will set the
-	 * size to one before doubling (resulting in a size of 2).
+	 * Inserts the specified element into this queue if it is possible to do
+	 * so immediately without violating capacity restrictions, returning
+	 * true upon success and throwing an IllegalStateException if no
+	 * space is currently available.
 	 *
-	 * @return true if resizing was successful, false if there was an error
+	 * @param event the element to add
+	 * @return true if this collection changed as a result of the call
+	 * @throws IllegalStateException if the element cannot be added at this
+	 * time due to capacity restrictions
+	 * @throws NullPointerException if the specified element is null
 	 */
-	private synchronized boolean doubleSize(){
+	@Override
+	public synchronized boolean add(Event event)
+			throws IllegalStateException, NullPointerException{
+		if (event == null){
+			//its null so don't worry about adding it
+			throw new NullPointerException();
+		}
+		if (size >= maxArraySize && getTotalFreeElements() <= 0){
+			//its completely full and cant resize larger
+			throw new IllegalStateException();
+		}
+
+		//shift the array and resize if necessary
+		if (shouldShift(1)){
+			shiftToStart();
+		}
+		while (getFreeElementsAtEnd() < 1){
+			//don't double size if its got a free space, but do double if full
+			doubleSize();
+		}
+
+		//copy elements over
 		try {
-			if (size == 0){
-				++size;
-			}
-
-			Event[] tmp = new Event[size*2];
-
-			/* Copy from array (old data) starting at the old head
-			 * position to the new array tmp, beginning at the index 0 of tmp,
-			 * of length (tail-head).
-			 */
-			System.arraycopy(array, head, tmp, 0, tail - head);
-
-			//set array to the new array
-			array = tmp;
-			tmp = null;
-
-			size *= 2;
-			//shift the head and tail over to the start
-			tail -= head;
-			head = 0;
+			array[tail+1] = event;
+			//update tail
+			tail += 1;
 			return true;
 		}
 		catch (Exception e){
-			return false;
+			return false;//it failed copying
 		}
-	}
-
-	/**
-	 * Takes the head and tail and shifts the data to the
-	 * beginning of the array.
-	 *
-	 * @return true on success, false for failure
-	 */
-	private synchronized boolean shiftToStart(){
-		try{
-			/* Copy from array starting at the old head
-			 * position to itself beginning at the 0 index,
-			 * total length equaling (tail-head)
-			 */
-			System.arraycopy(array, head, array, 0, tail - head);
-
-			//set head and tail to their new values
-			tail -= head;
-			head = 0;
-			return true;
-		}
-		catch (Exception e){
-			return false;
-		}
-	}
-
-	/**
-	 * Returns the event at the given position of the internal array.
-	 * This is not intended for use outside of the iterator. May return null.
-	 *
-	 * @param position what position in the queue to retrieve from
-	 * @return The element at that position
-	 */
-	private synchronized Event get(int position){
-		return array[position];
-	}
-
-	/**
-	 * Returns true if there is enough free space
-	 * left to shift the array to the start instead
-	 * of doubling size. Returns false if there is not
-	 * enough space to add all elements. Only shifts if
-	 * a certain percent of the array is free space.
-	 * <p>
-	 * This should be called before adding elements.
-	 *
-	 *@param elementsToAdd the number of elements to be added
-	 * @return true if the array needs to be shifted, false otherwise
-	 */
-	private synchronized boolean shouldShift(int elementsToAdd){
-		//not enough room
-		if (getTotalFreeElements() < elementsToAdd){
-			return false;
-		}
-		//Percentage free is greater than shiftPercentageUnused
-		if ((size-(tail-head)-1)/size >= shiftPercentageUnused){
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the number of free elements in
-	 * the array. These can be before or after
-	 * the block of elements currently being used.
-	 *
-	 * @return total free spaces available
-	 */
-	private synchronized int getTotalFreeElements(){
-		return getFreeElementsAtBeginning()+getFreeElementsAtEnd();
-	}
-
-	/**
-	 * Returns the number of free elements between
-	 * the tail and the end of the array.
-	 *
-	 * @return free spaces available after tail
-	 */
-	private synchronized int getFreeElementsAtEnd(){
-		//size - tail is one larger than the number of free elements
-		return size-tail-1;
-	}
-
-	/**
-	 * Returns the number of free elements between
-	 * the beginning of the array and the head element.
-	 *
-	 * @return free spaces available before head
-	 */
-	private synchronized int getFreeElementsAtBeginning(){
-		return head;
 	}
 
 	/**
@@ -270,6 +188,101 @@ public class EventQueue implements Queue<Event>{
 	}
 
 	/**
+	 * Doubles the size of the array and copies the new values over
+	 * to the new array. If the array has a size of zero, it will set the
+	 * size to one before doubling (resulting in a size of 2).
+	 *
+	 * @return true if resizing was successful, false if there was an error
+	 */
+	private synchronized boolean doubleSize(){
+		try {
+			if (size == 0){
+				++size;
+			}
+
+			Event[] tmp = new Event[size*2];
+
+			/* Copy from array (old data) starting at the old head
+			 * position to the new array tmp, beginning at the index 0 of tmp,
+			 * of length (tail-head).
+			 */
+			System.arraycopy(array, head, tmp, 0, tail - head);
+
+			//set array to the new array
+			array = tmp;
+			tmp = null;
+
+			size *= 2;
+			//shift the head and tail over to the start
+			tail -= head;
+			head = 0;
+			return true;
+		}
+		catch (Exception e){
+			e.printStackTrace(System.err);
+			return false;
+		}
+	}
+
+	/**
+	 * Retrieves, but does not remove, the head of this queue.
+	 * This method differs from {@link #peek} only in that it throws an
+	 * exception if this queue is empty.
+	 * @return the head of this queue
+	 * @throws NoSuchElementException if this queue is empty
+	 */
+	@Override
+	public synchronized Event element() throws NoSuchElementException{
+		if (isEmpty()){
+			throw new NoSuchElementException();
+		}
+		return array[head];
+	}
+
+	/**
+	 * Returns the event at the given position of the internal array.
+	 * This is not intended for use outside of the iterator. May return null.
+	 *
+	 * @param position what position in the queue to retrieve from
+	 * @return The element at that position
+	 */
+	private synchronized Event get(int position){
+		return array[position];
+	}
+
+	/**
+	 * Returns the number of free elements between
+	 * the beginning of the array and the head element.
+	 *
+	 * @return free spaces available before head
+	 */
+	private synchronized int getFreeElementsAtBeginning(){
+		return head;
+	}
+
+	/**
+	 * Returns the number of free elements between
+	 * the tail and the end of the array.
+	 *
+	 * @return free spaces available after tail
+	 */
+	private synchronized int getFreeElementsAtEnd(){
+		//size - tail is one larger than the number of free elements
+		return size-tail-1;
+	}
+
+	/**
+	 * Returns the number of free elements in
+	 * the array. These can be before or after
+	 * the block of elements currently being used.
+	 *
+	 * @return total free spaces available
+	 */
+	private synchronized int getTotalFreeElements(){
+		return getFreeElementsAtBeginning()+getFreeElementsAtEnd();
+	}
+
+	/**
 	 * Returns true if there are no more events
 	 * left to be processed. Note that this will
 	 * return true if there is data stored in the
@@ -309,6 +322,22 @@ public class EventQueue implements Queue<Event>{
 			int end = tail;
 
 			/**
+			 * Returns true if the iteration has more elements.
+			 * (In other words, returns true if {@link #next} would return
+			 * an element rather than throwing an exception.)
+			 *
+			 * @return true if the iteration has more elements
+			 */
+			@Override
+			public boolean hasNext() {
+				//the next position is valid and next element is not null
+				if (pos <= end && get(pos) != null){
+					return true;
+				}
+				return false;
+			}
+
+			/**
 			 * Returns the next element in the iteration.
 			 * @return the next element in the iteration
 			 * @throws NoSuchElementException
@@ -326,23 +355,96 @@ public class EventQueue implements Queue<Event>{
 				}
 				return tmp;
 			}
-
-			/**
-			 * Returns true if the iteration has more elements.
-			 * (In other words, returns true if {@link #next} would return
-			 * an element rather than throwing an exception.)
-			 *
-			 * @return true if the iteration has more elements
-			 */
-			@Override
-			public boolean hasNext() {
-				//the next position is valid and next element is not null
-				if (pos <= end && get(pos) != null){
-					return true;
-				}
-				return false;
-			}
 		};
+	}
+
+	/**
+	 * Inserts the specified element into this queue if it is possible to do
+	 * so immediately without violating capacity restrictions. When using
+	 * a capacity-restricted queue, this method is generally preferable to
+	 * {@link #add}, which can fail to insert an element only by
+	 * throwing an exception.
+	 *
+	 * @param event the element to add
+	 * @return true if the element was added to this queue, else false
+	 * @throws NullPointerException if the specified element is null
+	 */
+	@Override
+	public synchronized boolean offer(Event event)
+			throws NullPointerException {
+		if (event == null){
+			//dont add null events
+			throw new NullPointerException();
+		}
+		if (size >= maxArraySize && getTotalFreeElements() <= 0){
+			//its completely full and cant resize larger
+			return false;
+		}
+
+		//shift the array and resize if necessary
+		if (shouldShift(1)){
+			shiftToStart();
+		}
+		while (getFreeElementsAtEnd() < 1){
+			//don't double size if its got a free space, but do double if full
+			doubleSize();
+		}
+
+		//copy elements over
+		try {
+			array[tail+1] = event;
+			//update tail
+			tail += 1;
+			return true;
+		}
+		catch (Exception e){
+			return false;//it failed copying
+		}
+	}
+
+	/**
+	 * Retrieves, but does not remove, the head of this queue, or returns
+	 * null if this queue is empty.
+	 *
+	 * @return the head of this queue, or null if this queue is empty
+	 */
+	@Override
+	public synchronized Event peek() {
+		return array[head];
+	}
+
+	/**
+	 * Retrieves and removes the head of this queue, or returns null if
+	 * this queue is empty.
+	 * @return the head of this queue, or null if this queue is empty
+	 */
+	@Override
+	public synchronized Event poll() {
+		if (isEmpty()){
+			return null;
+		}
+		Event toReturn = array[head];
+		head++;
+		return toReturn;
+	}
+
+	/**
+	 * Retrieves and removes the head of this queue.
+	 * This method differs from {@link #poll}
+	 * only in that it throws an exception
+	 * if this queue is empty.
+	 *
+	 * @return the head of this queue
+	 * @throws NoSuchElementException if this queue is empty
+	 */
+	@Override
+	public synchronized Event remove() throws NoSuchElementException{
+		if (isEmpty()){
+			throw new NoSuchElementException();
+		}
+		Event toReturn = array[head];
+		head++;
+		return toReturn;
 	}
 
 	/**
@@ -425,6 +527,54 @@ public class EventQueue implements Queue<Event>{
 			}
 		}
 		return changed;
+	}
+
+	/**
+	 * Takes the head and tail and shifts the data to the
+	 * beginning of the array.
+	 *
+	 * @return true on success, false for failure
+	 */
+	private synchronized boolean shiftToStart(){
+		try{
+			/* Copy from array starting at the old head
+			 * position to itself beginning at the 0 index,
+			 * total length equaling (tail-head)
+			 */
+			System.arraycopy(array, head, array, 0, tail - head);
+
+			//set head and tail to their new values
+			tail -= head;
+			head = 0;
+			return true;
+		}
+		catch (Exception e){
+			return false;
+		}
+	}
+
+	/**
+	 * Returns true if there is enough free space
+	 * left to shift the array to the start instead
+	 * of doubling size. Returns false if there is not
+	 * enough space to add all elements. Only shifts if
+	 * a certain percent of the array is free space.
+	 * <p>
+	 * This should be called before adding elements.
+	 *
+	 *@param elementsToAdd the number of elements to be added
+	 * @return true if the array needs to be shifted, false otherwise
+	 */
+	private synchronized boolean shouldShift(int elementsToAdd){
+		//not enough room
+		if (getTotalFreeElements() < elementsToAdd){
+			return false;
+		}
+		//Percentage free is greater than shiftPercentageUnused
+		if ((size-(tail-head)-1)/size >= shiftPercentageUnused){
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -528,155 +678,6 @@ public class EventQueue implements Queue<Event>{
 			++i;
 		}
 		return newArray;
-	}
-
-	/**
-	 * Inserts the specified element into this queue if it is possible to do
-	 * so immediately without violating capacity restrictions, returning
-	 * true upon success and throwing an IllegalStateException if no
-	 * space is currently available.
-	 *
-	 * @param event the element to add
-	 * @return true if this collection changed as a result of the call
-	 * @throws IllegalStateException if the element cannot be added at this
-	 * time due to capacity restrictions
-	 * @throws NullPointerException if the specified element is null
-	 */
-	@Override
-	public synchronized boolean add(Event event)
-			throws IllegalStateException, NullPointerException{
-		if (event == null){
-			//its null so don't worry about adding it
-			throw new NullPointerException();
-		}
-		if (size >= maxArraySize && getTotalFreeElements() <= 0){
-			//its completely full and cant resize larger
-			throw new IllegalStateException();
-		}
-
-		//shift the array and resize if necessary
-		if (shouldShift(1)){
-			shiftToStart();
-		}
-		while (getFreeElementsAtEnd() < 1){
-			//don't double size if its got a free space, but do double if full
-			doubleSize();
-		}
-
-		//copy elements over
-		try {
-			array[tail+1] = event;
-			//update tail
-			tail += 1;
-			return true;
-		}
-		catch (Exception e){
-			return false;//it failed copying
-		}
-	}
-
-	/**
-	 * Retrieves, but does not remove, the head of this queue.
-	 * This method differs from {@link #peek} only in that it throws an
-	 * exception if this queue is empty.
-	 * @return the head of this queue
-	 * @throws NoSuchElementException if this queue is empty
-	 */
-	@Override
-	public synchronized Event element() throws NoSuchElementException{
-		if (isEmpty()){
-			throw new NoSuchElementException();
-		}
-		return array[head];
-	}
-
-	/**
-	 * Inserts the specified element into this queue if it is possible to do
-	 * so immediately without violating capacity restrictions. When using
-	 * a capacity-restricted queue, this method is generally preferable to
-	 * {@link #add}, which can fail to insert an element only by
-	 * throwing an exception.
-	 *
-	 * @param event the element to add
-	 * @return true if the element was added to this queue, else false
-	 * @throws NullPointerException if the specified element is null
-	 */
-	@Override
-	public synchronized boolean offer(Event event)
-			throws NullPointerException {
-		if (event == null){
-			//dont add null events
-			throw new NullPointerException();
-		}
-		if (size >= maxArraySize && getTotalFreeElements() <= 0){
-			//its completely full and cant resize larger
-			return false;
-		}
-
-		//shift the array and resize if necessary
-		if (shouldShift(1)){
-			shiftToStart();
-		}
-		while (getFreeElementsAtEnd() < 1){
-			//don't double size if its got a free space, but do double if full
-			doubleSize();
-		}
-
-		//copy elements over
-		try {
-			array[tail+1] = event;
-			//update tail
-			tail += 1;
-			return true;
-		}
-		catch (Exception e){
-			return false;//it failed copying
-		}
-	}
-
-	/**
-	 * Retrieves, but does not remove, the head of this queue, or returns
-	 * null if this queue is empty.
-	 *
-	 * @return the head of this queue, or null if this queue is empty
-	 */
-	@Override
-	public synchronized Event peek() {
-		return array[head];
-	}
-
-	/**
-	 * Retrieves and removes the head of this queue, or returns null if
-	 * this queue is empty.
-	 * @return the head of this queue, or null if this queue is empty
-	 */
-	@Override
-	public synchronized Event poll() {
-		if (isEmpty()){
-			return null;
-		}
-		Event toReturn = array[head];
-		head++;
-		return toReturn;
-	}
-
-	/**
-	 * Retrieves and removes the head of this queue.
-	 * This method differs from {@link #poll}
-	 * only in that it throws an exception
-	 * if this queue is empty.
-	 *
-	 * @return the head of this queue
-	 * @throws NoSuchElementException if this queue is empty
-	 */
-	@Override
-	public synchronized Event remove() throws NoSuchElementException{
-		if (isEmpty()){
-			throw new NoSuchElementException();
-		}
-		Event toReturn = array[head];
-		head++;
-		return toReturn;
 	}
 
 }

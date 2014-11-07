@@ -19,7 +19,7 @@ public class EventQueue implements Queue<Event>{
 	private int size = 0;
 	/**Index of the next item that will be fetched**/
 	private int head = 0;
-	/**Index of the last item added**/
+	/**Position where the next element will be placed**/
 	private int tail = 0;
 	/**
 	 * The percentage, represented from 0 to 100 as an int,
@@ -68,9 +68,9 @@ public class EventQueue implements Queue<Event>{
 
 		//copy elements over
 		try {
-			array[tail+1] = event;
-			//update tail
-			tail += 1;
+			array[tail] = event;
+			++tail;
+
 			return true;
 		}
 		catch (Exception e){
@@ -114,7 +114,7 @@ public class EventQueue implements Queue<Event>{
 		try {
 			Object[] eventArray = events.toArray();
 			for (int i = 0; i < eventArray.length; ++i){
-				array[i+tail+1] = (Event) eventArray[i];
+				array[i+tail] = (Event) eventArray[i];
 			}
 			//update tail
 			tail += events.size();
@@ -145,7 +145,7 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized boolean contains(Object object) {
-		for (int i = head; i <= tail; ++i){
+		for (int i = head; i < tail; ++i){
 			//if both are null or if the objects are not null and are equal
 			if (object == null ? array[i] == null : array[i].equals(object)){
 				return true;
@@ -167,7 +167,7 @@ public class EventQueue implements Queue<Event>{
 	public synchronized boolean containsAll(Collection<?> objects) {
 		boolean contains = true;
 		boolean ranLoop = false;//if this is false, contains is false
-		for (int i = head; i <= tail; ++i){
+		for (int i = head; i < tail; ++i){
 			//check all objects in the objects collection
 			for (Object object : objects){
 				//if both are null or if the objects are not null and are equal
@@ -198,6 +198,9 @@ public class EventQueue implements Queue<Event>{
 		try {
 			if (size == 0){
 				++size;
+			}
+			if (size >= maxArraySize){
+				return false;
 			}
 
 			Event[] tmp = new Event[size*2];
@@ -267,8 +270,7 @@ public class EventQueue implements Queue<Event>{
 	 * @return free spaces available after tail
 	 */
 	private synchronized int getFreeElementsAtEnd(){
-		//size - tail is one larger than the number of free elements
-		return size-tail-1;
+		return size-tail;
 	}
 
 	/**
@@ -295,16 +297,23 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized boolean isEmpty() {
+		if (head == tail){
+			clear();
+			return true;
+		}
 		//last event has been used
-		if (head>tail){
+		else if (head>tail){
+			clear();
 			return true;
 		}
 		//not a valid index for head
 		if (head <= -1){
+			clear();
 			return true;
 		}
 		//edge case, this should not happen
 		if (tail <= -1){
+			clear();
 			return true;
 		}
 		return false;
@@ -319,7 +328,7 @@ public class EventQueue implements Queue<Event>{
 	public synchronized Iterator<Event> iterator(){
 		return new Iterator<Event>() {
 			int pos = head;
-			int end = tail;
+			int end = tail -1;//last valid entry
 
 			/**
 			 * Returns true if the iteration has more elements.
@@ -387,17 +396,27 @@ public class EventQueue implements Queue<Event>{
 		}
 		while (getFreeElementsAtEnd() < 1){
 			//don't double size if its got a free space, but do double if full
-			doubleSize();
+			if (!doubleSize()){
+				break;
+			}
+		}
+		if (getTotalFreeElements() <= 0){
+			//its completely full and cant resize larger
+			return false;
+		}
+		if (getFreeElementsAtEnd() <= 0){
+			return false;
 		}
 
 		//copy elements over
 		try {
-			array[tail+1] = event;
+			array[tail] = event;
 			//update tail
-			tail += 1;
+			++tail;
 			return true;
 		}
 		catch (Exception e){
+			e.printStackTrace(System.err);
 			return false;//it failed copying
 		}
 	}
@@ -410,6 +429,9 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized Event peek() {
+		if (array.length <= head){
+			return null;
+		}
 		return array[head];
 	}
 
@@ -424,7 +446,7 @@ public class EventQueue implements Queue<Event>{
 			return null;
 		}
 		Event toReturn = array[head];
-		head++;
+		++head;
 		return toReturn;
 	}
 
@@ -443,7 +465,7 @@ public class EventQueue implements Queue<Event>{
 			throw new NoSuchElementException();
 		}
 		Event toReturn = array[head];
-		head++;
+		++head;
 		return toReturn;
 	}
 
@@ -466,7 +488,7 @@ public class EventQueue implements Queue<Event>{
 		int firstIndex = 0;
 		boolean found = false;
 
-		for (firstIndex = head; firstIndex <= tail; ++firstIndex){
+		for (firstIndex = head; firstIndex < tail; ++firstIndex){
 			//if both are null or if the objects are not null and are equal
 			if (object == null
 					? array[firstIndex] == null
@@ -476,13 +498,13 @@ public class EventQueue implements Queue<Event>{
 			}
 		}
 		if (found){
-			for (int i = firstIndex+1; i <= tail; ++i){
+			for (int i = firstIndex + 1; i < tail; ++i){
 				/* shift everything after the object back one to cover it
 				 * ignores everything in the array after the tail
 				 */
 				array[i-1] = array[i];
 			}
-			tail -= 1;
+			--tail;
 			return true;
 		}
 		return false;
@@ -520,7 +542,7 @@ public class EventQueue implements Queue<Event>{
 	@Override
 	public synchronized boolean retainAll(Collection<?> events) {
 		boolean changed = false;
-		for (int i = head; i <= tail; ++i){
+		for (int i = head; i < tail; ++i){
 			if (!events.contains(array[head])){
 				changed = changed || remove(array[head]);
 				--i;
@@ -541,8 +563,12 @@ public class EventQueue implements Queue<Event>{
 			 * position to itself beginning at the 0 index,
 			 * total length equaling (tail-head)
 			 */
-			System.arraycopy(array, head, array, 0, tail - head);
-
+			//faster than arraycopy
+			for (int i = head; i < tail; ++i){
+				array[head-i] = array[i];
+				//head - i is the distance from head we are currently at
+				//that is, position relative to 0 if head were at 0
+			}
 			//set head and tail to their new values
 			tail -= head;
 			head = 0;
@@ -571,7 +597,7 @@ public class EventQueue implements Queue<Event>{
 			return false;
 		}
 		//Percentage free is greater than shiftPercentageUnused
-		if ((size-(tail-head)-1)/size >= shiftPercentageUnused){
+		if ((size-(tail-head))/size >= shiftPercentageUnused){
 			return true;
 		}
 		return false;
@@ -601,10 +627,13 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized Object[] toArray() {
-		Object[] toReturn = new Object[tail-head+1];
-		for (int i = head; i <= tail; ++i){
-			toReturn[i-head] = array[i];
-		}
+		Object[] toReturn = new Object[tail-head];
+		/*
+		 * copy from array starting at head, to
+		 * toReturn starting at 0, where the items to copy
+		 * are of size tail-head (which exactly matches toReturn's size)
+		 */
+		System.arraycopy(array, head, toReturn, 0, tail - head);
 		return toReturn;
 
 	}
@@ -659,14 +688,14 @@ public class EventQueue implements Queue<Event>{
 	public synchronized <T> T[] toArray(T[] newArray)
 			throws ArrayStoreException{
 		//(head-tail) if (head-tail) > 0, otherwise its 0
-		int size = head-tail > 0 ? head-tail : 0;
+		int size = tail-head > 0 ? tail-head : 0;
 		if (newArray.length < size){
 			newArray = (T[]) Array.newInstance(
 					newArray.getClass().getComponentType(), size);
 		}
-		else if (array.length > size) {
+		else if (newArray.length > size) {
 			// If array is to large, set the first unassigned element to null
-			array[size] = null;
+			newArray[size] = null;
 		}
 		//if the sizes are equal, its fits just fine
 
@@ -677,6 +706,7 @@ public class EventQueue implements Queue<Event>{
 			newArray[i] = (T) e;
 			++i;
 		}
+
 		return newArray;
 	}
 

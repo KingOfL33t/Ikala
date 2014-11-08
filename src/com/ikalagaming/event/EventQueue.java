@@ -145,6 +145,9 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized boolean contains(Object object) {
+		if (isEmpty()){
+			return false;
+		}
 		for (int i = head; i < tail; ++i){
 			//if both are null or if the objects are not null and are equal
 			if (object == null ? array[i] == null : array[i].equals(object)){
@@ -165,6 +168,9 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized boolean containsAll(Collection<?> objects) {
+		if (isEmpty()){
+			return false;
+		}
 		boolean contains = true;
 		boolean ranLoop = false;//if this is false, contains is false
 		for (int i = head; i < tail; ++i){
@@ -250,6 +256,9 @@ public class EventQueue implements Queue<Event>{
 	 * @return The element at that position
 	 */
 	private synchronized Event get(int position){
+		if (position >= size){
+			return null;
+		}
 		return array[position];
 	}
 
@@ -482,6 +491,9 @@ public class EventQueue implements Queue<Event>{
 	 */
 	@Override
 	public synchronized boolean remove(Object object) {
+		if (isEmpty()){
+			return false;
+		}
 		if (!contains(object)){
 			return false;
 		}

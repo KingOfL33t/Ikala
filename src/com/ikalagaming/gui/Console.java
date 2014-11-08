@@ -19,7 +19,6 @@ import com.ikalagaming.core.NodeManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.events.NodeEvent;
 import com.ikalagaming.event.EventHandler;
-import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
@@ -181,12 +180,14 @@ public class Console extends WindowAdapter implements Node, Listener{
 	@Override
 	public boolean disable() {
 		onDisable();
+		enabled = false;
 		return true;
 	}
 
 	@Override
 	public boolean enable() {
 		onEnable();
+		enabled = true;
 		return true;
 	}
 
@@ -239,16 +240,6 @@ public class Console extends WindowAdapter implements Node, Listener{
 					ErrorCode.locale_resource_wrong_type,
 					LoggingLevel.WARNING, "Console.onLoad()");
 		}
-		if (nodeManager.isLoaded("event-manager")){
-			EventManager manager =
-					(EventManager) nodeManager.getNode("event-manager");
-			try {
-				manager.registerEventListeners(this);
-			} catch (Exception e) {
-				nodeManager.getLogger().logError(ErrorCode.exception,
-						LoggingLevel.WARNING, "Console.onLoad()");
-			}
-		}
 	}
 
 	@Override
@@ -294,12 +285,15 @@ public class Console extends WindowAdapter implements Node, Listener{
 		String enable = "enable";
 		String disable = "disable";
 
-		try {
-			callMethod = resourceBundle.getString("CMD_CALL");
-			onLoad = resourceBundle.getString("ARG_ON_LOAD");
-			onUnload = resourceBundle.getString("ARG_ON_UNLOAD");
-			enable = resourceBundle.getString("ARG_ENABLE");
-			disable = resourceBundle.getString("ARG_DISABLE");
+
+		try{
+			ResourceBundle nodeBundle;
+			nodeBundle = nodeManager.getResourceBundle();
+			callMethod = nodeBundle.getString("CMD_CALL");
+			onLoad = nodeBundle.getString("ARG_ON_LOAD");
+			onUnload = nodeBundle.getString("ARG_ON_UNLOAD");
+			enable = nodeBundle.getString("ARG_ENABLE");
+			disable = nodeBundle.getString("ARG_DISABLE");
 		}
 		catch (MissingResourceException missingResource){
 			nodeManager.getLogger().logError(

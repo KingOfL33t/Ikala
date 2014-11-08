@@ -13,7 +13,7 @@ import com.ikalagaming.logging.LoggingLevel;
  */
 public class EventDispatcher extends Thread{
 
-	private EventQueue queue = new EventQueue();
+	private EventQueue queue;
 
 	private Event currentEvent;
 	private HandlerList handlers;
@@ -29,6 +29,7 @@ public class EventDispatcher extends Thread{
 	 * @param manager the event manager that this dispatcher belongs to
 	 */
 	public EventDispatcher(EventManager manager){
+		queue = new EventQueue();
 		this.manager = manager;
 		this.hasEvents = false;
 		this.running = true;
@@ -41,11 +42,11 @@ public class EventDispatcher extends Thread{
 	 * @throws IllegalStateException if the element cannot be added at this
 	 * time due to capacity restrictions
 	 */
-	public synchronized void dispatchEvent(Event event)
+	public void dispatchEvent(Event event)
 			throws IllegalStateException{
 		try{
-			queue.add(event);//FIXME does not add to queue correctly
-			this.hasEvents = true;
+			queue.add(event);
+			hasEvents = true;
 		}
 		catch(IllegalStateException illegalState){
 			throw illegalState;
@@ -75,32 +76,26 @@ public class EventDispatcher extends Thread{
 		}
 		while (running){
 			if (hasEvents()){
-
 				try{
-					if (queue.peek() != null){
+					if (queue.isEmpty()){
+						hasEvents = false;
+					}
+					else if (queue.peek() != null){
 						currentEvent = queue.remove();
-						System.out.println();
 						handlers = manager.getHandlers(currentEvent);
-						listeners = handlers.getRegisteredListeners();
-						for (EventListener registration : listeners) {
-							try {
-								registration.callEvent(currentEvent);
-							} catch (EventException e) {
-								throw e;
+						if (handlers != null){
+							listeners = handlers.getRegisteredListeners();
+							for (EventListener registration : listeners) {
+								try {
+									registration.callEvent(currentEvent);
+								} catch (EventException e) {
+									throw e;
+								}
 							}
 						}
 					}
 					else{
-						Object[] debug = queue.toArray();
-						System.out.print("[");
-						for (int i = 0; i < debug.length; ++i){
-							System.out.print(debug[i]);
-							if (i< debug.length - 1){
-								System.out.print(", ");
-							}
-						}
-						System.out.println("]");
-						break;
+						continue;
 					}
 				}
 				catch(NoSuchElementException noElement){
@@ -112,7 +107,8 @@ public class EventDispatcher extends Thread{
 					if (manager.getNodeManager() != null){
 						manager.getNodeManager().getLogger().logError(
 								ErrorCode.exception, LoggingLevel.WARNING,
-								e.toString());
+								e.toString()+ " at EventDispatcher.run()");
+						e.printStackTrace();
 					}
 					else {
 						System.err.println(e.toString());
@@ -130,7 +126,8 @@ public class EventDispatcher extends Thread{
 	 * Stops the thread from executing its run method in preparation for
 	 * shutting down the thread.
 	 */
-	public synchronized void terminate(){
+	public void terminate(){
+		hasEvents = false;
 		running = false;
 		manager = null;//stop memory freeing from being stopped
 	}

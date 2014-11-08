@@ -22,21 +22,7 @@ public class EventManager implements Node {
 	private final double version = 0.1;
 	private NodeManager nodeManager;
 	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
-	private HashMap<Class<? extends Event>,
-	Class<? extends Event>> registration;
 	private String nodeName = "event-manager";
-
-	//private static final HandlerList handlers = new HandlerList();
-	///**
-	// * Returns the {@link HandlerList handler list}.
-	// *
-	// * @return The handler list.
-	// *
-	// */
-	//@Override
-	//public HandlerList getHandlers() {
-	//	return handlers;
-	//}
 
 	/**
 	 * Registers event listeners in the supplied listener.
@@ -48,74 +34,23 @@ public class EventManager implements Node {
 	 */
 	public void registerEventListeners(Listener listener) throws Exception {
 		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry
-				: createRegisteredListeners(
-						listener).entrySet()) {
-			getEventListeners(getRegistrationClass(entry.getKey()))
+				: createRegisteredListeners(listener).entrySet()) {
+			getEventListeners(entry.getKey())
 			.registerAll(entry.getValue());
 		}
 	}
 
 	/**
-	 * Returns a {@link HandlerList} for a give event type
+	 * Returns a {@link HandlerList} for a give event type. Creates one
+	 * if none exist.
 	 *
-	 * @param type
-	 *            The type of event to find handlers for
-	 * @throws Exception
-	 *             If an exception occurred
+	 * @param type the type of event to find handlers for
 	 */
-	private HandlerList getEventListeners(Class<? extends Event> type)
-			throws Exception {
-		try {
-			return handlerMap.get(type);
-
-			/*Method method = getRegistrationClass(type).getDeclaredMethod(
-					"getHandlerList");
-			method.setAccessible(true);
-			// get the handler list from the class
-			return (HandlerList) method.invoke(null);
-			 */
-		} catch (Exception e) {
-			throw new Exception(e.getMessage(), e.getCause());
+	private HandlerList getEventListeners(Class<? extends Event> type){
+		if (!handlerMap.containsKey(type)){
+			handlerMap.put(type, new HandlerList());
 		}
-	}
-
-	/**
-	 * Returns the class that has the handler list for the supplied
-	 * {@link Event}.
-	 *
-	 * @param eventClass
-	 *            The class to find handlers for
-	 * @throws Exception
-	 *             If a handler list cannot be found
-	 */
-	private Class<? extends Event> getRegistrationClass(
-			Class<? extends Event> eventClass) throws Exception {
-		/*try {
-			eventClass.getDeclaredMethod("getHandlerList");
-			return eventClass;
-		} catch (NoSuchMethodException e) {\
-		if (eventClass.getSuperclass() != null
-				&& !eventClass.getSuperclass().equals(Event.class)
-				&& Event.class.isAssignableFrom(eventClass.getSuperclass())) {
-
-			return getRegistrationClass(eventClass.getSuperclass()
-					.asSubclass(Event.class));
-		} else {
-			Exception excep = new Exception(
-					"Unable to find handler list for event "
-							+ eventClass.getName());
-			throw excep;
-		}
-		}*/
-		if (registration.containsKey(eventClass)){
-			return registration.get(eventClass);
-		} else {
-			Exception excep = new Exception(
-					"Unable to find handler list for event "
-							+ eventClass.getName());
-			throw excep;
-		}
-
+		return handlerMap.get(type);
 	}
 
 	/**
@@ -148,7 +83,7 @@ public class EventManager implements Node {
 	 *            The listener to create EventListenrs for
 	 * @return A map of events to a set of EventListeners belonging to it
 	 */
-	public Map<Class<? extends Event>, Set<EventListener>>
+	private Map<Class<? extends Event>, Set<EventListener>>
 	createRegisteredListeners(Listener listener) {
 
 		Map<Class<? extends Event>, Set<EventListener>> toReturn =
@@ -200,7 +135,6 @@ public class EventManager implements Node {
 						}
 						method.invoke(listener, event);
 					}
-
 					catch (Throwable t) {
 						EventException evtExcept = new EventException(t);
 						throw evtExcept;
@@ -215,19 +149,13 @@ public class EventManager implements Node {
 	}
 
 	/**
-	 * Returns the handlerlist for the given event. If none exists, returns
-	 * a new blank handlerlist.
+	 * Returns the handlerlist for the given event.
 	 *
 	 * @param event the class to find handlers for
 	 * @return the handlerlist for that class
 	 */
 	public HandlerList getHandlers(Event event){
-		if (handlerMap.containsKey(event)){
-			return handlerMap.get(event);
-		}
-		else{
-			return new HandlerList();
-		}
+		return getEventListeners(event.getClass());
 	}
 
 	@Override
@@ -242,7 +170,9 @@ public class EventManager implements Node {
 
 	@Override
 	public boolean enable() {
-		this.enabled = true;
+		if (isEnabled()){
+			return false;
+		}
 		try {
 			this.onEnable();
 		} catch (Exception e) {
@@ -253,20 +183,25 @@ public class EventManager implements Node {
 			this.enabled = false;
 			return false;
 		}
+		this.enabled = true;
 		return true;
 	}
 
 	@Override
 	public boolean disable() {
-		this.enabled = false;
+		if (!isEnabled()){
+			return false;
+		}
 		try {
 			this.onDisable();
 		} catch (Exception e) {
 			nodeManager.getLogger().logError(ErrorCode.node_disable_fail,
 					LoggingLevel.SEVERE,
 					"EventManager.disable()");
+			this.enabled = true;
 			return false;
 		}
+		this.enabled = false;
 		return true;
 	}
 
@@ -289,8 +224,6 @@ public class EventManager implements Node {
 		dispatcher = new EventDispatcher(this);
 		dispatcher.start();
 		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
-		registration = new HashMap<Class<? extends Event>,
-				Class<? extends Event>>();
 	}
 
 	@Override
@@ -298,7 +231,6 @@ public class EventManager implements Node {
 		for (HandlerList l : handlerMap.values()){
 			l.unregisterAll();
 		}
-		registration.clear();
 		handlerMap.clear();
 
 		dispatcher.terminate();

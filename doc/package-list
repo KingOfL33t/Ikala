@@ -1,4 +1,5 @@
 com.ikalagaming.core
 com.ikalagaming.core.events
 com.ikalagaming.event
+com.ikalagaming.gui
 com.ikalagaming.logging

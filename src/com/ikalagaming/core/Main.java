@@ -13,7 +13,7 @@ public class Main {
 	/**
 	 * The entrypoint of the program. This is the main method that is
 	 * run when the game is run.
-	 * @param args
+	 * @param args arguments to be passed to the program via command line
 	 */
 	public static void main(String[] args) {
 		boolean displayConsole = true;
@@ -38,7 +38,14 @@ public class Main {
 		g.init();
 
 		if (displayConsole){
-			g.getNodeManager().loadNode(new Console());
+			Console c = new Console();
+			g.getNodeManager().loadNode(c);
+			if (!NodeSettings.ENABLE_ON_LOAD){
+				if (!g.getNodeManager().getNode("console").isEnabled()){
+					g.getNodeManager().getNode("console").enable();
+
+				}
+			}
 		}
 	}
 }

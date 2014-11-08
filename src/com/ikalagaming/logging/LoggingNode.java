@@ -24,7 +24,7 @@ public class LoggingNode implements Node {
 	/**
 	 * Only logs events that are of this level or higher
 	 */
-	private LoggingLevel threshold = LoggingLevel.FINEST;
+	private LoggingLevel threshold = LoggingLevel.ALL;
 //TODO add log to queue, fire later? that prevents lockups when logging. -CB
 	/**
 	 * Logs the provided error. Attempts to use localized names for the
@@ -60,13 +60,15 @@ public class LoggingNode implements Node {
 			System.err.println(resourceBundle.getString("level_prefix")
 					+ level.getLocalizedName()
 					+ resourceBundle.getString("level_postfix")
-					+ errorMessage);
+					+ errorMessage
+					+ " " + details);
 		}
 		catch (Exception e){
 			System.err.println(level.getName());
+			System.err.println(details);
 			e.printStackTrace(System.err);//we need to know what broke the log
 		}
-		System.err.println(details);
+
 	}
 
 	/**
@@ -91,7 +93,7 @@ public class LoggingNode implements Node {
 					+ level.getLocalizedName()
 					+ resourceBundle.getString("level_postfix")
 					+ " "
-					+details);
+					+ details);
 		}
 		catch (Exception e){
 			System.err.println(level.getName());

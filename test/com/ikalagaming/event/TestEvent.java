@@ -34,7 +34,7 @@ public class TestEvent extends Event {
 
 	/**
 	 * Sets the message
-	 * @param newMsg
+	 * @param newMsg the new message to use
 	 */
 	public void setMessage(String newMsg){
 		this.message = newMsg;

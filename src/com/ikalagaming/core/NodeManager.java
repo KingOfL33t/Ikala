@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 
 import com.ikalagaming.core.events.NodeEvent;
 import com.ikalagaming.event.EventManager;
+import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.LoggingNode;
@@ -40,7 +41,7 @@ public class NodeManager {
 	/**
 	 * Returns the resource bundle for the node manager. This
 	 * is not safe and could be null.
-	 * @return
+	 * @return the current resource bundle
 	 */
 	public ResourceBundle getResourceBundle(){
 		return resourceBundle;
@@ -84,6 +85,26 @@ public class NodeManager {
 		loadedNodes.put(toLoad.getType(), toLoad);
 		toLoad.setNodeManager(this);
 
+		if (NodeSettings.USE_EVENTS_FOR_ACCESS){
+			if (isLoaded("event-manager")){
+				EventManager manager = (EventManager) getNode("event-manager");
+				if (manager.isEnabled()){
+					try {
+						if (toLoad instanceof Listener){
+							manager.registerEventListeners((Listener)toLoad);
+							getLogger().log(
+									LoggingLevel.FINER,
+									"Registered event listeners for " +
+									toLoad.getType());
+						}
+					} catch (Exception e) {
+						getLogger().logError(ErrorCode.exception,
+								LoggingLevel.WARNING, "Console.onLoad()");
+					}
+				}
+			}
+		}
+
 		//load it
 		if (NodeSettings.USE_EVENTS_FOR_ACCESS
 				&& NodeSettings.USE_EVENTS_FOR_ON_LOAD){
@@ -107,7 +128,9 @@ public class NodeManager {
 				messageValid = false;
 			}
 
-			if (messageValid){
+			if (messageValid
+					&& isLoaded("event-manager")
+					&& getNode("event-manager").isEnabled()){
 				getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
 						+ toLoad.getType()
 						+ " using event system.");
@@ -159,8 +182,10 @@ public class NodeManager {
 					messageValid = false;
 				}
 
-				if (messageValid){
-					getLogger().log(LoggingLevel.FINER, "Calling onEnable of "
+				if (messageValid
+						&& isLoaded("event-manager")
+						&& getNode("event-manager").isEnabled()){
+					getLogger().log(LoggingLevel.FINER, "Calling enable of "
 							+ toLoad.getType()
 							+ " using event system.");
 					/*
@@ -174,14 +199,14 @@ public class NodeManager {
 					}
 				}
 				else {
-					getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+					getLogger().log(LoggingLevel.FINER, "Calling enable of "
 							+ toLoad.getType());
 					//errors creating message so the event would not work
 					toLoad.enable();
 				}
 			}
 			else{
-				getLogger().log(LoggingLevel.FINER, "Calling onLoad of "
+				getLogger().log(LoggingLevel.FINER, "Calling enable of "
 						+ toLoad.getType());
 				//not using events for enable, or not using events at all
 				toLoad.enable();
@@ -317,7 +342,9 @@ public class NodeManager {
 						messageValid = false;
 					}
 
-					if (messageValid){
+					if (messageValid
+							&& isLoaded("event-manager")
+							&& getNode("event-manager").isEnabled()){
 						getLogger().log(LoggingLevel.FINER, "Calling disable "
 								+ "method of " + toUnload + " using events.");
 						/*
@@ -368,7 +395,9 @@ public class NodeManager {
 				messageValid = false;
 			}
 
-			if (messageValid){
+			if (messageValid
+					&& isLoaded("event-manager")
+					&& getNode("event-manager").isEnabled()){
 				getLogger().log(LoggingLevel.FINER, "Calling onUnload "
 						+ "method of " + toUnload + " using events.");
 				/*

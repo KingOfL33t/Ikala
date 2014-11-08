@@ -14,6 +14,7 @@ public class HandlerList {
 	 * This is a HashSet for speed.
 	 */
 	private HashSet<EventListener> handlerslots;
+	private EventListener[] bakedList;
 
 	/**
 	 * Unregisters all handlers.
@@ -21,6 +22,7 @@ public class HandlerList {
 	public void unregisterAll() {
 		synchronized (handlerslots) {
 			handlerslots.clear();
+			bake();
 		}
 	}
 
@@ -32,6 +34,7 @@ public class HandlerList {
 	public void unregisterAll(Listener listener) {
 		synchronized (handlerslots) {
 			handlerslots.remove(listener);
+			bake();
 		}
 	}
 
@@ -41,6 +44,7 @@ public class HandlerList {
 	 */
 	public HandlerList() {
 		handlerslots = new HashSet<EventListener>();
+		bakedList = new EventListener[0];
 	}
 
 	/**
@@ -56,6 +60,7 @@ public class HandlerList {
 			throw excep;
 		}
 		handlerslots.add(listener);
+		bake();
 	}
 
 	/**
@@ -67,6 +72,7 @@ public class HandlerList {
 		for (EventListener listener : listeners) {
 			register(listener);
 		}
+		bake();
 	}
 
 	/**
@@ -76,6 +82,7 @@ public class HandlerList {
 	 */
 	public synchronized void unregister(EventListener listener) {
 		handlerslots.remove(listener);
+		bake();
 	}
 
 
@@ -84,6 +91,7 @@ public class HandlerList {
 	 * @param listener the Listener to unregister
 	 */
 	public synchronized void unregister(Listener listener) {
+
 		//loop through and unregister a listener from the list if it
 		//matches the param
 		for (Iterator<EventListener> i = handlerslots.iterator(); i.hasNext();)
@@ -92,15 +100,24 @@ public class HandlerList {
 				i.remove();
 			}
 		}
+		bake();
 	}
 
+	/**
+	 * Creates an array of listeners that can be returned. This
+	 * is done whenever the hashset changes and saves on memory.
+	 */
+	private synchronized void bake(){
+		bakedList = new EventListener[handlerslots.size()];
+		bakedList = handlerslots.toArray(bakedList);
+	}
 	/**
 	 * Get the baked registered listeners associated with this handler list
 	 *
 	 * @return The listeners registered
 	 */
 	public EventListener[] getRegisteredListeners() {
-		return handlerslots.toArray(new EventListener[handlerslots.size()]);
+		return bakedList;
 	}
 
 }

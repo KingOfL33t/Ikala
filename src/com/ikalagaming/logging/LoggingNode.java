@@ -21,11 +21,12 @@ public class LoggingNode implements Node {
 	private final double version = 0.1;
 	private NodeManager nodeManager;
 	private String nodeName = "logging";
+	private LogDispatcher dispatcher;
+	private String newLog = "";
 	/**
 	 * Only logs events that are of this level or higher
 	 */
 	private LoggingLevel threshold = LoggingLevel.ALL;
-//TODO add log to queue, fire later? that prevents lockups when logging. -CB
 	/**
 	 * Logs the provided error. Attempts to use localized names for the
 	 * error code and logging level. This only logs errors that are above
@@ -36,6 +37,7 @@ public class LoggingNode implements Node {
 	 * @param details additional information about the error
 	 */
 	public void logError(ErrorCode eCode, LoggingLevel level, String details) {
+		newLog = "";
 		if (!enabled){
 			System.err.println(eCode.getName()
 					+ " "
@@ -55,19 +57,19 @@ public class LoggingNode implements Node {
 		} catch (Exception e) {
 			errorMessage = eCode.getName();
 		}
-		//TODO print to console or files
 		try {
-			System.err.println(resourceBundle.getString("level_prefix")
+			newLog = resourceBundle.getString("level_prefix")
 					+ level.getLocalizedName()
 					+ resourceBundle.getString("level_postfix")
 					+ errorMessage
-					+ " " + details);
+					+ " " + details;
 		}
 		catch (Exception e){
 			System.err.println(level.getName());
 			System.err.println(details);
 			e.printStackTrace(System.err);//we need to know what broke the log
 		}
+		dispatcher.log(newLog);
 
 	}
 
@@ -80,6 +82,7 @@ public class LoggingNode implements Node {
 	 * @param details what to log
 	 */
 	public void log(LoggingLevel level, String details) {
+		newLog = "";
 		if (!enabled){
 			System.out.println(level.getName() + " " + details);
 			return;
@@ -87,18 +90,19 @@ public class LoggingNode implements Node {
 		if (level.intValue() < threshold.intValue()) {
 			return;
 		}
-		//TODO print to console or files
 		try {
-			System.out.println(resourceBundle.getString("level_prefix")
+			newLog = resourceBundle.getString("level_prefix")
 					+ level.getLocalizedName()
 					+ resourceBundle.getString("level_postfix")
 					+ " "
-					+ details);
+					+ details;
 		}
 		catch (Exception e){
 			System.err.println(level.getName());
+			System.err.println(details);
 			e.printStackTrace(System.err);//we need to know what broke the log
 		}
+		dispatcher.log(newLog);
 	}
 
 	@Override
@@ -173,6 +177,8 @@ public class LoggingNode implements Node {
 					LoggingLevel.SEVERE,
 					"LoggingNode.onLoad()");
 		}
+		dispatcher = new LogDispatcher(this);
+		dispatcher.start();
 	}
 
 	@Override

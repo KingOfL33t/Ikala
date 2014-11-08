@@ -81,7 +81,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @return the width of the frame
 	 */
-	public synchronized int getWidth() {
+	public int getWidth() {
 		return width;
 	}
 
@@ -91,7 +91,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @param width The new width
 	 */
-	public synchronized void setWidth(int width) {
+	public void setWidth(int width) {
 		this.width = width;
 		frame.setSize(width, frame.getHeight());
 	}
@@ -102,7 +102,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @return the height of the frame
 	 */
-	public synchronized int getHeight() {
+	public int getHeight() {
 		return height;
 	}
 
@@ -112,7 +112,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @param height The new height
 	 */
-	public synchronized void setHeight(int height) {
+	public void setHeight(int height) {
 		this.height = height;
 		frame.setSize(frame.getWidth(), height);
 	}
@@ -123,7 +123,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @return the max number of lines
 	 */
-	public synchronized int getMaxLineCount() {
+	public int getMaxLineCount() {
 		return maxLineCount;
 	}
 
@@ -132,7 +132,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @param maxLineCount the maximum number of lines to store
 	 */
-	public synchronized void setMaxLineCount(int maxLineCount) {
+	public void setMaxLineCount(int maxLineCount) {
 		this.maxLineCount = maxLineCount;
 	}
 
@@ -141,7 +141,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @return the String that is used as the title
 	 */
-	public synchronized String getWindowTitle() {
+	public String getWindowTitle() {
 		return windowTitle;
 	}
 
@@ -150,7 +150,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 	 *
 	 * @param windowTitle the String to use as the title
 	 */
-	public synchronized void setWindowTitle(String windowTitle) {
+	public void setWindowTitle(String windowTitle) {
 		this.windowTitle = windowTitle;
 		frame.setTitle(windowTitle);
 	}

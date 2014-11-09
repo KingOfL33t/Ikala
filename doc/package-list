@@ -3,3 +3,5 @@ com.ikalagaming.core.events
 com.ikalagaming.event
 com.ikalagaming.gui
 com.ikalagaming.logging
+com.ikalagaming.packages.rng
+com.ikalagaming.util

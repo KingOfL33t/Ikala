@@ -31,6 +31,12 @@ public interface Package {
 	public boolean enable();
 
 	/**
+	 * Returns the current package manager reference, if it exists.
+	 * @return the parent package manager
+	 */
+	public PackageManager getPackageManager();
+
+	/**
 	 * Returns the type of package this is. This is a string that describes the
 	 * package, such as "Graphics" or "AI".
 	 *
@@ -88,10 +94,4 @@ public interface Package {
 	 * @param parent the parent package manager
 	 */
 	public void setPackageManager(PackageManager parent);
-
-	/**
-	 * Returns the current package manager reference, if it exists.
-	 * @return the parent package manager
-	 */
-	public PackageManager getPackageManager();
 }

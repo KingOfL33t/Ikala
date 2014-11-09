@@ -1,4 +1,4 @@
-package com.ikalagaming.logging;
+package com.ikalagaming.core;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -7,17 +7,19 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 
 /**
- * The queue that strings are placed in pending dispatch.
+ * A generic queue implementation.
  * @author Ches Burks
+ * @param <E> The type of object the queue contains
  *
  */
-public class StringQueue implements Queue<String>{
+public class IQueue<E extends Object> implements Queue<E>{
 
 	/**Contains all of the data used in the queue**/
-	private String[] array = new String[0];
-	/**How many strings are in the queue**/
+	@SuppressWarnings("unchecked")//It is a subclass of object. It will work.
+	private E[] array = (E[]) new Object[0];
+	/**How many objects are in the queue**/
 	private int size = 0;
-	/**Index of the next item that will be fetched**/
+	/**Index of the next element that will be fetched**/
 	private int head = 0;
 	/**Position where the next element will be placed**/
 	private int tail = 0;
@@ -27,11 +29,11 @@ public class StringQueue implements Queue<String>{
 	 * shifted to the beginning instead of resizing the array upon
 	 * adding an element.
 	 */
-	private int shiftPercentageUnused = 50;
+	private final int shiftPercentageUnused = 50;
 	/**The maximum number of slots that can be allocated.
 	 * This is to prevent the queue from using up too much memory
 	 */
-	private final int maxArraySize = 1024;
+	private final int maxArraySize = 8192;
 
 	/**
 	 * Inserts the specified element into this queue if it is possible to do
@@ -39,16 +41,16 @@ public class StringQueue implements Queue<String>{
 	 * true upon success and throwing an IllegalStateException if no
 	 * space is currently available.
 	 *
-	 * @param string the element to add
+	 * @param e the element to add
 	 * @return true if this collection changed as a result of the call
 	 * @throws IllegalStateException if the element cannot be added at this
 	 * time due to capacity restrictions
 	 * @throws NullPointerException if the specified element is null
 	 */
 	@Override
-	public synchronized boolean add(String string)
+	public synchronized boolean add(E e)
 			throws IllegalStateException, NullPointerException{
-		if (string == null){
+		if (e == null){
 			//its null so don't worry about adding it
 			throw new NullPointerException();
 		}
@@ -68,59 +70,60 @@ public class StringQueue implements Queue<String>{
 
 		//copy elements over
 		try {
-			array[tail] = string;
+			array[tail] = e;
 			++tail;
 
 			return true;
 		}
-		catch (Exception e){
+		catch (Exception except){
 			return false;//it failed copying
 		}
 	}
 
 	/**
-	 * Adds all of the strings in the given Collection to the
+	 * Adds all of the objects in the given Collection to the
 	 * end of the queue.
 	 * Elements are added in the order they appear in the supplied
 	 * collection.
 	 *
-	 * @param strings A list of strings to add to the queue.
+	 * @param e A list of objects to add to the queue.
 	 * @return true on success, false in the event of a failure
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized boolean addAll(Collection<? extends String> strings) {
+	public synchronized boolean addAll(Collection<? extends E> e) {
 		//we don't need to do anything if the collections empty
-		if (strings.isEmpty()){
+		if (e.isEmpty()){
 			return true;
 		}
-		if (strings.size() > maxArraySize){
-			//could not hold the strings even if the queue is empty
+		if (e.size() > maxArraySize){
+			//could not hold the events even if the queue is empty
 			return false;
 		}
-		else if (strings.size() == maxArraySize && !isEmpty()){
-			//it could hold the strings but its not empty so it will not
+		else if (e.size() == maxArraySize && !isEmpty()){
+			//it could hold the events but its not empty so it will not
 			return false;
 		}
 		//shift the array and resize if necessary
-		if (shouldShift(strings.size())){
+		if (shouldShift(e.size())){
 			shiftToStart();
 		}
-		while (getFreeElementsAtEnd() < strings.size()){
+		while (getFreeElementsAtEnd() < e.size()){
 			//only double if there is not enough room for the array
 			doubleSize();
 		}
 
 		//copy elements over
 		try {
-			Object[] stringArray = strings.toArray();
-			for (int i = 0; i < stringArray.length; ++i){
-				array[i+tail] = (String) stringArray[i];
+			Object[] obje = e.toArray();
+			for (int i = 0; i < obje.length; ++i){
+				obje[i+tail] = (E) obje[i];
 			}
 			//update tail
-			tail += strings.size();
+			tail += e.size();
 			return true;
 		}
-		catch (Exception e){
+		catch (Exception except){
 			return false;//it failed copying
 		}
 	}
@@ -128,20 +131,25 @@ public class StringQueue implements Queue<String>{
 	/**
 	 * Removes all of the elements from this collection (optional operation).
 	 * The collection will be empty after this method returns.
-	 * This does not actually clear out the data, only resets the head and tail
-	 * positions.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void clear() {
 		head = 0;
 		tail = 0;
+
+		//Free all objects from memory for gc to take care of
+		size = 0;
+		array = (E[]) new Object[0];
 	}
 
 	/**
 	 * Returns true if the queue contains the specified element and it has not
-	 * already been dispatched. More formally, returns true if and only if
+	 * already been removed. More formally, returns true if and only if
 	 * this queue contains at least one element e such that
 	 * (o==null ? e==null : o.equals(e)).
+	 * @param object element whose presence in this collection is to be tested
+	 * @return true if this collection contains the specified element
 	 */
 	@Override
 	public synchronized boolean contains(Object object) {
@@ -209,7 +217,9 @@ public class StringQueue implements Queue<String>{
 				return false;
 			}
 
-			String[] tmp = new String[size*2];
+			//It is a subclass of object so this should not fail.
+			@SuppressWarnings("unchecked")
+			E[] tmp = (E[]) new Object[size*2];
 
 			/* Copy from array (old data) starting at the old head
 			 * position to the new array tmp, beginning at the index 0 of tmp,
@@ -241,7 +251,7 @@ public class StringQueue implements Queue<String>{
 	 * @throws NoSuchElementException if this queue is empty
 	 */
 	@Override
-	public synchronized String element() throws NoSuchElementException{
+	public synchronized E element() throws NoSuchElementException{
 		if (isEmpty()){
 			throw new NoSuchElementException();
 		}
@@ -249,13 +259,13 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Returns the string at the given position of the internal array.
+	 * Returns the object at the given position of the internal array.
 	 * This is not intended for use outside of the iterator. May return null.
 	 *
 	 * @param position what position in the queue to retrieve from
 	 * @return The element at that position
 	 */
-	private synchronized String get(int position){
+	private synchronized E get(int position){
 		if (position >= size){
 			return null;
 		}
@@ -294,14 +304,14 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Returns true if there are no more strings
-	 * left to be processed. Note that this will
+	 * Returns true if there are no more objects
+	 * left to be processed. Note that this may
 	 * return true if there is data stored in the
 	 * queue which has already been fetched and
 	 * is not going to be used again, even though
 	 * the data structure is not actually empty.
 	 *
-	 * @return false if there are unprocessed strings,
+	 * @return false if there are objects remaining,
 	 * true otherwise
 	 */
 	@Override
@@ -310,7 +320,7 @@ public class StringQueue implements Queue<String>{
 			clear();
 			return true;
 		}
-		//last string has been used
+		//last event has been used
 		else if (head>tail){
 			clear();
 			return true;
@@ -329,13 +339,13 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Returns an iterator over the valid strings in this collection.
+	 * Returns an iterator over the valid objects in this collection.
 	 *
 	 * @return an Iterator over the elements in this collection
 	 */
 	@Override
-	public synchronized Iterator<String> iterator(){
-		return new Iterator<String>() {
+	public synchronized Iterator<E> iterator(){
+		return new Iterator<E>() {
 			int pos = head;
 			int end = tail -1;//last valid entry
 
@@ -362,8 +372,8 @@ public class StringQueue implements Queue<String>{
 			 * if the iteration has no more elements
 			 */
 			@Override
-			public String next() throws NoSuchElementException{
-				String tmp = null;
+			public E next() throws NoSuchElementException{
+				E tmp = null;
 				if (pos <= end){
 					tmp = get(pos);
 					++pos;
@@ -379,19 +389,20 @@ public class StringQueue implements Queue<String>{
 	/**
 	 * Inserts the specified element into this queue if it is possible to do
 	 * so immediately without violating capacity restrictions. When using
-	 * a capacity-restricted queue, this method is generally preferable to
+	 * a capacity-restricted queue (like this),
+	 * this method is generally preferable to
 	 * {@link #add}, which can fail to insert an element only by
 	 * throwing an exception.
 	 *
-	 * @param string the element to add
+	 * @param e the element to add
 	 * @return true if the element was added to this queue, else false
 	 * @throws NullPointerException if the specified element is null
 	 */
 	@Override
-	public synchronized boolean offer(String string)
+	public synchronized boolean offer(E e)
 			throws NullPointerException {
-		if (string == null){
-			//dont add null strings
+		if (e == null){
+			//dont add null events
 			throw new NullPointerException();
 		}
 		if (size >= maxArraySize && getTotalFreeElements() <= 0){
@@ -419,13 +430,13 @@ public class StringQueue implements Queue<String>{
 
 		//copy elements over
 		try {
-			array[tail] = string;
+			array[tail] = e;
 			//update tail
 			++tail;
 			return true;
 		}
-		catch (Exception e){
-			e.printStackTrace(System.err);
+		catch (Exception except){
+			except.printStackTrace(System.err);
 			return false;//it failed copying
 		}
 	}
@@ -437,7 +448,7 @@ public class StringQueue implements Queue<String>{
 	 * @return the head of this queue, or null if this queue is empty
 	 */
 	@Override
-	public synchronized String peek() {
+	public synchronized E peek() {
 		if (array.length <= head){
 			return null;
 		}
@@ -450,11 +461,11 @@ public class StringQueue implements Queue<String>{
 	 * @return the head of this queue, or null if this queue is empty
 	 */
 	@Override
-	public synchronized String poll() {
+	public synchronized E poll() {
 		if (isEmpty()){
 			return null;
 		}
-		String toReturn = array[head];
+		E toReturn = array[head];
 		++head;
 		return toReturn;
 	}
@@ -469,11 +480,11 @@ public class StringQueue implements Queue<String>{
 	 * @throws NoSuchElementException if this queue is empty
 	 */
 	@Override
-	public synchronized String remove() throws NoSuchElementException{
+	public synchronized E remove() throws NoSuchElementException{
 		if (isEmpty()){
 			throw new NoSuchElementException();
 		}
-		String toReturn = array[head];
+		E toReturn = array[head];
 		++head;
 		return toReturn;
 	}
@@ -528,14 +539,14 @@ public class StringQueue implements Queue<String>{
 	 * returns, this collection will contain no elements in common
 	 * with the specified collection.
 	 *
-	 * @param strings collection containing elements to be removed from this
+	 * @param events collection containing elements to be removed from this
 	 * collection
 	 * @return true if this collection changed as a result of the call
 	 */
 	@Override
-	public synchronized boolean removeAll(Collection<?> strings) {
+	public synchronized boolean removeAll(Collection<?> events) {
 		boolean changed = false;
-		for (Object object : strings){
+		for (Object object : events){
 			changed = changed || remove(object);
 			//if remove ever returns true, changed will be true
 		}
@@ -547,15 +558,15 @@ public class StringQueue implements Queue<String>{
 	 * in the specified collection (optional operation). In other words,
 	 * removes everything in the queue that is not in the supplied collection.
 	 *
-	 * @param strings collection containing elements to be retained in
+	 * @param events collection containing elements to be retained in
 	 * this collection
 	 * @return true if this collection changed as a result of the call
 	 */
 	@Override
-	public synchronized boolean retainAll(Collection<?> strings) {
+	public synchronized boolean retainAll(Collection<?> events) {
 		boolean changed = false;
 		for (int i = head; i < tail; ++i){
-			if (!strings.contains(array[head])){
+			if (!events.contains(array[head])){
 				changed = changed || remove(array[head]);
 				--i;
 			}
@@ -564,8 +575,8 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Takes the head and tail and shifts the data to the
-	 * beginning of the array.
+	 * Shifts the data to the beginning of the array
+	 * and updates the head and tail.
 	 *
 	 * @return true on success, false for failure
 	 */
@@ -620,7 +631,7 @@ public class StringQueue implements Queue<String>{
 	 * contains more than Integer.MAX_VALUE elements, returns
 	 * Integer.MAX_VALUE.
 	 *
-	 * @return the number of strings left to dispatch
+	 * @return the number of events left to dispatch
 	 */
 	@Override
 	public synchronized int size() {
@@ -632,10 +643,9 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Returns an array containing only valid
-	 * strings yet to be sent.
+	 * Returns an array containing the remaining objects.
 	 *
-	 * @return the strings that have yet to be dispatched
+	 * @return the events that have yet to be dispatched
 	 */
 	@Override
 	public synchronized Object[] toArray() {
@@ -651,8 +661,8 @@ public class StringQueue implements Queue<String>{
 	}
 
 	/**
-	 * Returns an array containing all of the valid strings in the queue.
-	 * the runtime type of the returned array is that of the specified array.
+	 * Returns an array containing all of the valid objects in the queue.
+	 * The runtime type of the returned array is that of the specified array.
 	 * If the collection fits in the specified array, it is returned therein.
 	 * Otherwise, a new array is allocated with the runtime type of the
 	 * specified array and the size of this collection.
@@ -712,10 +722,10 @@ public class StringQueue implements Queue<String>{
 		//if the sizes are equal, its fits just fine
 
 		int i = 0;
-		for (Object e : toArray()) {
+		for (Object obj : toArray()) {
 			// No need for checked cast - ArrayStoreException will be thrown
 			// if types are incompatible, just as required
-			newArray[i] = (T) e;
+			newArray[i] = (T) obj;
 			++i;
 		}
 

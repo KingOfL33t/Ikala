@@ -9,7 +9,14 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Ches Burks
  *
  */
-@SuiteClasses({EventQueue.class})
+
+import com.ikalagaming.core.IQueue;
+/**
+ * Tests the IQueue using events
+ * @author Ches Burks
+ *
+ */
+@SuiteClasses({IQueue.class})
 public class EventQueueTest {
 
 	/**
@@ -17,7 +24,7 @@ public class EventQueueTest {
 	 */
 	@Test
 	public void testInit(){
-		EventQueue queue = new EventQueue();
+		IQueue<Event> queue = new IQueue<Event>();
 
 		assertNotNull("queue is null", queue);
 		assertNotNull("no iterator exists", queue.iterator());
@@ -29,7 +36,7 @@ public class EventQueueTest {
 	 */
 	@Test
 	public void testOneElement(){
-		EventQueue queue = new EventQueue();
+		IQueue<Event> queue = new IQueue<Event>();
 		Event event = new TestEvent("Testing");
 		Event[] tmpArray = new Event[0];
 
@@ -79,7 +86,7 @@ public class EventQueueTest {
 	 */
 	@Test
 	public void testMultipleElements(){
-		EventQueue queue = new EventQueue();
+		IQueue<Event> queue = new IQueue<Event>();
 		Event event = new TestEvent("Testing");
 		Event event2 = new TestEvent("Testing");
 		Event[] tmpArray = new Event[0];
@@ -118,7 +125,7 @@ public class EventQueueTest {
 	 */
 	@Test
 	public void testMaxingOutArray(){
-		EventQueue queue = new EventQueue();
+		IQueue<Event> queue = new IQueue<Event>();
 		int maxArraySize = 8192;
 		int i;
 		TestEvent tmp;

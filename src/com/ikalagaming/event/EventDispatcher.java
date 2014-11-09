@@ -2,6 +2,7 @@ package com.ikalagaming.event;
 
 import java.util.NoSuchElementException;
 
+import com.ikalagaming.core.IQueue;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 
@@ -13,7 +14,7 @@ import com.ikalagaming.logging.LoggingLevel;
  */
 public class EventDispatcher extends Thread{
 
-	private EventQueue queue;
+	private IQueue<Event> queue;
 
 	private Event currentEvent;
 	private HandlerList handlers;
@@ -29,7 +30,7 @@ public class EventDispatcher extends Thread{
 	 * @param manager the event manager that this dispatcher belongs to
 	 */
 	public EventDispatcher(EventManager manager){
-		queue = new EventQueue();
+		queue = new IQueue<Event>();
 		this.manager = manager;
 		this.hasEvents = false;
 		this.running = true;

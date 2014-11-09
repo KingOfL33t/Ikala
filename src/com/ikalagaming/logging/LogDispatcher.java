@@ -2,6 +2,8 @@ package com.ikalagaming.logging;
 
 import java.util.NoSuchElementException;
 
+import com.ikalagaming.core.IQueue;
+
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
  *
@@ -10,7 +12,7 @@ import java.util.NoSuchElementException;
  */
 public class LogDispatcher extends Thread{
 
-	private StringQueue queue;
+	private IQueue<String> queue;
 	private String currentStr;
 	private boolean running;
 	private boolean hasLogs;
@@ -22,7 +24,7 @@ public class LogDispatcher extends Thread{
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
 	public LogDispatcher(LoggingPackage manager){
-		queue = new StringQueue();
+		queue = new IQueue<String>();
 		this.hasLogs = false;
 		this.running = true;
 		this.manager = manager;

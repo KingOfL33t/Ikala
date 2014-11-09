@@ -19,16 +19,16 @@ public class ResourceLocation {
 	= "com.ikalagaming.gui.resources.Console";
 
 	/**
-	 * The classpath for the NodeManager resources
+	 * The classpath for the PackageManager resources
 	 */
-	public static String NodeManager
-	= "com.ikalagaming.core.resources.NodeManager";
+	public static String PackageManager
+	= "com.ikalagaming.core.resources.PackageManager";
 
 	/**
-	 * The classpath for the ErrorReportNode resources
+	 * The classpath for the ErrorReportPackage resources
 	 */
-	public static String LoggingNode
-	= "com.ikalagaming.logging.resources.LoggingNode";
+	public static String LoggingPackage
+	= "com.ikalagaming.logging.resources.LoggingPackage";
 
 	/**
 	 * The path for the Error code resources

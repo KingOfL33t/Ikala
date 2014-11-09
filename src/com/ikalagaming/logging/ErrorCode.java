@@ -12,60 +12,60 @@ public enum ErrorCode {
 	/**
 	 * The system ran out of memory.
 	 */
-	sys_out_of_memory(nextIndex(), "sys_no_mem"),
+	SYS_OUT_OF_MEMORY(nextIndex(), "sys_no_mem"),
 	/**
 	 * A thread was busy and got interrupted
 	 */
-	thread_interrupted(nextIndex(), "thread_interrupt"),
+	THREAD_INTERRUPTED(nextIndex(), "thread_interrupt"),
 	/**
 	 * The event queue could not add more items because it is full
 	 */
-	event_queue_full(nextIndex(), "evt_queue_full"),
+	EVENT_QUEUE_FULL(nextIndex(), "evt_queue_full"),
 	/**
 	 * An Exception occurred, but the type is unknown
 	 */
-	exception(nextIndex(), "exception"),
+	EXCEPTION(nextIndex(), "exception"),
 
 	//localization errors
 	/**
 	 * A requested locale does not exist.
 	 */
-	locale_not_found(nextIndex(),"no_locale"),
+	LOCALE_NOT_FOUND(nextIndex(),"no_locale"),
 	/**
 	 * A resource was requested but could not be found.
 	 */
-	locale_resource_not_found(nextIndex(), "locale_resource_missing"),
+	LOCALE_RESOURCE_NOT_FOUND(nextIndex(), "locale_resource_missing"),
 	/**
 	 * The resource loaded is different than the type that was expected.
 	 * For example, a string was found where an integer was supposed to be.
 	 */
-	locale_resource_wrong_type(nextIndex(), "locale_wrong_type"),
+	LOCALE_RESOURCE_WRONG_TYPE(nextIndex(), "locale_wrong_type"),
 
-	//node errors
+	//package errors
 	/**
-	 * A node did not enable properly.
+	 * A package did not enable properly.
 	 */
-	node_enable_fail(nextIndex(), "node_enable_fail"),
+	PACKAGE_ENABLE_FAIL(nextIndex(), "package_enable_fail"),
 	/**
-	 * A node did not disable properly.
+	 * A package did not disable properly.
 	 */
-	node_disable_fail(nextIndex(), "node_disable_fail"),
+	PACKAGE_DISABLE_FAIL(nextIndex(), "package_disable_fail"),
 	/**
-	 * A node did not get loaded properly.
+	 * A package did not get loaded properly.
 	 */
-	node_load_fail(nextIndex(), "node_load_fail"),
+	PACKAGE_LOAD_FAIL(nextIndex(), "package_load_fail"),
 	/**
-	 * A node did not get unloaded properly.
+	 * A package did not get unloaded properly.
 	 */
-	node_unload_fail(nextIndex(), "node_unload_fail"),
+	PACKAGE_UNLOAD_FAIL(nextIndex(), "package_unload_fail"),
 	/**
-	 * Someone tried to communicate with a node that is not loaded
+	 * Someone tried to communicate with a package that is not loaded
 	 */
-	node_not_loaded(nextIndex(), "node_not_loaded"),
+	PACKAGE_NOT_LOADED(nextIndex(), "package_not_packageed"),
 	/**
-	 * Someone tried to communicate with a node that is not enabled
+	 * Someone tried to communicate with a package that is not enabled
 	 */
-	node_not_enabled(nextIndex(), "node_not_enabled");
+	PACKAGE_NOT_ENABLED(nextIndex(), "package_not_enabled");
 
 
 	/*

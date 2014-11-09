@@ -55,9 +55,9 @@ public class EventDispatcher extends Thread{
 			;//do nothing since its a null event
 		}
 		catch(Exception e){
-			if (manager.getNodeManager() != null){
-				manager.getNodeManager().getLogger().logError(
-						ErrorCode.exception, LoggingLevel.WARNING,
+			if (manager.getPackageManager() != null){
+				manager.getPackageManager().getLogger().logError(
+						ErrorCode.EXCEPTION, LoggingLevel.WARNING,
 						e.toString());
 			}
 			else {
@@ -104,9 +104,9 @@ public class EventDispatcher extends Thread{
 					continue;
 				}
 				catch(Exception e){
-					if (manager.getNodeManager() != null){
-						manager.getNodeManager().getLogger().logError(
-								ErrorCode.exception, LoggingLevel.WARNING,
+					if (manager.getPackageManager() != null){
+						manager.getPackageManager().getLogger().logError(
+								ErrorCode.EXCEPTION, LoggingLevel.WARNING,
 								e.toString()+ " at EventDispatcher.run()");
 						e.printStackTrace();
 					}

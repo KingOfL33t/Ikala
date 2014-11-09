@@ -14,14 +14,14 @@ public class LogDispatcher extends Thread{
 	private String currentStr;
 	private boolean running;
 	private boolean hasLogs;
-	private LoggingNode manager;
+	private LoggingPackage manager;
 
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
-	 * @param manager the logging node that this dispatcher belongs to
+	 * @param manager the logging package that this dispatcher belongs to
 	 */
-	public LogDispatcher(LoggingNode manager){
+	public LogDispatcher(LoggingPackage manager){
 		queue = new StringQueue();
 		this.hasLogs = false;
 		this.running = true;

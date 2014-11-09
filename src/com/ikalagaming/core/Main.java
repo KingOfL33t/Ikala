@@ -39,10 +39,10 @@ public class Main {
 
 		if (displayConsole){
 			Console c = new Console();
-			g.getNodeManager().loadNode(c);
-			if (!NodeSettings.ENABLE_ON_LOAD){
-				if (!g.getNodeManager().getNode("console").isEnabled()){
-					g.getNodeManager().getNode("console").enable();
+			g.getPackageManager().loadPackage(c);
+			if (!PackageSettings.ENABLE_ON_LOAD){
+				if (!g.getPackageManager().getPackage("console").isEnabled()){
+					g.getPackageManager().getPackage("console").enable();
 
 				}
 			}

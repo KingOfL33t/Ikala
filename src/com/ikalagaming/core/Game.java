@@ -9,31 +9,31 @@ import com.ikalagaming.event.EventManager;
  *
  */
 public class Game {
-	private NodeManager nodeMgr;
+	private PackageManager packageMgr;
 
 	/**
 	 * Initializes main subsystems.
 	 */
 	public void init(){
-		nodeMgr = new NodeManager();
-		loadCoreNodes();
+		packageMgr = new PackageManager();
+		loadCorePackages();
 	}
 
 	/**
-	 * Loads the main nodes used by the game like the
+	 * Loads the main packages used by the game like the
 	 * event system.
 	 */
-	private void loadCoreNodes(){
-		nodeMgr.loadNode(new EventManager());
+	private void loadCorePackages(){
+		packageMgr.loadPackage(new EventManager());
 	}
 
 	/**
-	 * Returns the game's node manager.
+	 * Returns the game's package manager.
 	 *
-	 * @return The node manager
+	 * @return The package manager
 	 */
-	public NodeManager getNodeManager(){
-		return this.nodeMgr;
+	public PackageManager getPackageManager(){
+		return this.packageMgr;
 	}
 
 

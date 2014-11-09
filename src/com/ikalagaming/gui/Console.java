@@ -14,10 +14,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import com.ikalagaming.core.Localization;
-import com.ikalagaming.core.Node;
-import com.ikalagaming.core.NodeManager;
+import com.ikalagaming.core.Package;
+import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
-import com.ikalagaming.core.events.NodeEvent;
+import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.ErrorCode;
@@ -29,7 +29,7 @@ import com.ikalagaming.logging.LoggingLevel;
  * @author Ches Burks
  *
  */
-public class Console extends WindowAdapter implements Node, Listener{
+public class Console extends WindowAdapter implements Package, Listener{
 	private ResourceBundle resourceBundle;
 	private String windowTitle;
 	private int width = 300;
@@ -42,8 +42,8 @@ public class Console extends WindowAdapter implements Node, Listener{
 	private JTextArea textArea;
 	private JTextField inputArea;
 
-	private NodeManager nodeManager;
-	private String nodeName = "console";
+	private PackageManager packageManager;
+	private String packageName = "console";
 	private boolean enabled = false;
 	private final double version = 0.1;
 
@@ -170,8 +170,8 @@ public class Console extends WindowAdapter implements Node, Listener{
 				end = this.textArea.getLineEndOffset(0);
 				this.textArea.replaceRange("", 0, end);
 			} catch (BadLocationException e) {
-				nodeManager.getLogger().logError(
-						ErrorCode.exception,
+				packageManager.getLogger().logError(
+						ErrorCode.EXCEPTION,
 						LoggingLevel.WARNING, "Console.appendMessage(String)");
 			}
 		}
@@ -193,7 +193,7 @@ public class Console extends WindowAdapter implements Node, Listener{
 
 	@Override
 	public String getType() {
-		return nodeName;
+		return packageName;
 	}
 
 	@Override
@@ -225,19 +225,19 @@ public class Console extends WindowAdapter implements Node, Listener{
 					Localization.getLocale());
 		}
 		catch (MissingResourceException missingResource){
-			nodeManager.getLogger().logError(ErrorCode.locale_not_found,
+			packageManager.getLogger().logError(ErrorCode.LOCALE_NOT_FOUND,
 					LoggingLevel.WARNING, "Console.onLoad()");
 		}
 		try{
 			windowTitle = resourceBundle.getString("title");
 		}
 		catch (MissingResourceException missingResource){
-			nodeManager.getLogger().logError(ErrorCode.locale_not_found,
+			packageManager.getLogger().logError(ErrorCode.LOCALE_NOT_FOUND,
 					LoggingLevel.WARNING, "Console.onLoad()");
 		}
 		catch (ClassCastException classCast){
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_wrong_type,
+			packageManager.getLogger().logError(
+					ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
 					LoggingLevel.WARNING, "Console.onLoad()");
 		}
 	}
@@ -261,22 +261,22 @@ public class Console extends WindowAdapter implements Node, Listener{
 	}
 
 	@Override
-	public void setNodeManager(NodeManager parent) {
-		this.nodeManager = parent;
+	public void setPackageManager(PackageManager parent) {
+		this.packageManager = parent;
 	}
 
 	@Override
-	public NodeManager getNodeManager() {
-		return this.nodeManager;
+	public PackageManager getPackageManager() {
+		return this.packageManager;
 	}
 
 	/**
-	 * Called when a node event is sent out by the event system.
+	 * Called when a package event is sent out by the event system.
 	 * @param event the event that was fired
 	 */
 	@EventHandler
-	public void onNodeEvent(NodeEvent event){
-		if (event.getTo() != nodeName){
+	public void onPackageEvent(PackageEvent event){
+		if (event.getTo() != packageName){
 			return;
 		}
 		String callMethod = "call";
@@ -287,25 +287,25 @@ public class Console extends WindowAdapter implements Node, Listener{
 
 
 		try{
-			ResourceBundle nodeBundle;
-			nodeBundle = nodeManager.getResourceBundle();
-			callMethod = nodeBundle.getString("CMD_CALL");
-			onLoad = nodeBundle.getString("ARG_ON_LOAD");
-			onUnload = nodeBundle.getString("ARG_ON_UNLOAD");
-			enable = nodeBundle.getString("ARG_ENABLE");
-			disable = nodeBundle.getString("ARG_DISABLE");
+			ResourceBundle packageBundle;
+			packageBundle = packageManager.getResourceBundle();
+			callMethod = packageBundle.getString("CMD_CALL");
+			onLoad = packageBundle.getString("ARG_ON_LOAD");
+			onUnload = packageBundle.getString("ARG_ON_UNLOAD");
+			enable = packageBundle.getString("ARG_ENABLE");
+			disable = packageBundle.getString("ARG_DISABLE");
 		}
 		catch (MissingResourceException missingResource){
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_not_found,
+			packageManager.getLogger().logError(
+					ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
 					LoggingLevel.WARNING,
-					"NodeManager.loadNode(Node) load");
+					"PackageManager.loadPackage(Package) load");
 		}
 		catch (ClassCastException classCast){
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_wrong_type,
+			packageManager.getLogger().logError(
+					ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
 					LoggingLevel.WARNING,
-					"NodeManager.loadNode(Node) load");
+					"PackageManager.loadPackage(Package) load");
 		}
 
 		if (event.getMessage().startsWith(callMethod)){

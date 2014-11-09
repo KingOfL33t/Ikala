@@ -6,23 +6,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ikalagaming.core.Node;
-import com.ikalagaming.core.NodeManager;
+import com.ikalagaming.core.Package;
+import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 
 /**
  * Manages events and listeners.
  */
-public class EventManager implements Node {
+public class EventManager implements Package {
 
 	private EventDispatcher dispatcher;
 	//private ResourceBundle resourceBundle;
 	private boolean enabled = false;
 	private final double version = 0.1;
-	private NodeManager nodeManager;
+	private PackageManager packageManager;
 	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
-	private String nodeName = "event-manager";
+	private String packageName = "event-manager";
 
 	/**
 	 * Registers event listeners in the supplied listener.
@@ -68,8 +68,8 @@ public class EventManager implements Node {
 		} catch (IllegalStateException illegalState) {
 			throw illegalState;
 		} catch (Exception e) {
-			nodeManager.getLogger().logError(
-					ErrorCode.event_queue_full,
+			packageManager.getLogger().logError(
+					ErrorCode.EVENT_QUEUE_FULL,
 					LoggingLevel.WARNING,
 					"EventManager.fireEvent(Event)");
 		}
@@ -160,7 +160,7 @@ public class EventManager implements Node {
 
 	@Override
 	public String getType() {
-		return nodeName;
+		return packageName;
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class EventManager implements Node {
 		try {
 			this.onEnable();
 		} catch (Exception e) {
-			nodeManager.getLogger().logError(ErrorCode.node_enable_fail,
+			packageManager.getLogger().logError(ErrorCode.PACKAGE_ENABLE_FAIL,
 					LoggingLevel.SEVERE,
 					"EventManager.enable()");
 			// better safe than sorry (probably did not initialize correctly)
@@ -195,7 +195,7 @@ public class EventManager implements Node {
 		try {
 			this.onDisable();
 		} catch (Exception e) {
-			nodeManager.getLogger().logError(ErrorCode.node_disable_fail,
+			packageManager.getLogger().logError(ErrorCode.PACKAGE_DISABLE_FAIL,
 					LoggingLevel.SEVERE,
 					"EventManager.disable()");
 			this.enabled = true;
@@ -237,7 +237,7 @@ public class EventManager implements Node {
 		try {
 			dispatcher.join();
 		} catch (InterruptedException e) {
-			nodeManager.getLogger().logError(ErrorCode.thread_interrupted,
+			packageManager.getLogger().logError(ErrorCode.THREAD_INTERRUPTED,
 					LoggingLevel.WARNING,
 					"EventManager.onDisable()");
 		}
@@ -246,30 +246,21 @@ public class EventManager implements Node {
 
 	@Override
 	public void onLoad() {
-		/*try {
-			resourceBundle = ResourceBundle.getBundle(
-					ResourceLocation.EventManager, Localization.getLocale());
-		} catch (MissingResourceException missingResource) {
-			nodeManager.getLogger().logError(
-					ErrorCode.locale_resource_not_found,
-					LoggingLevel.SEVERE,
-					"EventManager.onLoad()");
-		}*/
 	}
 
 	@Override
 	public void onUnload() {
 		//this.resourceBundle = null;
-		this.nodeManager = null;
+		this.packageManager = null;
 	}
 
 	@Override
-	public void setNodeManager(NodeManager parent) {
-		this.nodeManager = parent;
+	public void setPackageManager(PackageManager parent) {
+		this.packageManager = parent;
 	}
 
 	@Override
-	public NodeManager getNodeManager(){
-		return this.nodeManager;
+	public PackageManager getPackageManager(){
+		return this.packageManager;
 	}
 }

@@ -1,5 +1,6 @@
 package com.ikalagaming.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -13,16 +14,18 @@ import com.ikalagaming.logging.LoggingPackage;
 
 /**
  * Handles loading, unloading and storage of Packages.
+ * This is considered a package, but is never loaded.
  * @author Ches Burks
  *
  */
-public class PackageManager {
+public class PackageManager implements Package{
 
 	private ResourceBundle resourceBundle;
 
 	/**maps strings to packages loaded in memory*/
 	private HashMap<String, Package> loadedPackages;
 	private String packageName = "package-manager";
+	private CommandRegistry cmdRegistry;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -37,8 +40,54 @@ public class PackageManager {
 		catch(MissingResourceException e){
 			e.printStackTrace(System.err);
 		}
+		cmdRegistry = new CommandRegistry(this);
+		registerCommands();
 	}
 
+	/**
+	 * Registers commands with the registry that
+	 * the package manager uses
+	 */
+	private void registerCommands(){
+		ArrayList<String> commands = new ArrayList<String>();
+		commands.add("COMMAND_ENABLE");
+		commands.add("COMMAND_DISABLE");
+		commands.add("COMMAND_LOAD");
+		commands.add("COMMAND_UNLOAD");
+		commands.add("COMMAND_LIST_PACKAGES");
+		commands.add("COMMAND_RELOAD");
+		commands.add("COMMAND_HELP");
+
+		String tmp = "";
+		try {
+			for (String s : commands){
+				tmp = resourceBundle.getString(s);
+				cmdRegistry.registerCommand(tmp, this);
+			}
+		}
+		catch (MissingResourceException missingResource){
+			getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
+					LoggingLevel.WARNING,
+					"PackageManager.loadPackage(Package) load");
+		}
+		catch (ClassCastException classCast){
+			getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
+					LoggingLevel.WARNING,
+					"PackageManager.loadPackage(Package) load");
+		}
+	}
+
+	/**
+	 * Returns the {@link CommandRegistry} for this package
+	 * manager.
+	 * @return the command registry
+	 */
+	public CommandRegistry getCommandRegistry(){
+		if (cmdRegistry == null){
+			cmdRegistry = new CommandRegistry(this);
+		}
+		return cmdRegistry;
+	}
 	/**
 	 * Returns the resource bundle for the package manager. This
 	 * is not safe and could be null.
@@ -99,7 +148,7 @@ public class PackageManager {
 							getLogger().log(
 									LoggingLevel.FINER,
 									"Registered event listeners for " +
-									toLoad.getType());
+											toLoad.getType());
 						}
 					} catch (Exception e) {
 						getLogger().logError(ErrorCode.EXCEPTION,
@@ -488,4 +537,54 @@ public class PackageManager {
 		return (LoggingPackage)loadedPackages.get(loggingPackageName);
 
 	}
+
+	@Override
+	public boolean disable() {
+		return false;
+	}
+
+	@Override
+	public boolean enable() {
+		return false;
+	}
+
+	@Override
+	public PackageManager getPackageManager() {
+		return this;
+	}
+
+	@Override
+	public String getType() {
+		return packageName;
+	}
+
+	@Override
+	public double getVersion() {
+		return version;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
+	public void onDisable() {}
+
+	@Override
+	public void onEnable() {}
+
+	@Override
+	public void onLoad() {}
+
+	@Override
+	public void onUnload() {}
+
+	@Override
+	public boolean reload() {
+		return false;
+	}
+
+	@Override
+	public void setPackageManager(PackageManager parent) {}
 }

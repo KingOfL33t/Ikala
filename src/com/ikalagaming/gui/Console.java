@@ -19,8 +19,10 @@ import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
+import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.event.EventHandler;
+import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
@@ -56,15 +58,6 @@ public class Console extends WindowAdapter implements Package, Listener{
 	private String packageName = "console";
 	private boolean enabled = false;
 	private final double version = 0.1;
-
-	//For testing
-	//TODO remove me
-	public static void main(String[] args) {
-		Console c = new Console();
-		c.onLoad();
-		c.enable();
-		c.appendIndicatorChar();
-	}
 
 	private void init(){
 		frame = new JFrame(windowTitle);
@@ -151,11 +144,26 @@ public class Console extends WindowAdapter implements Package, Listener{
 	 * nothing.
 	 */
 	private void runLine(){
-		//TODO do something with  the input
 		String line = currentLine;
-		currentLine = "";
+		clearCurrentText();
 		newLine();
-		appendIndicatorChar();
+
+		String firstWord = line.trim().split("\\s+")[0];
+
+		if (!packageManager.getCommandRegistry().contains(firstWord)){
+			appendMessage(resourceBundle.getString("unknown_command")
+					+" "+ firstWord);
+		}
+		if (packageManager.isLoaded("event-manager")){
+			EventManager mgr =
+					(EventManager) packageManager.getPackage("event-manager");
+
+			Package pack =
+					packageManager.getCommandRegistry().getParent(firstWord);
+			if (pack != null){
+				mgr.fireEvent(new CommandFired(pack.getType(), line));
+			}
+		}
 	}
 
 	/**
@@ -166,6 +174,13 @@ public class Console extends WindowAdapter implements Package, Listener{
 		++cursorX;
 		moveRight();
 	}
+	/**
+	 * Appends the input indicator char to the console
+	 */
+	private void removeIndicatorChar(){
+		int offset = getSafeLineStartOffset(currentIndicatorLine);
+		textArea.replaceRange("", offset, offset+1);
+	}
 
 	/**
 	 * Clears out the text on the current line(s). Everything after
@@ -174,17 +189,14 @@ public class Console extends WindowAdapter implements Package, Listener{
 	 */
 	private void clearCurrentText(){
 		int start;
-		int end;
 		//fetch the index of the last line of text
 		start = getSafeLineStartOffset(currentIndicatorLine);
 		//add one to account for the input indicator char
 		++start;
-		//the end of the last line
-		end = getSafeLineEndOffset(textArea.getLineCount()-1);
-		textArea.replaceRange("", start, end);
+		textArea.replaceRange("", start, start+currentLine.length());
 		posInString = 0;
 		cursorY = 0;
-		cursorX = 1;
+		cursorX = 0;
 		currentLine = "";
 		validatePositions();
 		updateCaretPosition();
@@ -202,12 +214,17 @@ public class Console extends WindowAdapter implements Package, Listener{
 		}
 		cursorX = 0;
 		cursorY = 0;
-		++currentIndicatorLine;
-		validatePositions();
-		updateCaretPosition();
+		updateInputLine();
 		while (textArea.getLineCount() > maxLineCount){
 			removeTopLine();
 		}
+	}
+
+	private void updateInputLine(){
+		currentIndicatorLine = textArea.getLineCount() - 1;
+		appendIndicatorChar();
+		validatePositions();
+		updateCaretPosition();
 	}
 
 	/**
@@ -277,10 +294,11 @@ public class Console extends WindowAdapter implements Package, Listener{
 	 */
 	private void updateCaretPosition(){
 		int position = getSafeLineStartOffset(
-				textArea.getLineCount()
-				- 1
-				)
+				currentIndicatorLine + cursorY)
 				+ cursorX;
+		if (position >= textArea.getText().length()){
+			position = textArea.getText().length();
+		}
 		textArea.setCaretPosition(position);
 	}
 
@@ -365,23 +383,6 @@ public class Console extends WindowAdapter implements Package, Listener{
 			packageManager.getLogger().logError(
 					ErrorCode.EXCEPTION,
 					LoggingLevel.WARNING, "Console.getSafeLineOffset(String)");
-		}
-		return -1;
-	}
-
-	/**
-	 * Returns the lineEndOffset of the given line and handles errors.
-	 * @param line the line to find
-	 * @return the offset of the end of the line
-	 */
-	private int getSafeLineEndOffset(int line){
-		try {
-			return textArea.getLineEndOffset(line);
-		} catch (BadLocationException e) {
-			packageManager.getLogger().logError(
-					ErrorCode.EXCEPTION,
-					LoggingLevel.WARNING,
-					"Console.getSafeLineEndOffset(String)");
 		}
 		return -1;
 	}
@@ -509,8 +510,21 @@ public class Console extends WindowAdapter implements Package, Listener{
 	 * @param message The message to append
 	 */
 	public void appendMessage(String message){
+		String curLine = currentLine;
+		int x = cursorX;
+		int y = cursorY;
+		int p = posInString;
+		clearCurrentText();
+		removeIndicatorChar();
 		textArea.append(message+System.lineSeparator());
-
+		updateInputLine();
+		textArea.append(curLine);
+		currentLine = curLine;
+		cursorX = x;
+		cursorY = y;
+		posInString = p;
+		validatePositions();
+		updateCaretPosition();
 		while (textArea.getLineCount() > maxLineCount){
 			removeTopLine();
 		}
@@ -570,6 +584,7 @@ public class Console extends WindowAdapter implements Package, Listener{
 	@Override
 	public void onEnable() {
 		init();
+		appendIndicatorChar();
 	}
 
 	@Override
@@ -624,6 +639,19 @@ public class Console extends WindowAdapter implements Package, Listener{
 		return this.packageManager;
 	}
 
+
+	/**
+	 * Called when a command event is sent.
+	 * @param event the command sent
+	 */
+	@EventHandler
+	public void onCommand(CommandFired event){
+		appendMessage("got cmd " + event.getMessage());
+		if (!event.getTo().equalsIgnoreCase(packageName)){
+			return;
+		}
+
+	}
 	/**
 	 * Called when a package event is sent out by the event system.
 	 * @param event the event that was fired

@@ -4,7 +4,7 @@ import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
 
 /**
- * The main class for the package.
+ * The main interface for the rng package.
  * @author Ches Burks
  *
  */

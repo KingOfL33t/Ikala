@@ -1,6 +1,7 @@
 package com.ikalagaming.core;
 
 import com.ikalagaming.event.EventManager;
+import com.ikalagaming.packages.rng.RngPackageMain;
 
 
 /**
@@ -25,6 +26,7 @@ public class Game {
 	 */
 	private void loadCorePackages(){
 		packageMgr.loadPackage(new EventManager());
+		packageMgr.loadPackage(new RngPackageMain());
 	}
 
 	/**

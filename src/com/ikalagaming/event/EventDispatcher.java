@@ -76,6 +76,11 @@ public class EventDispatcher extends Thread{
 			return;
 		}
 		while (running){
+			try {
+				sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			if (hasEvents()){
 				try{
 					if (queue.isEmpty()){

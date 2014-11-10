@@ -1,6 +1,7 @@
 package com.ikalagaming.core;
 
 import com.ikalagaming.gui.Console;
+import com.ikalagaming.packages.userinput.InputPackage;
 
 /**
  * The entrypoint of the program.
@@ -45,6 +46,12 @@ public class Main {
 					g.getPackageManager().getPackage("console").enable();
 
 				}
+			}
+		}
+		g.getPackageManager().loadPackage(new InputPackage());
+		if (!PackageSettings.ENABLE_ON_LOAD){
+			if (!g.getPackageManager().getPackage("user-input").isEnabled()){
+				g.getPackageManager().getPackage("user-input").enable();
 			}
 		}
 	}

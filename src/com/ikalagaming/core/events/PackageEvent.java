@@ -56,7 +56,7 @@ public class PackageEvent extends Event {
 	}
 
 	/**
-	 * Returns the message transmitted. This may be a command.
+	 * Returns the message transmitted.
 	 * @return the message
 	 */
 	public String getMessage(){

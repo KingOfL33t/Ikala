@@ -63,6 +63,9 @@ public class EventManager implements Package {
 	 *             restrictions
 	 */
 	public void fireEvent(Event event) throws IllegalStateException {
+		if (!enabled){
+			return;
+		}
 		try {
 			dispatcher.dispatchEvent(event);
 		} catch (IllegalStateException illegalState) {

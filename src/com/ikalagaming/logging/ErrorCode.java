@@ -65,7 +65,16 @@ public enum ErrorCode {
 	/**
 	 * Someone tried to communicate with a package that is not enabled
 	 */
-	PACKAGE_NOT_ENABLED(nextIndex(), "package_not_enabled");
+	PACKAGE_NOT_ENABLED(nextIndex(), "package_not_enabled"),
+	//Command errors
+	/**
+	 * A package tried to register a command that already exists
+	 */
+	COMMAND_ALREADY_REGISTERED(nextIndex(), "command_already_registered"),
+	/**
+	 * A command was sent that was not registered
+	 */
+	COMMAND_UNKNOWN(nextIndex(), "command_unknown");
 
 
 	/*

@@ -63,6 +63,11 @@ public class LogDispatcher extends Thread{
 			return;
 		}
 		while (running){
+			try {
+				sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			if (hasEvents()){
 				try{
 					if (queue.isEmpty()){

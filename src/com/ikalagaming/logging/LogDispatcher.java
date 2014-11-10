@@ -1,8 +1,10 @@
+
 package com.ikalagaming.logging;
 
 import java.util.NoSuchElementException;
 
 import com.ikalagaming.core.IQueue;
+import com.ikalagaming.gui.Console;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
@@ -10,7 +12,7 @@ import com.ikalagaming.core.IQueue;
  * @author Ches Burks
  *
  */
-public class LogDispatcher extends Thread{
+public class LogDispatcher extends Thread {
 
 	private IQueue<String> queue;
 	private String currentStr;
@@ -21,9 +23,10 @@ public class LogDispatcher extends Thread{
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
+	 *
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
-	public LogDispatcher(LoggingPackage manager){
+	public LogDispatcher(LoggingPackage manager) {
 		queue = new IQueue<String>();
 		this.hasLogs = false;
 		this.running = true;
@@ -34,68 +37,79 @@ public class LogDispatcher extends Thread{
 	 * Adds the String to the queue pending logging.
 	 *
 	 * @param log The log message to record
-	 * @throws IllegalStateException if the element cannot be added at this
-	 * time due to capacity restrictions
+	 * @throws IllegalStateException if the element cannot be added at this time
+	 *             due to capacity restrictions
 	 */
-	public void log(String log)
-			throws IllegalStateException{
-		try{
+	public void log(String log) throws IllegalStateException {
+		try {
 			queue.add(log);
 			hasLogs = true;
 		}
-		catch(IllegalStateException illegalState){
+		catch (IllegalStateException illegalState) {
 			throw illegalState;
 		}
-		catch(NullPointerException nullPointer){
-			;//do nothing since its a null event
+		catch (NullPointerException nullPointer) {
+			;// do nothing since its a null event
 		}
-		catch(Exception e){
+		catch (Exception e) {
 			System.err.println(e.toString());
 		}
 	}
 
 	/**
-	 * Checks for Strings in the queue, and logs them if possible.
-	 * Does not do anything if {@link #terminate()} has been called.
+	 * Checks for Strings in the queue, and logs them if possible. Does not do
+	 * anything if {@link #terminate()} has been called.
 	 */
 	public void run() {
-		if (!running){
+		if (!running) {
 			return;
 		}
-		while (running){
+		while (running) {
 			try {
 				sleep(50);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (hasEvents()){
-				try{
-					if (queue.isEmpty()){
+			if (hasEvents()) {
+				try {
+					if (queue.isEmpty()) {
 						hasLogs = false;
 					}
-					else if (queue.peek() != null){
+					else if (queue.peek() != null) {
 						currentStr = queue.remove();
-						//log it to the system output stream
+						// log it to the system output stream
 						System.out.println(currentStr);
-						//TODO log to console/file
+
+						if (manager != null
+								&& manager.getPackageManager() != null
+								&& manager.getPackageManager().isLoaded(
+										"console")) {
+							Console c =
+									(Console) manager.getPackageManager()
+											.getPackage("console");
+							if (c.isEnabled()) {
+								c.appendMessage(currentStr);
+							}
+						}
 					}
-					else{
+					else {
 						continue;
 					}
 				}
-				catch(NoSuchElementException noElement){
-					//the queue is empty
-					//hasEvents = false;
+				catch (NoSuchElementException noElement) {
+					// the queue is empty
+					// hasEvents = false;
 					continue;
 				}
-				catch(Exception e){
+				catch (Exception e) {
 					System.err.println(e.toString());
 				}
 			}
 		}
 	}
 
-	private boolean hasEvents(){
+	private boolean hasEvents() {
 		return hasLogs;
 	}
 
@@ -103,7 +117,7 @@ public class LogDispatcher extends Thread{
 	 * Stops the thread from executing its run method in preparation for
 	 * shutting down the thread.
 	 */
-	public void terminate(){
+	public void terminate() {
 		hasLogs = false;
 		running = false;
 	}

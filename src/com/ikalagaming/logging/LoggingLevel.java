@@ -1,3 +1,4 @@
+
 package com.ikalagaming.logging;
 
 import java.util.Locale;
@@ -10,10 +11,10 @@ import com.ikalagaming.core.ResourceLocation;
 /**
  * A set of levels for logging. This is the standard java logging list in an
  * enum form, with the values changed.
- *
+ * 
  * @see Level
  * @author Ches Burks
- *
+ * 
  */
 public enum LoggingLevel {
 
@@ -104,11 +105,9 @@ public enum LoggingLevel {
 
 	/**
 	 * Constructs a named logging level with the given integer value.
-	 *
-	 * @param name
-	 *            the name of the level
-	 * @param value
-	 *            an integer value for the level
+	 * 
+	 * @param name the name of the level
+	 * @param value an integer value for the level
 	 */
 	private LoggingLevel(String name, int value) {
 		this.name = name;
@@ -117,7 +116,7 @@ public enum LoggingLevel {
 
 	/**
 	 * Returns the (non-localized) name of the logging level.
-	 *
+	 * 
 	 * @return the non-localized name of the logging level
 	 */
 	public String getName() {
@@ -127,7 +126,7 @@ public enum LoggingLevel {
 	/**
 	 * Attempts to find the localized name for the logging level. If none
 	 * exists, the default level will be returned.
-	 *
+	 * 
 	 * @return the localized name of the logging level
 	 */
 	public String getLocalizedName() {
@@ -137,6 +136,7 @@ public enum LoggingLevel {
 	// Avoid looking up the localizedLevelName twice if we already have it
 	/**
 	 * This is from line 289 of {@link Level Level}
+	 * 
 	 * @see Level
 	 * @return The cached name for this level
 	 */
@@ -153,9 +153,9 @@ public enum LoggingLevel {
 		}
 
 		if (ResourceLocation.LoggingLevel == null) {
-            // No resource bundle; just use the default name.
-            return name;
-        }
+			// No resource bundle; just use the default name.
+			return name;
+		}
 		// We need to compute the localized name.
 		// Either because it's the first time, or because our cached
 		// value is for a different locale.
@@ -165,6 +165,7 @@ public enum LoggingLevel {
 	// Avoid looking up the localizedLevelName twice if we already have it.
 	/**
 	 * This is from line 312 of {@link Level Level}
+	 * 
 	 * @see Level
 	 * @return The localized version of the level name
 	 */
@@ -176,13 +177,14 @@ public enum LoggingLevel {
 			return cachedLocalizedName;
 		}
 
-		//try to fetch the localized name
+		// try to fetch the localized name
 		try {
-			localizedLevelName = ResourceBundle.getBundle(
-					ResourceLocation.LoggingLevel, Localization.getLocale())
-					.getString(name);
-		} catch (Exception ex) {
-			//if we fail, just use the default
+			localizedLevelName =
+					ResourceBundle.getBundle(ResourceLocation.LoggingLevel,
+							Localization.getLocale()).getString(name);
+		}
+		catch (Exception ex) {
+			// if we fail, just use the default
 			localizedLevelName = name;
 		}
 		cachedLocale = Localization.getLocale();
@@ -191,7 +193,7 @@ public enum LoggingLevel {
 
 	/**
 	 * Returns the integer value assigned to the level.
-	 *
+	 * 
 	 * @return the integer value for this level
 	 */
 	public int intValue() {

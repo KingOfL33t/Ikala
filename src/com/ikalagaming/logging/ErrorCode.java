@@ -1,14 +1,15 @@
+
 package com.ikalagaming.logging;
 
 /**
  * A centralized list of errors and their corresponding code.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public enum ErrorCode {
 
-	//system errors
+	// system errors
 	/**
 	 * The system ran out of memory.
 	 */
@@ -26,22 +27,22 @@ public enum ErrorCode {
 	 */
 	EXCEPTION(nextIndex(), "exception"),
 
-	//localization errors
+	// localization errors
 	/**
 	 * A requested locale does not exist.
 	 */
-	LOCALE_NOT_FOUND(nextIndex(),"no_locale"),
+	LOCALE_NOT_FOUND(nextIndex(), "no_locale"),
 	/**
 	 * A resource was requested but could not be found.
 	 */
 	LOCALE_RESOURCE_NOT_FOUND(nextIndex(), "locale_resource_missing"),
 	/**
-	 * The resource loaded is different than the type that was expected.
-	 * For example, a string was found where an integer was supposed to be.
+	 * The resource loaded is different than the type that was expected. For
+	 * example, a string was found where an integer was supposed to be.
 	 */
 	LOCALE_RESOURCE_WRONG_TYPE(nextIndex(), "locale_wrong_type"),
 
-	//package errors
+	// package errors
 	/**
 	 * A package did not enable properly.
 	 */
@@ -66,7 +67,7 @@ public enum ErrorCode {
 	 * Someone tried to communicate with a package that is not enabled
 	 */
 	PACKAGE_NOT_ENABLED(nextIndex(), "package_not_enabled"),
-	//Command errors
+	// Command errors
 	/**
 	 * A package tried to register a command that already exists
 	 */
@@ -76,55 +77,56 @@ public enum ErrorCode {
 	 */
 	COMMAND_UNKNOWN(nextIndex(), "command_unknown");
 
-
 	/*
-	 * This allows enum values to be shifted around or values to be
-	 * added later without having to change all of the values by hand.
+	 * This allows enum values to be shifted around or values to be added later
+	 * without having to change all of the values by hand.
 	 */
 	/**
 	 * The current index value for the class.
 	 */
 	private static int i = 0;
+
 	/**
 	 * Returns the next index value.
+	 * 
 	 * @return the next value
 	 */
-	private static int nextIndex(){
+	private static int nextIndex() {
 		++i;
 		return i;
 	}
 
-	/** The int associated with the error*/
+	/** The int associated with the error */
 	private int code;
-	/** The name used to look up the translated error message*/
+	/** The name used to look up the translated error message */
 	private String name;
 
 	/**
 	 * Constructs a new ErrorCode with the given int index and name.
-	 *
+	 * 
 	 * @param val the int associated with the error
 	 * @param label the name used to look up the translated error message
 	 */
-	private ErrorCode(int val, String label){
+	private ErrorCode(int val, String label) {
 		this.code = val;
 		this.name = label;
 	}
 
-
 	/**
 	 * Returns the int value associated with this error.
+	 * 
 	 * @return the error code
 	 */
-	public int getCode(){
+	public int getCode() {
 		return this.code;
 	}
 
 	/**
 	 * Returns the name used to look up the translated error message
-	 *
+	 * 
 	 * @return the name code
 	 */
-	public String getName(){
+	public String getName() {
 		return this.name;
 	}
 }

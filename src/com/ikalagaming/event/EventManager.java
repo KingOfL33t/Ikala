@@ -1,3 +1,4 @@
+
 package com.ikalagaming.event;
 
 import java.lang.reflect.Method;
@@ -17,7 +18,7 @@ import com.ikalagaming.logging.LoggingLevel;
 public class EventManager implements Package {
 
 	private EventDispatcher dispatcher;
-	//private ResourceBundle resourceBundle;
+	// private ResourceBundle resourceBundle;
 	private boolean enabled = false;
 	private final double version = 0.1;
 	private PackageManager packageManager;
@@ -26,28 +27,25 @@ public class EventManager implements Package {
 
 	/**
 	 * Registers event listeners in the supplied listener.
-	 *
-	 * @param listener
-	 *            The listener to register
-	 * @throws Exception
-	 *             If there is an exception registering
+	 * 
+	 * @param listener The listener to register
+	 * @throws Exception If there is an exception registering
 	 */
 	public void registerEventListeners(Listener listener) throws Exception {
-		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry
-				: createRegisteredListeners(listener).entrySet()) {
-			getEventListeners(entry.getKey())
-			.registerAll(entry.getValue());
+		for (Map.Entry<Class<? extends Event>, Set<EventListener>> entry : createRegisteredListeners(
+				listener).entrySet()) {
+			getEventListeners(entry.getKey()).registerAll(entry.getValue());
 		}
 	}
 
 	/**
-	 * Returns a {@link HandlerList} for a give event type. Creates one
-	 * if none exist.
-	 *
+	 * Returns a {@link HandlerList} for a give event type. Creates one if none
+	 * exist.
+	 * 
 	 * @param type the type of event to find handlers for
 	 */
-	private HandlerList getEventListeners(Class<? extends Event> type){
-		if (!handlerMap.containsKey(type)){
+	private HandlerList getEventListeners(Class<? extends Event> type) {
+		if (!handlerMap.containsKey(type)) {
 			handlerMap.put(type, new HandlerList());
 		}
 		return handlerMap.get(type);
@@ -55,39 +53,36 @@ public class EventManager implements Package {
 
 	/**
 	 * Sends the {@link Event event} to all of its listeners.
-	 *
-	 * @param event
-	 *            The event to fire
-	 * @throws IllegalStateException
-	 *             if the element cannot be added at this time due to capacity
-	 *             restrictions
+	 * 
+	 * @param event The event to fire
+	 * @throws IllegalStateException if the element cannot be added at this time
+	 *             due to capacity restrictions
 	 */
 	public void fireEvent(Event event) throws IllegalStateException {
-		if (!enabled){
+		if (!enabled) {
 			return;
 		}
 		try {
 			dispatcher.dispatchEvent(event);
-		} catch (IllegalStateException illegalState) {
+		}
+		catch (IllegalStateException illegalState) {
 			throw illegalState;
-		} catch (Exception e) {
-			packageManager.getLogger().logError(
-					ErrorCode.EVENT_QUEUE_FULL,
-					LoggingLevel.WARNING,
-					"EventManager.fireEvent(Event)");
+		}
+		catch (Exception e) {
+			packageManager.getLogger().logError(ErrorCode.EVENT_QUEUE_FULL,
+					LoggingLevel.WARNING, "EventManager.fireEvent(Event)");
 		}
 	}
 
 	/**
 	 * Creates {@link EventListener EventListeners} for a given {@link Listener
 	 * listener}.
-	 *
-	 * @param listener
-	 *            The listener to create EventListenrs for
+	 * 
+	 * @param listener The listener to create EventListenrs for
 	 * @return A map of events to a set of EventListeners belonging to it
 	 */
-	private Map<Class<? extends Event>, Set<EventListener>>
-	createRegisteredListeners(Listener listener) {
+	private Map<Class<? extends Event>, Set<EventListener>> createRegisteredListeners(
+			Listener listener) {
 
 		Map<Class<? extends Event>, Set<EventListener>> toReturn =
 				new HashMap<Class<? extends Event>, Set<EventListener>>();
@@ -102,24 +97,25 @@ public class EventManager implements Package {
 			for (Method method : listener.getClass().getDeclaredMethods()) {
 				methods.add(method);
 			}
-		} catch (NoClassDefFoundError e) {
+		}
+		catch (NoClassDefFoundError e) {
 			return toReturn;
 		}
 
 		// search the methods for listeners
 		for (final Method method : methods) {
-			final EventHandler handlerAnnotation = method
-					.getAnnotation(EventHandler.class);
+			final EventHandler handlerAnnotation =
+					method.getAnnotation(EventHandler.class);
 			if (handlerAnnotation == null)
 				continue;
 			final Class<?> checkClass;
 			if (method.getParameterTypes().length != 1
-					|| !Event.class.isAssignableFrom(checkClass = method
-					.getParameterTypes()[0])) {
+					|| !Event.class.isAssignableFrom(checkClass =
+							method.getParameterTypes()[0])) {
 				continue;
 			}
-			final Class<? extends Event> eventClass = checkClass
-					.asSubclass(Event.class);
+			final Class<? extends Event> eventClass =
+					checkClass.asSubclass(Event.class);
 			method.setAccessible(true);
 			Set<EventListener> eventSet = toReturn.get(eventClass);
 			if (eventSet == null) {
@@ -153,11 +149,11 @@ public class EventManager implements Package {
 
 	/**
 	 * Returns the handlerlist for the given event.
-	 *
+	 * 
 	 * @param event the class to find handlers for
 	 * @return the handlerlist for that class
 	 */
-	public HandlerList getHandlers(Event event){
+	public HandlerList getHandlers(Event event) {
 		return getEventListeners(event.getClass());
 	}
 
@@ -173,15 +169,15 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean enable() {
-		if (isEnabled()){
+		if (isEnabled()) {
 			return false;
 		}
 		try {
 			this.onEnable();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			packageManager.getLogger().logError(ErrorCode.PACKAGE_ENABLE_FAIL,
-					LoggingLevel.SEVERE,
-					"EventManager.enable()");
+					LoggingLevel.SEVERE, "EventManager.enable()");
 			// better safe than sorry (probably did not initialize correctly)
 			this.enabled = false;
 			return false;
@@ -192,15 +188,15 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean disable() {
-		if (!isEnabled()){
+		if (!isEnabled()) {
 			return false;
 		}
 		try {
 			this.onDisable();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			packageManager.getLogger().logError(ErrorCode.PACKAGE_DISABLE_FAIL,
-					LoggingLevel.SEVERE,
-					"EventManager.disable()");
+					LoggingLevel.SEVERE, "EventManager.disable()");
 			this.enabled = true;
 			return false;
 		}
@@ -231,7 +227,7 @@ public class EventManager implements Package {
 
 	@Override
 	public void onDisable() {
-		for (HandlerList l : handlerMap.values()){
+		for (HandlerList l : handlerMap.values()) {
 			l.unregisterAll();
 		}
 		handlerMap.clear();
@@ -239,21 +235,20 @@ public class EventManager implements Package {
 		dispatcher.terminate();
 		try {
 			dispatcher.join();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			packageManager.getLogger().logError(ErrorCode.THREAD_INTERRUPTED,
-					LoggingLevel.WARNING,
-					"EventManager.onDisable()");
+					LoggingLevel.WARNING, "EventManager.onDisable()");
 		}
 
 	}
 
 	@Override
-	public void onLoad() {
-	}
+	public void onLoad() {}
 
 	@Override
 	public void onUnload() {
-		//this.resourceBundle = null;
+		// this.resourceBundle = null;
 		this.packageManager = null;
 	}
 
@@ -263,7 +258,7 @@ public class EventManager implements Package {
 	}
 
 	@Override
-	public PackageManager getPackageManager(){
+	public PackageManager getPackageManager() {
 		return this.packageManager;
 	}
 }

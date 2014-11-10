@@ -1,3 +1,4 @@
+
 package com.ikalagaming.packages.userinput;
 
 import java.util.MissingResourceException;
@@ -15,12 +16,13 @@ import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 
 /**
- * The main interface for the package that
- * handles input from the console and from the System.in stream.
+ * The main interface for the package that handles input from the console and
+ * from the System.in stream.
+ * 
  * @author Ches Burks
- *
+ * 
  */
-public class InputPackage implements Package, Listener{
+public class InputPackage implements Package, Listener {
 
 	private PackageManager parent;
 	private final double version = 0.1;
@@ -32,10 +34,10 @@ public class InputPackage implements Package, Listener{
 
 	/**
 	 * Adds the given string to the buffer pending processing.
-	 *
+	 * 
 	 * @param str the string to add
 	 */
-	public synchronized void addToInputBuffer(String str){
+	public synchronized void addToInputBuffer(String str) {
 		inputBuffer.add(str);
 		System.out.println(str);
 	}
@@ -43,37 +45,36 @@ public class InputPackage implements Package, Listener{
 	/**
 	 * Handle lines of input, if any exist
 	 */
-	public void processInput(){
+	public void processInput() {
 		String line = "";
-		synchronized(inputBuffer){
-			if (inputBuffer.isEmpty()){
+		synchronized (inputBuffer) {
+			if (inputBuffer.isEmpty()) {
 				return;
 			}
 			line = inputBuffer.remove();
 		}
 		String firstWord = line.trim().split(" ")[0];
-		if (parent.getCommandRegistry().contains(firstWord)){
-			if (parent.isLoaded("event-manager")){
+		if (parent.getCommandRegistry().contains(firstWord)) {
+			if (parent.isLoaded("event-manager")) {
 				EventManager mgr =
 						(EventManager) parent.getPackage("event-manager");
 				CommandFired event =
 						new CommandFired(parent.getCommandRegistry()
-								.getParent(firstWord).getType(),
-								line);
+								.getParent(firstWord).getType(), line);
 				mgr.fireEvent(event);
 			}
 			else {
 				parent.getLogger().logError(ErrorCode.PACKAGE_NOT_LOADED,
-						LoggingLevel.WARNING,
-						"event-manager");
+						LoggingLevel.WARNING, "event-manager");
 			}
 		}
-		else{
+		else {
 			parent.getLogger().logError(ErrorCode.COMMAND_UNKNOWN,
 					LoggingLevel.INFO, firstWord);
 		}
 
 	}
+
 	@Override
 	public boolean disable() {
 		onDisable();
@@ -126,15 +127,18 @@ public class InputPackage implements Package, Listener{
 		retrieval = new InputRetrievalThread(this);
 		processing = new InputProcessingThread(this);
 	}
+
 	@Override
 	public void onUnload() {
 		try {
 			retrieval.join();
 			processing.join();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
+
 	@Override
 	public boolean reload() {
 		enable();
@@ -149,11 +153,12 @@ public class InputPackage implements Package, Listener{
 
 	/**
 	 * Called when a package event is sent out by the event system.
+	 * 
 	 * @param event the event that was fired
 	 */
 	@EventHandler
-	public void onPackageEvent(PackageEvent event){
-		if (event.getTo() != packageName){
+	public void onPackageEvent(PackageEvent event) {
+		if (event.getTo() != packageName) {
 			return;
 		}
 		String callMethod = "call";
@@ -162,7 +167,7 @@ public class InputPackage implements Package, Listener{
 		String enable = "enable";
 		String disable = "disable";
 
-		try{
+		try {
 			ResourceBundle packageBundle;
 			packageBundle = parent.getResourceBundle();
 			callMethod = packageBundle.getString("CMD_CALL");
@@ -171,32 +176,30 @@ public class InputPackage implements Package, Listener{
 			enable = packageBundle.getString("ARG_ENABLE");
 			disable = packageBundle.getString("ARG_DISABLE");
 		}
-		catch (MissingResourceException missingResource){
-			parent.getLogger().logError(
-					ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
+		catch (MissingResourceException missingResource) {
+			parent.getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
 					LoggingLevel.WARNING,
 					"PackageManager.loadPackage(Package) load");
 		}
-		catch (ClassCastException classCast){
-			parent.getLogger().logError(
-					ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
+		catch (ClassCastException classCast) {
+			parent.getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
 					LoggingLevel.WARNING,
 					"PackageManager.loadPackage(Package) load");
 		}
 
-		if (event.getMessage().startsWith(callMethod)){
+		if (event.getMessage().startsWith(callMethod)) {
 			String trimmed = event.getMessage().replaceFirst(callMethod, "");
 			trimmed = trimmed.replaceFirst(" ", "");
-			if (trimmed.startsWith(onLoad)){
+			if (trimmed.startsWith(onLoad)) {
 				onLoad();
 			}
-			else if (trimmed.startsWith(onUnload)){
+			else if (trimmed.startsWith(onUnload)) {
 				onUnload();
 			}
-			else if (trimmed.startsWith(enable)){
+			else if (trimmed.startsWith(enable)) {
 				enable();
 			}
-			else if (trimmed.startsWith(disable)){
+			else if (trimmed.startsWith(disable)) {
 				disable();
 			}
 		}

@@ -1,3 +1,4 @@
+
 package com.ikalagaming.event;
 
 /**
@@ -13,8 +14,7 @@ public class EventListener {
 	 * @param listener The listener to call
 	 * @param executor The executor for the events
 	 */
-	public EventListener(final Listener listener, final EventExecutor executor) 
-	{
+	public EventListener(final Listener listener, final EventExecutor executor) {
 		this.listener = listener;
 		this.executor = executor;
 	}

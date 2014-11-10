@@ -1,3 +1,4 @@
+
 package com.ikalagaming.gui;
 
 import java.awt.Graphics;
@@ -8,12 +9,13 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 
 /**
- * A custom caret that looks better than the default one.
- * This code is from http://www.java2s.com/Code/Java/Swing-JFC/Fanciercustomcaretclass.htm
+ * A custom caret that looks better than the default one. This code is from
+ * http://www.java2s.com/Code/Java/Swing-JFC/Fanciercustomcaretclass.htm
+ * 
  * @author Ches Burks
- *
+ * 
  */
-public class MyCaret extends DefaultCaret{
+public class MyCaret extends DefaultCaret {
 
 	private static final long serialVersionUID = -389070432822516041L;
 
@@ -51,7 +53,8 @@ public class MyCaret extends DefaultCaret{
 			if (r == null)
 				return;
 			dotChar = comp.getText(dot, 1).charAt(0);
-		} catch (BadLocationException e) {
+		}
+		catch (BadLocationException e) {
 			return;
 		}
 
@@ -76,7 +79,7 @@ public class MyCaret extends DefaultCaret{
 			return;
 		}
 
-		if (dotChar == '\t'){
+		if (dotChar == '\t') {
 			try {
 				Rectangle nextr = comp.modelToView(dot + 1);
 				if ((r.y == nextr.y) && (r.x < nextr.x)) {
@@ -85,9 +88,11 @@ public class MyCaret extends DefaultCaret{
 						g.fillRect(r.x, r.y, width, r.height);
 					width = r.height / 2 + 2;
 					return;
-				} else
+				}
+				else
 					dotChar = ' ';
-			} catch (BadLocationException e) {
+			}
+			catch (BadLocationException e) {
 				dotChar = ' ';
 			}
 		}

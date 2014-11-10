@@ -1,3 +1,4 @@
+
 package com.ikalagaming.gui;
 
 import static org.junit.Assert.*;
@@ -6,10 +7,12 @@ import org.junit.Test;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.ikalagaming.gui.Console;
+
 /**
  * Used for testing the Console class.
+ * 
  * @author Ches Burks
- *
+ * 
  */
 @SuiteClasses({Console.class})
 public class ConsoleTest {
@@ -18,7 +21,7 @@ public class ConsoleTest {
 	 * Ensures the window can be properly resized
 	 */
 	@Test
-	public void testResize(){
+	public void testResize() {
 		Console tested = new Console();
 		tested.onLoad();
 		tested.enable();
@@ -31,12 +34,11 @@ public class ConsoleTest {
 	}
 
 	/**
-	 * Ensures that getter methods do not
-	 * return null values immediately after
+	 * Ensures that getter methods do not return null values immediately after
 	 * init
 	 */
 	@Test
-	public void testGetters(){
+	public void testGetters() {
 		Console tested = new Console();
 		tested.onLoad();
 		tested.enable();
@@ -50,7 +52,7 @@ public class ConsoleTest {
 	 * Appends a message to the console
 	 */
 	@Test
-	public void testAppendingMessage(){
+	public void testAppendingMessage() {
 		Console tested = new Console();
 		tested.onLoad();
 		tested.enable();
@@ -58,18 +60,17 @@ public class ConsoleTest {
 	}
 
 	/**
-	 * Tests the appending of more messages than
-	 * the console is supposed to hold to ensure
-	 * they are handled properly
+	 * Tests the appending of more messages than the console is supposed to hold
+	 * to ensure they are handled properly
 	 */
 	@Test
-	public void testOverflowingMessages(){
+	public void testOverflowingMessages() {
 		Console tested = new Console();
 		tested.onLoad();
 		tested.enable();
 		int i;
-		int overflow = 10;//how many lines to add after the max
-		for (i = 0; i < tested.getMaxLineCount()+overflow; i++){
+		int overflow = 10;// how many lines to add after the max
+		for (i = 0; i < tested.getMaxLineCount() + overflow; i++) {
 			tested.appendMessage("Test line " + i);
 		}
 	}

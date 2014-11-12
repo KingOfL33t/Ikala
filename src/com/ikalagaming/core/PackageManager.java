@@ -9,16 +9,16 @@ import java.util.ResourceBundle;
 import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.LoggingPackage;
+import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * Handles loading, unloading and storage of Packages. This is considered a
  * package, but is never loaded.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class PackageManager implements Package {
 
@@ -28,11 +28,15 @@ public class PackageManager implements Package {
 	private HashMap<String, Package> loadedPackages;
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
+	private Game game;// TODO use this for loading plugins
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
+	 *
+	 * @param g the game that owns this package manager
 	 */
-	public PackageManager() {
+	public PackageManager(Game g) {
+		game = g;
 		loadedPackages = new HashMap<String, Package>();
 		try {
 			resourceBundle =
@@ -60,27 +64,18 @@ public class PackageManager implements Package {
 		commands.add("COMMAND_HELP");
 
 		String tmp = "";
-		try {
-			for (String s : commands) {
-				tmp = resourceBundle.getString(s);
-				cmdRegistry.registerCommand(tmp, this);
-			}
+
+		for (String s : commands) {
+
+			tmp = SafeResourceLoader.getString(s, resourceBundle, s);
+			cmdRegistry.registerCommand(tmp, this);
 		}
-		catch (MissingResourceException missingResource) {
-			getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-					LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
-		catch (ClassCastException classCast) {
-			getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-					LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
+
 	}
 
 	/**
 	 * Returns the {@link CommandRegistry} for this package manager.
-	 * 
+	 *
 	 * @return the command registry
 	 */
 	public CommandRegistry getCommandRegistry() {
@@ -93,7 +88,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns the resource bundle for the package manager. This is not safe and
 	 * could be null.
-	 * 
+	 *
 	 * @return the current resource bundle
 	 */
 	public ResourceBundle getResourceBundle() {
@@ -112,7 +107,7 @@ public class PackageManager implements Package {
 	 * one is loaded in its place. If the versions are equal, or the new package
 	 * is older, then it does not load the new version and returns false.
 	 * </p>
-	 * 
+	 *
 	 * @param toLoad the package to load
 	 * @return true if the package was loaded properly, false otherwise
 	 */
@@ -151,18 +146,12 @@ public class PackageManager implements Package {
 				EventManager manager =
 						(EventManager) getPackage("event-manager");
 				if (manager.isEnabled()) {
-					try {
-						if (toLoad instanceof Listener) {
-							manager.registerEventListeners((Listener) toLoad);
-							getLogger().log(
-									LoggingLevel.FINER,
-									"Registered event listeners for "
-											+ toLoad.getType());
-						}
-					}
-					catch (Exception e) {
-						getLogger().logError(ErrorCode.EXCEPTION,
-								LoggingLevel.WARNING, "Console.onLoad()");
+					if (toLoad instanceof Listener) {
+						manager.registerEventListeners((Listener) toLoad);
+						getLogger().log(
+								LoggingLevel.FINER,
+								"Registered event listeners for "
+										+ toLoad.getType());
 					}
 				}
 			}
@@ -172,26 +161,15 @@ public class PackageManager implements Package {
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS
 				&& PackageSettings.USE_EVENTS_FOR_ON_LOAD) {
 			String toSend = "";
-			boolean messageValid = true;
-			try {
-				toSend =
-						resourceBundle.getString("CMD_CALL") + " "
-								+ resourceBundle.getString("ARG_ON_LOAD");
-			}
-			catch (MissingResourceException missingResource) {
-				getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-						LoggingLevel.WARNING,
-						"PackageManager.loadPackage(Package) load");
-				messageValid = false;
-			}
-			catch (ClassCastException classCast) {
-				getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-						LoggingLevel.WARNING,
-						"PackageManager.loadPackage(Package) load");
-				messageValid = false;
-			}
 
-			if (messageValid && isLoaded("event-manager")
+			toSend =
+					SafeResourceLoader.getString("CMD_CALL", resourceBundle,
+							"call")
+							+ " "
+							+ SafeResourceLoader.getString("ARG_ON_LOAD",
+									resourceBundle, "onLoad");
+
+			if (isLoaded("event-manager")
 					&& getPackage("event-manager").isEnabled()) {
 				getLogger().log(
 						LoggingLevel.FINER,
@@ -226,26 +204,14 @@ public class PackageManager implements Package {
 			if (PackageSettings.USE_EVENTS_FOR_ACCESS
 					&& PackageSettings.USE_EVENTS_FOR_ENABLE) {
 				String toSend = "";
-				boolean messageValid = true;
-				try {
-					toSend =
-							resourceBundle.getString("CMD_CALL") + " "
-									+ resourceBundle.getString("ARG_ENABLE");
-				}
-				catch (MissingResourceException missingResource) {
-					getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-							LoggingLevel.WARNING,
-							"PackageManager.loadPackage(Package) enable");
-					messageValid = false;
-				}
-				catch (ClassCastException classCast) {
-					getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-							LoggingLevel.WARNING,
-							"PackageManager.loadPackage(Package) enable");
-					messageValid = false;
-				}
+				toSend =
+						SafeResourceLoader.getString("CMD_CALL",
+								resourceBundle, "call")
+								+ " "
+								+ SafeResourceLoader.getString("ARG_ENABLE",
+										resourceBundle, "enable");
 
-				if (messageValid && isLoaded("event-manager")
+				if (isLoaded("event-manager")
 						&& getPackage("event-manager").isEnabled()) {
 					getLogger().log(
 							LoggingLevel.FINER,
@@ -282,11 +248,20 @@ public class PackageManager implements Package {
 		return true;
 	}
 
+	public boolean loadPackage(String name) {
+		// TODO load a package from file
+		/*
+		 * Check for being a jar file check for package info file load and check
+		 * for valid info load the file if necessary
+		 */
+		return false;
+	}
+
 	/**
 	 * Fires an event with a message to a package type from the package manager.
 	 * If an error occurs, this will return false. The event should not have
 	 * been sent if false was returned.
-	 * 
+	 *
 	 * @param to the package to send the message to
 	 * @param content the message to transfer
 	 * @return true if the event was fired correctly
@@ -294,13 +269,17 @@ public class PackageManager implements Package {
 	private boolean fireEvent(String to, String content) {
 
 		if (!isLoaded("event-manager")) {
-			getLogger().logError(ErrorCode.PACKAGE_NOT_LOADED,
+			getLogger().logError(
+					SafeResourceLoader.getString("package_not_loaded",
+							resourceBundle, "Package not loaded"),
 					LoggingLevel.WARNING, to);
 			return false;
 		}
 
 		if (!getPackage("event-manager").isEnabled()) {
-			getLogger().logError(ErrorCode.PACKAGE_NOT_ENABLED,
+			getLogger().logError(
+					SafeResourceLoader.getString("package_not_enabled",
+							resourceBundle, "Package not enabled"),
 					LoggingLevel.WARNING, to);
 			return false;
 		}
@@ -308,27 +287,19 @@ public class PackageManager implements Package {
 		PackageEvent tmpEvent;
 
 		tmpEvent = new PackageEvent(packageName, to, content);
-		try {
-			if (tmpEvent != null) {// just in case the assignment failed
-				((EventManager) getPackage("event-manager"))
-						.fireEvent(tmpEvent);
 
-			}
+		if (tmpEvent != null) {// just in case the assignment failed
+			((EventManager) getPackage("event-manager")).fireEvent(tmpEvent);
+
 		}
-		catch (IllegalStateException illegalState) {
-			// the queue was full
-			getLogger().logError(ErrorCode.EVENT_QUEUE_FULL,
-					LoggingLevel.WARNING,
-					"PackageManager.fireEvent(String, String)");
-			return false;
-		}
+
 		return true;
 	}
 
 	/**
 	 * Returns true if a package exists with the given type (for example:
 	 * "Graphics")'
-	 * 
+	 *
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -341,7 +312,7 @@ public class PackageManager implements Package {
 	 * Returns true if a package exists that has the same type as the provided
 	 * package (for example: "Graphics"). This is the same as calling
 	 * <code>{@link #isLoaded(String) isLoaded}(Package.getType())</code>
-	 * 
+	 *
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -354,7 +325,7 @@ public class PackageManager implements Package {
 	 * If a package of type exists ({@link #isLoaded(String)}), then the package
 	 * that is of that type is returned. If no package exists of that type, null
 	 * is returned.
-	 * 
+	 *
 	 * @param type The package type
 	 * @return the Package with the given type or null if none exists
 	 */
@@ -370,7 +341,7 @@ public class PackageManager implements Package {
 	/**
 	 * Attempts to unload the package from memory. If no package exists with the
 	 * given name ({@link #isLoaded(String)}), returns false and does nothing.
-	 * 
+	 *
 	 * @param toUnload The type of package to unload
 	 * @return true if the package was unloaded properly
 	 */
@@ -388,30 +359,16 @@ public class PackageManager implements Package {
 				if (PackageSettings.USE_EVENTS_FOR_ACCESS
 						&& PackageSettings.USE_EVENTS_FOR_DISABLE) {
 					String toSend = "";
-					boolean messageValid = true;
-					try {
-						toSend =
-								resourceBundle.getString("CMD_CALL")
-										+ " "
-										+ resourceBundle
-												.getString("ARG_ON_DISABLE");
-					}
-					catch (MissingResourceException missingResource) {
-						getLogger().logError(
-								ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-								LoggingLevel.WARNING,
-								"PackageManager.unloadPackage(String) disable");
-						messageValid = false;
-					}
-					catch (ClassCastException classCast) {
-						getLogger().logError(
-								ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-								LoggingLevel.WARNING,
-								"PackageManager.unloadPackage(String) disable");
-						messageValid = false;
-					}
 
-					if (messageValid && isLoaded("event-manager")
+					toSend =
+							SafeResourceLoader.getString("CMD_CALL",
+									resourceBundle, "call")
+									+ " "
+									+ SafeResourceLoader.getString(
+											"ARG_ON_DISABLE", resourceBundle,
+											"onDisable");
+
+					if (isLoaded("event-manager")
 							&& getPackage("event-manager").isEnabled()) {
 						getLogger().log(
 								LoggingLevel.FINER,
@@ -447,26 +404,15 @@ public class PackageManager implements Package {
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS
 				&& PackageSettings.USE_EVENTS_FOR_ON_UNLOAD) {
 			String toSend = "";
-			boolean messageValid = true;
-			try {
-				toSend =
-						resourceBundle.getString("CMD_CALL") + " "
-								+ resourceBundle.getString("ARG_UNLOAD");
-			}
-			catch (MissingResourceException missingResource) {
-				getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-						LoggingLevel.WARNING,
-						"PackageManager.unloadPackage(String) unload");
-				messageValid = false;
-			}
-			catch (ClassCastException classCast) {
-				getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-						LoggingLevel.WARNING,
-						"PackageManager.unloadPackage(String) unload");
-				messageValid = false;
-			}
 
-			if (messageValid && isLoaded("event-manager")
+			toSend =
+					SafeResourceLoader.getString("CMD_CALL", resourceBundle,
+							"call")
+							+ " "
+							+ SafeResourceLoader.getString("ARG_UNLOAD",
+									resourceBundle, "unload");
+
+			if (isLoaded("event-manager")
 					&& getPackage("event-manager").isEnabled()) {
 				getLogger().log(
 						LoggingLevel.FINER,
@@ -506,7 +452,7 @@ public class PackageManager implements Package {
 	 * Attempts to unload the package from memory. Does nothing if the package
 	 * is not loaded. Packages are disabled before unloading. This calls
 	 * {@link #unloadPackage(String)} using the package type.
-	 * 
+	 *
 	 * @param toUnload The type of package to unload
 	 */
 	public void unloadPackage(Package toUnload) {
@@ -529,7 +475,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns a logger for the system. If one does not exist, it will be
 	 * created.
-	 * 
+	 *
 	 * @return a logger for the engine
 	 */
 	public LoggingPackage getLogger() {

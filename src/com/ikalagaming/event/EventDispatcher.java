@@ -4,7 +4,6 @@ package com.ikalagaming.event;
 import java.util.NoSuchElementException;
 
 import com.ikalagaming.core.IQueue;
-import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
 
 /**
@@ -60,7 +59,7 @@ public class EventDispatcher extends Thread {
 			if (manager.getPackageManager() != null) {
 				manager.getPackageManager()
 						.getLogger()
-						.logError(ErrorCode.EXCEPTION, LoggingLevel.WARNING,
+						.logError("error firing event", LoggingLevel.WARNING,
 								e.toString());
 			}
 			else {
@@ -118,7 +117,7 @@ public class EventDispatcher extends Thread {
 						manager.getPackageManager()
 								.getLogger()
 								.logError(
-										ErrorCode.EXCEPTION,
+										"error running event dispatcher",
 										LoggingLevel.WARNING,
 										e.toString()
 												+ " at EventDispatcher.run()");

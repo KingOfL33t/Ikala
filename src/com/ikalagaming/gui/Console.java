@@ -25,35 +25,39 @@ import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * A simple console.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Console extends WindowAdapter implements Package, Listener {
 	private class ConsoleKeyListener extends KeyAdapter {
 
 		@Override
 		public void keyPressed(KeyEvent event) {
-			// TODO numpad arrows, numpad numbers, paste
+			// TODO paste
 			int keyCode = event.getKeyCode();
 			switch (keyCode) {
 			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_KP_LEFT:
 				moveLeft();
 				break;
 			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_KP_RIGHT:
 				moveRight();
 				break;
 			case KeyEvent.VK_UP:
+			case KeyEvent.VK_KP_UP:
 				if (history.hasPrevious()) {
 					setCurrentText(history.getPrevious());
 				}
 				break;
 			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_KP_DOWN:
 				if (history.hasNext()) {
 					setCurrentText(history.getNext());
 				}
@@ -64,7 +68,52 @@ public class Console extends WindowAdapter implements Package, Listener {
 			case KeyEvent.VK_BACK_SPACE:
 				delChar();
 				break;
-			case KeyEvent.VK_ALPHANUMERIC:
+			case KeyEvent.VK_0:
+			case KeyEvent.VK_1:
+			case KeyEvent.VK_2:
+			case KeyEvent.VK_3:
+			case KeyEvent.VK_4:
+			case KeyEvent.VK_5:
+			case KeyEvent.VK_6:
+			case KeyEvent.VK_7:
+			case KeyEvent.VK_8:
+			case KeyEvent.VK_9:
+			case KeyEvent.VK_A:
+			case KeyEvent.VK_B:
+			case KeyEvent.VK_C:
+			case KeyEvent.VK_D:
+			case KeyEvent.VK_E:
+			case KeyEvent.VK_F:
+			case KeyEvent.VK_G:
+			case KeyEvent.VK_H:
+			case KeyEvent.VK_I:
+			case KeyEvent.VK_J:
+			case KeyEvent.VK_K:
+			case KeyEvent.VK_L:
+			case KeyEvent.VK_M:
+			case KeyEvent.VK_N:
+			case KeyEvent.VK_O:
+			case KeyEvent.VK_P:
+			case KeyEvent.VK_Q:
+			case KeyEvent.VK_R:
+			case KeyEvent.VK_S:
+			case KeyEvent.VK_T:
+			case KeyEvent.VK_U:
+			case KeyEvent.VK_V:
+			case KeyEvent.VK_W:
+			case KeyEvent.VK_X:
+			case KeyEvent.VK_Y:
+			case KeyEvent.VK_Z:
+			case KeyEvent.VK_NUMPAD0:
+			case KeyEvent.VK_NUMPAD1:
+			case KeyEvent.VK_NUMPAD2:
+			case KeyEvent.VK_NUMPAD3:
+			case KeyEvent.VK_NUMPAD4:
+			case KeyEvent.VK_NUMPAD5:
+			case KeyEvent.VK_NUMPAD6:
+			case KeyEvent.VK_NUMPAD7:
+			case KeyEvent.VK_NUMPAD8:
+			case KeyEvent.VK_NUMPAD9:
 			case KeyEvent.VK_AMPERSAND:
 			case KeyEvent.VK_ASTERISK:
 			case KeyEvent.VK_AT:
@@ -132,7 +181,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Adds a char to the end of the current string and console line
-	 *
+	 * 
 	 * @param c the char to add
 	 */
 	private void addChar(char c) {
@@ -163,7 +212,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	/**
 	 * Adds a String to the bottom of the console. Removes the top lines
 	 * if/while they exceed the maximum line count.
-	 *
+	 * 
 	 * @param message The message to append
 	 */
 	public synchronized void appendMessage(String message) {
@@ -246,7 +295,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	/**
 	 * Returns the window height. This is the height of the frame the console is
 	 * in.
-	 *
+	 * 
 	 * @return the height of the frame
 	 */
 	public int getHeight() {
@@ -255,7 +304,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the maximum number of lines that are stored in the window.
-	 *
+	 * 
 	 * @return the max number of lines
 	 */
 	public int getMaxLineCount() {
@@ -269,7 +318,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the lineStartOffset of the given line and handles errors.
-	 *
+	 * 
 	 * @param line the line to find
 	 * @return the offset of the start of the line
 	 */
@@ -278,7 +327,9 @@ public class Console extends WindowAdapter implements Package, Listener {
 			return textArea.getLineStartOffset(line);
 		}
 		catch (BadLocationException e) {
-			packageManager.getLogger().logError(ErrorCode.EXCEPTION,
+			packageManager.getLogger().logError(
+					SafeResourceLoader.getString("error_bad_location",
+							resourceBundle, "Bad location"),
 					LoggingLevel.WARNING, "Console.getSafeLineOffset(String)");
 		}
 		return -1;
@@ -296,7 +347,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns window width. This is the width of the frame the console is in.
-	 *
+	 * 
 	 * @return the width of the frame
 	 */
 	public int getWidth() {
@@ -305,7 +356,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the window title.
-	 *
+	 * 
 	 * @return the String that is used as the title
 	 */
 	public String getWindowTitle() {
@@ -495,7 +546,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Called when a command event is sent.
-	 *
+	 * 
 	 * @param event the command sent
 	 */
 	@EventHandler
@@ -528,26 +579,19 @@ public class Console extends WindowAdapter implements Package, Listener {
 							Localization.getLocale());
 		}
 		catch (MissingResourceException missingResource) {
-			packageManager.getLogger().logError(ErrorCode.LOCALE_NOT_FOUND,
+			// don't localize this since it would fail anyways
+			packageManager.getLogger().logError("Locale not found",
 					LoggingLevel.WARNING, "Console.onLoad()");
 		}
-		try {
-			windowTitle = resourceBundle.getString("title");
-		}
-		catch (MissingResourceException missingResource) {
-			packageManager.getLogger().logError(ErrorCode.LOCALE_NOT_FOUND,
-					LoggingLevel.WARNING, "Console.onLoad()");
-		}
-		catch (ClassCastException classCast) {
-			packageManager.getLogger().logError(
-					ErrorCode.LOCALE_RESOURCE_WRONG_TYPE, LoggingLevel.WARNING,
-					"Console.onLoad()");
-		}
+		windowTitle =
+				SafeResourceLoader
+						.getString("title", resourceBundle, "Console");
+
 	}
 
 	/**
 	 * Called when a package event is sent out by the event system.
-	 *
+	 * 
 	 * @param event the event that was fired
 	 */
 	@EventHandler
@@ -561,25 +605,15 @@ public class Console extends WindowAdapter implements Package, Listener {
 		String enable = "enable";
 		String disable = "disable";
 
-		try {
-			ResourceBundle packageBundle;
-			packageBundle = packageManager.getResourceBundle();
-			callMethod = packageBundle.getString("CMD_CALL");
-			onLoad = packageBundle.getString("ARG_ON_LOAD");
-			onUnload = packageBundle.getString("ARG_ON_UNLOAD");
-			enable = packageBundle.getString("ARG_ENABLE");
-			disable = packageBundle.getString("ARG_DISABLE");
-		}
-		catch (MissingResourceException missingResource) {
-			packageManager.getLogger().logError(
-					ErrorCode.LOCALE_RESOURCE_NOT_FOUND, LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
-		catch (ClassCastException classCast) {
-			packageManager.getLogger().logError(
-					ErrorCode.LOCALE_RESOURCE_WRONG_TYPE, LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
+		ResourceBundle packageBundle;
+		packageBundle = packageManager.getResourceBundle();
+
+		SafeResourceLoader.getString("CMD_CALL", packageBundle, "call");
+		SafeResourceLoader.getString("ARG_ON_LOAD", packageBundle, "onLoad");
+		SafeResourceLoader
+				.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
+		SafeResourceLoader.getString("ARG_ENABLE", packageBundle, "enable");
+		SafeResourceLoader.getString("ARG_DISABLE", packageBundle, "disable");
 
 		if (event.getMessage().startsWith(callMethod)) {
 			String trimmed = event.getMessage().replaceFirst(callMethod, "");
@@ -635,7 +669,9 @@ public class Console extends WindowAdapter implements Package, Listener {
 			textArea.replaceRange("", 0, end);
 		}
 		catch (BadLocationException e) {
-			packageManager.getLogger().logError(ErrorCode.EXCEPTION,
+			packageManager.getLogger().logError(
+					SafeResourceLoader.getString("error_bad_location",
+							resourceBundle, "Bad location"),
 					LoggingLevel.WARNING, "Console.removeTopLine(String)");
 		}
 	}
@@ -692,7 +728,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the frame height. This is the height of the frame the console is in.
-	 *
+	 * 
 	 * @param height The new height
 	 */
 	public void setHeight(int height) {
@@ -702,7 +738,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the maximum number of lines stored in the window.
-	 *
+	 * 
 	 * @param maxLineCount the maximum number of lines to store
 	 */
 	public void setMaxLineCount(int maxLineCount) {
@@ -716,7 +752,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the frame width. This is the width of the frame the console is in.
-	 *
+	 * 
 	 * @param width The new width
 	 */
 	public void setWidth(int width) {
@@ -726,7 +762,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the title of the window.
-	 *
+	 * 
 	 * @param windowTitle the String to use as the title
 	 */
 	public void setWindowTitle(String windowTitle) {

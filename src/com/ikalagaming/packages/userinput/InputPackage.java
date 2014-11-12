@@ -1,7 +1,6 @@
 
 package com.ikalagaming.packages.userinput;
 
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import com.ikalagaming.core.IQueue;
@@ -12,8 +11,8 @@ import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * The main interface for the package that handles input from the console and
@@ -64,12 +63,17 @@ public class InputPackage implements Package, Listener {
 				mgr.fireEvent(event);
 			}
 			else {
-				parent.getLogger().logError(ErrorCode.PACKAGE_NOT_LOADED,
-						LoggingLevel.WARNING, "event-manager");
+				parent.getLogger().logError(
+						SafeResourceLoader.getString("package_not_loaded",
+								parent.getResourceBundle(),
+								"Package not loaded"), LoggingLevel.WARNING,
+						"event-manager");
 			}
 		}
 		else {
-			parent.getLogger().logError(ErrorCode.COMMAND_UNKNOWN,
+			parent.getLogger().logError(
+					SafeResourceLoader.getString("command_unknown",
+							parent.getResourceBundle(), "Unknown command"),
 					LoggingLevel.INFO, firstWord);
 		}
 
@@ -167,25 +171,15 @@ public class InputPackage implements Package, Listener {
 		String enable = "enable";
 		String disable = "disable";
 
-		try {
-			ResourceBundle packageBundle;
-			packageBundle = parent.getResourceBundle();
-			callMethod = packageBundle.getString("CMD_CALL");
-			onLoad = packageBundle.getString("ARG_ON_LOAD");
-			onUnload = packageBundle.getString("ARG_ON_UNLOAD");
-			enable = packageBundle.getString("ARG_ENABLE");
-			disable = packageBundle.getString("ARG_DISABLE");
-		}
-		catch (MissingResourceException missingResource) {
-			parent.getLogger().logError(ErrorCode.LOCALE_RESOURCE_NOT_FOUND,
-					LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
-		catch (ClassCastException classCast) {
-			parent.getLogger().logError(ErrorCode.LOCALE_RESOURCE_WRONG_TYPE,
-					LoggingLevel.WARNING,
-					"PackageManager.loadPackage(Package) load");
-		}
+		ResourceBundle packageBundle;
+		packageBundle = parent.getResourceBundle();
+
+		SafeResourceLoader.getString("CMD_CALL", packageBundle, "call");
+		SafeResourceLoader.getString("ARG_ON_LOAD", packageBundle, "onLoad");
+		SafeResourceLoader
+				.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
+		SafeResourceLoader.getString("ARG_ENABLE", packageBundle, "enable");
+		SafeResourceLoader.getString("ARG_DISABLE", packageBundle, "disable");
 
 		if (event.getMessage().startsWith(callMethod)) {
 			String trimmed = event.getMessage().replaceFirst(callMethod, "");

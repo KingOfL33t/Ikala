@@ -3,8 +3,8 @@ package com.ikalagaming.core;
 
 import java.util.ArrayList;
 
-import com.ikalagaming.logging.ErrorCode;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * Handles storing and managing commands for controlling the server. Commands
@@ -44,7 +44,9 @@ public class CommandRegistry {
 		if (contains(command)) {
 			int index = getIndexOf(command);
 			manager.getLogger().logError(
-					ErrorCode.COMMAND_ALREADY_REGISTERED,
+					SafeResourceLoader.getString("command_already_registered",
+							manager.getResourceBundle(),
+							"command already registered"),
 					LoggingLevel.WARNING,
 					command + " is already registered to "
 							+ commands.get(index).getOwner().getType());

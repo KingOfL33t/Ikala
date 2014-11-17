@@ -18,6 +18,9 @@ import com.ikalagaming.core.PackageManager;
  */
 public class Permission {
 
+	/**
+	 * The default value for a permission.
+	 */
 	public static final DefaultPermissionValue DEFAULT_PERMISSION =
 			DefaultPermissionValue.OPERATOR;
 	private final String name;
@@ -26,37 +29,96 @@ public class Permission {
 	private DefaultPermissionValue defaultValue = DEFAULT_PERMISSION;
 	private String description;
 
+	/**
+	 * Constructs a new Permission with the given information. The children,
+	 * description and default value default to empty.
+	 *
+	 * @param name the name of the permission
+	 */
 	public Permission(String name) {
 		this(name, null, null, null);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The children and
+	 * default value default to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param description a brief description of the permission
+	 */
 	public Permission(String name, String description) {
 		this(name, description, null, null);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The children and
+	 * description default to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param defaultValue the default value for the permission
+	 */
 	public Permission(String name, DefaultPermissionValue defaultValue) {
 		this(name, null, defaultValue, null);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The children
+	 * default to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param description a brief description of the permission
+	 * @param defaultValue the default value for the permission
+	 */
 	public Permission(String name, String description,
 			DefaultPermissionValue defaultValue) {
 		this(name, description, defaultValue, null);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The default value
+	 * and description default to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param children a map of child permissions
+	 */
 	public Permission(String name, Map<String, Boolean> children) {
 		this(name, null, null, children);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The default value
+	 * defaults to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param description a brief description of the permission
+	 * @param children a map of child permissions
+	 */
 	public Permission(String name, String description,
 			Map<String, Boolean> children) {
 		this(name, description, null, children);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information. The description
+	 * defaults to empty.
+	 *
+	 * @param name the name of the permission
+	 * @param defaultValue the default value for the permission
+	 * @param children a map of child permissions
+	 */
 	public Permission(String name, DefaultPermissionValue defaultValue,
 			Map<String, Boolean> children) {
 		this(name, null, defaultValue, children);
 	}
 
+	/**
+	 * Constructs a new Permission with the given information.
+	 *
+	 * @param name the name of the permission
+	 * @param description a brief description of the permission
+	 * @param defaultValue the default value for the permission
+	 * @param children a map of child permissions
+	 */
 	public Permission(String name, String description,
 			DefaultPermissionValue defaultValue, Map<String, Boolean> children) {
 		this.name = name;
@@ -158,7 +220,7 @@ public class Permission {
 		 *
 		 * Using name
 		 */
-
+//TODO finish me
 		return null;
 	}
 
@@ -174,6 +236,7 @@ public class Permission {
 		 * Recalculate the defaults for this <p> This will have no effect if the
 		 * specified permission is not registered here.
 		 */
+		//TODO recalculate permissions
 		for (Permissible p : perms) {
 			p.recalculatePermissions();
 		}

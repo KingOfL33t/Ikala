@@ -9,18 +9,22 @@ import com.ikalagaming.core.Game;
 
 /**
  * Base Permissions for use in any Permissions object through extension
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
-public class PermissionsBase implements Permissible {
+public class PlayerPermissions implements Permissible {
 	private Operator oppable = null;
 	private Permissible parent = this;
 	private final Map<String, Boolean> permissions =
 			new LinkedHashMap<String, Boolean>();
 
-	// TODO connect plugins and permissions
-	public PermissionsBase(Operator opable) {
+	/**
+	 * Constructs a new permissions object for the given entity.
+	 *
+	 * @param opable the entity to create permissions for
+	 */
+	public PlayerPermissions(Operator opable) {
 		this.oppable = opable;
 		if (opable instanceof Permissible) {
 			this.parent = (Permissible) opable;

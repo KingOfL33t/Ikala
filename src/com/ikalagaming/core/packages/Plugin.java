@@ -6,13 +6,13 @@ import com.ikalagaming.core.config.FileConfiguration;
 
 /**
  * A package that is loaded from an external source.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class Plugin implements IPlugin {
 
-	private String packageName = "empty-package";
+	private String packageName = "null-plugin";
 	private boolean enabled = false;
 	private final double version = 0.1;
 	private PackageManager packageManager;

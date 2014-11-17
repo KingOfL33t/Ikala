@@ -20,18 +20,16 @@ public class IQueue<E extends Object> implements Queue<E> {
 	@SuppressWarnings("unchecked")
 	// It is a subclass of object. It will work.
 	private E[] array = (E[]) new Object[0];
-	/** How many objects are in the queue **/
+	/** How many objects are in the queue. Multiples of 2. **/
 	private int size = 0;
 	/** Index of the next element that will be fetched **/
 	private int head = 0;
 	/** Position where the next element will be placed **/
 	private int tail = 0;
 	/**
-	 * The percentage, represented from 0 to 100 as an int, that should be
-	 * unused in the array before the contents are shifted to the beginning
-	 * instead of resizing the array upon adding an element.
+	 * The minimum size the array will shrink to.
 	 */
-	private final int shiftPercentageUnused = 50;
+	private final int minShrinkSize = 4;
 	/**
 	 * The maximum number of slots that can be allocated. This is to prevent the
 	 * queue from using up too much memory
@@ -62,11 +60,7 @@ public class IQueue<E extends Object> implements Queue<E> {
 			throw new IllegalStateException();
 		}
 
-		// shift the array and resize if necessary
-		if (shouldShift(1)) {
-			shiftToStart();
-		}
-		while (getFreeElementsAtEnd() < 1) {
+		if (getFreeElementsAtEnd() < 1) {
 			// don't double size if its got a free space, but do double if full
 			doubleSize();
 		}
@@ -105,10 +99,6 @@ public class IQueue<E extends Object> implements Queue<E> {
 			// it could hold the events but its not empty so it will not
 			return false;
 		}
-		// shift the array and resize if necessary
-		if (shouldShift(e.size())) {
-			shiftToStart();
-		}
 		while (getFreeElementsAtEnd() < e.size()) {
 			// only double if there is not enough room for the array
 			doubleSize();
@@ -133,15 +123,10 @@ public class IQueue<E extends Object> implements Queue<E> {
 	 * Removes all of the elements from this collection (optional operation).
 	 * The collection will be empty after this method returns.
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void clear() {
 		head = 0;
 		tail = 0;
-
-		// Free all objects from memory for gc to take care of
-		size = 0;
-		array = (E[]) new Object[0];
 	}
 
 	/**
@@ -228,11 +213,58 @@ public class IQueue<E extends Object> implements Queue<E> {
 			 */
 			System.arraycopy(array, head, tmp, 0, tail - head);
 
+			array = null;
 			// set array to the new array
 			array = tmp;
 			tmp = null;
 
 			size *= 2;
+			// shift the head and tail over to the start
+			tail -= head;
+			head = 0;
+
+			return true;
+		}
+		catch (Exception e) {
+			e.printStackTrace(System.err);
+			return false;
+		}
+	}
+
+	/**
+	 * Halves the size of the array and copies the new values over to the new
+	 * array. If the array has a size of 1, it will be emptied. This should only
+	 * be called if the array is half full or less. Any values that are over
+	 * half the size are lost. This is for speed, so the size does not have to
+	 * be checked twice.
+	 * 
+	 * @return true if resizing was successful, false if there was an error
+	 */
+	@SuppressWarnings("unchecked")
+	private synchronized boolean halfSize() {
+		try {
+			if (size == 1) {
+				size = 0;
+				array = (E[]) new Object[0];
+				return true;
+			}
+
+			// It is a subclass of object so this should not fail.
+			E[] tmp = (E[]) new Object[size / 2];
+
+			/*
+			 * Copy from array (old data) starting at the old head position to
+			 * the new array tmp, beginning at the index 0 of tmp, of length
+			 * (tail-head).
+			 */
+			System.arraycopy(array, head, tmp, 0, tail - head);
+
+			array = null;
+			// set array to the new array
+			array = tmp;
+			tmp = null;
+
+			size /= 2;
 			// shift the head and tail over to the start
 			tail -= head;
 			head = 0;
@@ -407,10 +439,6 @@ public class IQueue<E extends Object> implements Queue<E> {
 			return false;
 		}
 
-		// shift the array and resize if necessary
-		if (shouldShift(1)) {
-			shiftToStart();
-		}
 		while (getFreeElementsAtEnd() < 1) {
 			// don't double size if its got a free space, but do double if full
 			if (!doubleSize()) {
@@ -465,6 +493,9 @@ public class IQueue<E extends Object> implements Queue<E> {
 		}
 		E toReturn = array[head];
 		++head;
+		if (shouldShrink()) {
+			halfSize();
+		}
 		return toReturn;
 	}
 
@@ -482,6 +513,10 @@ public class IQueue<E extends Object> implements Queue<E> {
 		}
 		E toReturn = array[head];
 		++head;
+
+		if (shouldShrink()) {
+			halfSize();
+		}
 		return toReturn;
 	}
 
@@ -524,6 +559,10 @@ public class IQueue<E extends Object> implements Queue<E> {
 				array[i - 1] = array[i];
 			}
 			--tail;
+
+			if (shouldShrink()) {
+				halfSize();
+			}
 			return true;
 		}
 		return false;
@@ -570,52 +609,15 @@ public class IQueue<E extends Object> implements Queue<E> {
 		return changed;
 	}
 
-	/**
-	 * Shifts the data to the beginning of the array and updates the head and
-	 * tail.
-	 * 
-	 * @return true on success, false for failure
-	 */
-	private synchronized boolean shiftToStart() {
-		try {
-			/*
-			 * Copy from array starting at the old head position to itself
-			 * beginning at the 0 index, total length equaling (tail-head)
-			 */
-			// faster than arraycopy
-			for (int i = head; i < tail; ++i) {
-				array[head - i] = array[i];
-				// head - i is the distance from head we are currently at
-				// that is, position relative to 0 if head were at 0
-			}
-			// set head and tail to their new values
-			tail -= head;
-			head = 0;
-			return true;
-		}
-		catch (Exception e) {
+	private boolean shouldShrink() {
+		if (size <= 0) {
 			return false;
 		}
-	}
-
-	/**
-	 * Returns true if there is enough free space left to shift the array to the
-	 * start instead of doubling size. Returns false if there is not enough
-	 * space to add all elements. Only shifts if a certain percent of the array
-	 * is free space.
-	 * <p>
-	 * This should be called before adding elements.
-	 * 
-	 * @param elementsToAdd the number of elements to be added
-	 * @return true if the array needs to be shifted, false otherwise
-	 */
-	private synchronized boolean shouldShift(int elementsToAdd) {
-		// not enough room
-		if (getTotalFreeElements() < elementsToAdd) {
+		if (size < minShrinkSize) {
 			return false;
 		}
-		// Percentage free is greater than shiftPercentageUnused
-		if ((size - (tail - head)) / size >= shiftPercentageUnused) {
+		// Percentage free more than half
+		if ((size - (tail - head)) * 2 >= size) {
 			return true;
 		}
 		return false;

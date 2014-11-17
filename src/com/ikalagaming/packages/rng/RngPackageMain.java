@@ -1,8 +1,8 @@
 
 package com.ikalagaming.packages.rng;
 
-import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
+import com.ikalagaming.core.packages.Package;
 
 /**
  * The main interface for the rng package.
@@ -112,7 +112,7 @@ public class RngPackageMain implements Package {
 	}
 
 	@Override
-	public String getType() {
+	public String getName() {
 		return packageName;
 	}
 

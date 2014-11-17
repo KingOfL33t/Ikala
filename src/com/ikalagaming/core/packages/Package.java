@@ -1,5 +1,7 @@
 
-package com.ikalagaming.core;
+package com.ikalagaming.core.packages;
+
+import com.ikalagaming.core.PackageManager;
 
 /**
  * A distinct chunk of the program with a specific purpose and methods for
@@ -44,7 +46,7 @@ public interface Package {
 	 * 
 	 * @return a string descriptor of the package
 	 */
-	public String getType();
+	public String getName();
 
 	/**
 	 * Returns this classes version number. This changes periodically for each
@@ -96,4 +98,5 @@ public interface Package {
 	 * @param parent the parent package manager
 	 */
 	public void setPackageManager(PackageManager parent);
+
 }

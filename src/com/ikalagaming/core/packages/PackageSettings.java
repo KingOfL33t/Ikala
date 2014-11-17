@@ -1,5 +1,5 @@
 
-package com.ikalagaming.core;
+package com.ikalagaming.core.packages;
 
 /**
  * Configurable settings that allow changing the behavior of the package system.

@@ -66,7 +66,7 @@ public class LogDispatcher extends Thread {
 		}
 		while (running) {
 			try {
-				sleep(50);
+				sleep(5);
 			}
 			catch (InterruptedException e) {
 				e.printStackTrace();

@@ -3,7 +3,9 @@ package com.ikalagaming.core;
 
 import java.util.ArrayList;
 
+import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.PackageLogger;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -21,6 +23,7 @@ public class CommandRegistry {
 	private ArrayList<RegisteredCommand> commands;
 
 	private PackageManager manager;
+	private PackageLogger logger;
 
 	/**
 	 * Constructs a new command registry and sets up the internal structures.
@@ -30,6 +33,7 @@ public class CommandRegistry {
 	public CommandRegistry(PackageManager manager) {
 		commands = new ArrayList<RegisteredCommand>();
 		this.manager = manager;
+		logger = new PackageLogger(manager);
 	}
 
 	/**
@@ -43,20 +47,18 @@ public class CommandRegistry {
 	public boolean registerCommand(String command, Package owner) {
 		if (contains(command)) {
 			int index = getIndexOf(command);
-			manager.getLogger().logError(
-					SafeResourceLoader.getString("command_already_registered",
-							manager.getResourceBundle(),
-							"command already registered"),
-					LoggingLevel.WARNING,
+			logger.logError(SafeResourceLoader.getString(
+					"command_already_registered", manager.getResourceBundle(),
+					"command already registered"), LoggingLevel.WARNING,
 					command + " is already registered to "
-							+ commands.get(index).getOwner().getType());
+							+ commands.get(index).getOwner().getName());
 			return false;
 		}
 		else {
 			RegisteredCommand cmd = new RegisteredCommand(command, owner);
 			commands.add(cmd);
-			manager.getLogger().log(LoggingLevel.FINEST,
-					"Registered command " + command + " to " + owner.getType());
+			logger.log(LoggingLevel.FINEST, "Registered command " + command
+					+ " to " + owner.getName());
 			java.util.Collections.sort(commands);
 			return true;
 		}
@@ -74,8 +76,7 @@ public class CommandRegistry {
 				int index = getIndexOf(command);
 				commands.remove(index);
 			}
-			manager.getLogger().log(LoggingLevel.FINEST,
-					"Unregistered command " + command);
+			logger.log(LoggingLevel.FINEST, "Unregistered command " + command);
 			return true;
 		}
 		else {
@@ -92,7 +93,7 @@ public class CommandRegistry {
 		ArrayList<String> registeredCommands = new ArrayList<String>();
 		// find all the commands registered to the package
 		for (RegisteredCommand c : commands) {
-			if (c.getOwner().getType().equalsIgnoreCase(owner.getType())) {
+			if (c.getOwner().getName().equalsIgnoreCase(owner.getName())) {
 				registeredCommands.add(c.getCommand());
 			}
 		}

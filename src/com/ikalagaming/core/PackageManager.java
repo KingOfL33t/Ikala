@@ -1,16 +1,24 @@
 
 package com.ikalagaming.core;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ListIterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.jar.JarFile;
 
 import com.ikalagaming.core.events.PackageEvent;
+import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.core.packages.PackageSettings;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.LoggingPackage;
+import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.permissions.Permission;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -28,15 +36,15 @@ public class PackageManager implements Package {
 	private HashMap<String, Package> loadedPackages;
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
-	private Game game;// TODO use this for loading plugins
+	private PackageLogger logger;
+	private HashMap<String, Permission> permissionMap;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
 	 *
 	 * @param g the game that owns this package manager
 	 */
-	public PackageManager(Game g) {
-		game = g;
+	public PackageManager() {
 		loadedPackages = new HashMap<String, Package>();
 		try {
 			resourceBundle =
@@ -48,6 +56,8 @@ public class PackageManager implements Package {
 		}
 		cmdRegistry = new CommandRegistry(this);
 		registerCommands();
+		logger = new PackageLogger(this);
+		permissionMap = new HashMap<String, Permission>();
 	}
 
 	/**
@@ -62,6 +72,7 @@ public class PackageManager implements Package {
 		commands.add("COMMAND_LIST_PACKAGES");
 		commands.add("COMMAND_RELOAD");
 		commands.add("COMMAND_HELP");
+		commands.add("COMMAND_VERSION");
 
 		String tmp = "";
 
@@ -98,7 +109,8 @@ public class PackageManager implements Package {
 	/**
 	 * <p>
 	 * Loads the given package into memory, stores it by type, and enables it if
-	 * packages are {@link com.ikalagaming.core.PackageSettings#ENABLE_ON_LOAD
+	 * packages are
+	 * {@link com.ikalagaming.core.packages.PackageSettings#ENABLE_ON_LOAD
 	 * enabled on load} by default.
 	 * </p>
 	 * <p>
@@ -112,33 +124,27 @@ public class PackageManager implements Package {
 	 * @return true if the package was loaded properly, false otherwise
 	 */
 	public boolean loadPackage(Package toLoad) {
-		getLogger().log(
-				LoggingLevel.FINE,
-				"Loading package " + toLoad.getType() + " (V"
-						+ toLoad.getVersion() + ")" + "...");
+		logger.log(LoggingLevel.FINE, "Loading package " + toLoad.getName()
+				+ " (V" + toLoad.getVersion() + ")" + "...");
 		// if the package exists and is older than toLoad, unload
 		if (isLoaded(toLoad)) {
-			getLogger().log(
-					LoggingLevel.FINE,
-					"Package " + toLoad.getType() + " is already loaded. (V"
-							+ toLoad.getVersion() + ")");
-			if (loadedPackages.get(toLoad.getType()).getVersion() < toLoad
+			logger.log(LoggingLevel.FINE, "Package " + toLoad.getName()
+					+ " is already loaded. (V" + toLoad.getVersion() + ")");
+			if (loadedPackages.get(toLoad.getName()).getVersion() < toLoad
 					.getVersion()) {
-				unloadPackage(loadedPackages.get(toLoad.getType()));
+				unloadPackage(loadedPackages.get(toLoad.getName()));
 				// unload the old package and continue loading the new one
 			}
 			else {
-				getLogger().log(
-						LoggingLevel.FINE,
-						"Package " + toLoad.getType() + " (V"
-								+ toLoad.getVersion() + ")" + " was outdated. "
-								+ "Aborting.");
+				logger.log(LoggingLevel.FINE, "Package " + toLoad.getName()
+						+ " (V" + toLoad.getVersion() + ")" + " was outdated. "
+						+ "Aborting.");
 				return false;
 			}
 		}
 
 		// store the new package
-		loadedPackages.put(toLoad.getType(), toLoad);
+		loadedPackages.put(toLoad.getName(), toLoad);
 		toLoad.setPackageManager(this);
 
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS) {
@@ -148,10 +154,10 @@ public class PackageManager implements Package {
 				if (manager.isEnabled()) {
 					if (toLoad instanceof Listener) {
 						manager.registerEventListeners((Listener) toLoad);
-						getLogger().log(
+						logger.log(
 								LoggingLevel.FINER,
 								"Registered event listeners for "
-										+ toLoad.getType());
+										+ toLoad.getName());
 					}
 				}
 			}
@@ -171,30 +177,29 @@ public class PackageManager implements Package {
 
 			if (isLoaded("event-manager")
 					&& getPackage("event-manager").isEnabled()) {
-				getLogger().log(
-						LoggingLevel.FINER,
-						"Calling onLoad of " + toLoad.getType()
+				logger.log(LoggingLevel.FINER,
+						"Calling onLoad of " + toLoad.getName()
 								+ " using event system.");
 				/*
 				 * Tries to send the event. If the return value is false, it
 				 * failed and therefore we must load manually
 				 */
-				if (!fireEvent(toLoad.getType(), toSend)) {
-					getLogger().log(LoggingLevel.FINER,
-							"Event failed, " + "calling method directly.");
+				if (!fireEvent(toLoad.getName(), toSend)) {
+					logger.log(LoggingLevel.FINER, "Event failed, "
+							+ "calling method directly.");
 					toLoad.onLoad();
 				}
 			}
 			else {
-				getLogger().log(LoggingLevel.FINER,
-						"Calling onLoad of " + toLoad.getType());
+				logger.log(LoggingLevel.FINER,
+						"Calling onLoad of " + toLoad.getName());
 				// errors creating message so the event would not work
 				toLoad.onLoad();
 			}
 		}
 		else {
-			getLogger().log(LoggingLevel.FINER,
-					"Calling onLoad of " + toLoad.getType());
+			logger.log(LoggingLevel.FINER,
+					"Calling onLoad of " + toLoad.getName());
 			// not using events for onload, or not using events at all
 			toLoad.onLoad();
 		}
@@ -213,48 +218,105 @@ public class PackageManager implements Package {
 
 				if (isLoaded("event-manager")
 						&& getPackage("event-manager").isEnabled()) {
-					getLogger().log(
-							LoggingLevel.FINER,
-							"Calling enable of " + toLoad.getType()
-									+ " using event system.");
+					logger.log(LoggingLevel.FINER, "Calling enable of "
+							+ toLoad.getName() + " using event system.");
 					/*
 					 * Tries to send the event. If the return value is false, it
 					 * failed and therefore we must load manually
 					 */
-					if (!fireEvent(toLoad.getType(), toSend)) {
-						getLogger().log(LoggingLevel.FINER,
-								"Event failed, " + "calling method directly.");
+					if (!fireEvent(toLoad.getName(), toSend)) {
+						logger.log(LoggingLevel.FINER, "Event failed, "
+								+ "calling method directly.");
 						toLoad.enable();
 					}
 				}
 				else {
-					getLogger().log(LoggingLevel.FINER,
-							"Calling enable of " + toLoad.getType());
+					logger.log(LoggingLevel.FINER, "Calling enable of "
+							+ toLoad.getName());
 					// errors creating message so the event would not work
 					toLoad.enable();
 				}
 			}
 			else {
-				getLogger().log(LoggingLevel.FINER,
-						"Calling enable of " + toLoad.getType());
+				logger.log(LoggingLevel.FINER,
+						"Calling enable of " + toLoad.getName());
 				// not using events for enable, or not using events at all
 				toLoad.enable();
 			}
 		}
-		getLogger().log(
-				LoggingLevel.FINE,
-				"Package " + toLoad.getType() + " (V" + toLoad.getVersion()
-						+ ")" + " loaded!");
+		logger.log(LoggingLevel.FINE, "Package " + toLoad.getName() + " (V"
+				+ toLoad.getVersion() + ")" + " loaded!");
 		return true;
 	}
 
-	public boolean loadPackage(String name) {
+	public boolean loadPlugin(String name) {
 		// TODO load a package from file
 		/*
 		 * Check for being a jar file check for package info file load and check
 		 * for valid info load the file if necessary
 		 */
+		File pluginFolder = Game.getPluginFolder();
+		if (!pluginFolder.exists()) {
+			// TODO log error
+			return false;
+		}
+		if (!pluginFolder.isDirectory()) {
+			// TODO log error
+			return false;
+		}
+		String[] filenames;
+		filenames = pluginFolder.list();
+		if (filenames == null) {
+			// TODO log error
+			return false;
+		}
+		if (filenames.length == 0) {
+			// empty
+			// TODO log error
+			return false;
+		}
+		filenames = null;
+
+		ArrayList<File> files = new ArrayList<File>();
+
+		// adds valid jar files to the list of files
+		for (File f : pluginFolder.listFiles()) {
+			if (f.isDirectory()) {
+				continue;// its a folder
+			}
+			if (!f.getName().toLowerCase().endsWith(".jar")) {
+				continue;// its not a jar file
+			}
+			files.add(f);
+		}
+
+		if (files.size() == 0) {
+			// TODO log error
+			return false;
+		}
+
+		ListIterator<File> iterator = files.listIterator();
+		File tmp;
+		while (iterator.hasNext()) {
+			tmp = iterator.next();
+
+		}
 		return false;
+	}
+
+	private void getPluginDescription(File jarfile) {
+		JarFile jar = null;
+		InputStream stream = null;
+		/*
+		 * try { jar = new JarFile(jarfile); JarEntry entry =
+		 * jar.getJarEntry("plugin.yml"); if (entry == null) { //TODO log error
+		 * no plugin.yml jar.close(); } stream = jar.getInputStream(entry);
+		 * return new PluginDescriptionFile(stream); } catch (IOException ex) {
+		 * throw new InvalidDescriptionException(ex); } catch (YAMLException ex)
+		 * { throw new InvalidDescriptionException(ex); } finally { if (jar !=
+		 * null) { try { jar.close(); } catch (IOException e) { } } if (stream
+		 * != null) { try { stream.close(); } catch (IOException e) { } } }
+		 */
 	}
 
 	/**
@@ -269,17 +331,15 @@ public class PackageManager implements Package {
 	private boolean fireEvent(String to, String content) {
 
 		if (!isLoaded("event-manager")) {
-			getLogger().logError(
-					SafeResourceLoader.getString("package_not_loaded",
-							resourceBundle, "Package not loaded"),
+			logger.logError(SafeResourceLoader.getString("package_not_loaded",
+					resourceBundle, "Package not loaded"),
 					LoggingLevel.WARNING, to);
 			return false;
 		}
 
 		if (!getPackage("event-manager").isEnabled()) {
-			getLogger().logError(
-					SafeResourceLoader.getString("package_not_enabled",
-							resourceBundle, "Package not enabled"),
+			logger.logError(SafeResourceLoader.getString("package_not_enabled",
+					resourceBundle, "Package not enabled"),
 					LoggingLevel.WARNING, to);
 			return false;
 		}
@@ -294,6 +354,37 @@ public class PackageManager implements Package {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the permission assigned to the given string. This is not case
+	 * sensitive and my return null.
+	 *
+	 * @param name the name of the permission
+	 * @return the pemission associated with the string
+	 */
+	public Permission getPermission(String name) {
+		return permissionMap.get(name.toLowerCase());
+	}
+
+	/**
+	 * Removes the permission assigned to the given string.
+	 *
+	 * @param name the name of the permission
+	 */
+	public void removePermission(String name) {
+		if (permissionMap.containsKey(name)) {
+			permissionMap.remove(name);
+		}
+	}
+
+	/**
+	 * Adds the permission to the list of permissions.
+	 *
+	 * @param perm the permission to add
+	 */
+	public void addPermission(Permission perm) {
+		permissionMap.put(perm.getName(), perm);
 	}
 
 	/**
@@ -318,7 +409,7 @@ public class PackageManager implements Package {
 	 *         exist
 	 */
 	public boolean isLoaded(Package type) {
-		return loadedPackages.containsKey(type.getType());
+		return loadedPackages.containsKey(type.getName());
 	}
 
 	/**
@@ -346,11 +437,10 @@ public class PackageManager implements Package {
 	 * @return true if the package was unloaded properly
 	 */
 	public boolean unloadPackage(String toUnload) {
-		getLogger().log(LoggingLevel.FINE,
-				"Unloading package " + toUnload + "...");
+		logger.log(LoggingLevel.FINE, "Unloading package " + toUnload + "...");
 		if (!isLoaded(toUnload)) {
-			getLogger().log(LoggingLevel.FINE,
-					"Package " + toUnload + " is not loaded. Aborting.");
+			logger.log(LoggingLevel.FINE, "Package " + toUnload
+					+ " is not loaded. Aborting.");
 			return false;
 		}
 
@@ -370,32 +460,28 @@ public class PackageManager implements Package {
 
 					if (isLoaded("event-manager")
 							&& getPackage("event-manager").isEnabled()) {
-						getLogger().log(
-								LoggingLevel.FINER,
-								"Calling disable " + "method of " + toUnload
-										+ " using events.");
+						logger.log(LoggingLevel.FINER, "Calling disable "
+								+ "method of " + toUnload + " using events.");
 						/*
 						 * Tries to send the event. If the return value is
 						 * false, it failed and therefore we must load manually
 						 */
 						if (!fireEvent(toUnload, toSend)) {
-							getLogger().log(
-									LoggingLevel.FINER,
-									"Events failed, "
-											+ "calling method instead.");
+							logger.log(LoggingLevel.FINER, "Events failed, "
+									+ "calling method instead.");
 							loadedPackages.get(toUnload).disable();
 						}
 					}
 					else {
-						getLogger().log(LoggingLevel.FINER,
-								"Calling disable " + "method of " + toUnload);
+						logger.log(LoggingLevel.FINER, "Calling disable "
+								+ "method of " + toUnload);
 						// errors creating message so the event would not work
 						loadedPackages.get(toUnload).disable();
 					}
 				}
 				else {
-					getLogger().log(LoggingLevel.FINER,
-							"Calling disable " + "method of " + toUnload);
+					logger.log(LoggingLevel.FINER, "Calling disable "
+							+ "method of " + toUnload);
 					loadedPackages.get(toUnload).disable();
 				}
 			}
@@ -414,37 +500,34 @@ public class PackageManager implements Package {
 
 			if (isLoaded("event-manager")
 					&& getPackage("event-manager").isEnabled()) {
-				getLogger().log(
-						LoggingLevel.FINER,
-						"Calling onUnload " + "method of " + toUnload
-								+ " using events.");
+				logger.log(LoggingLevel.FINER, "Calling onUnload "
+						+ "method of " + toUnload + " using events.");
 				/*
 				 * Tries to send the event. If the return value is false, it
 				 * failed and therefore we must load manually
 				 */
 				if (!fireEvent(toUnload, toSend)) {
-					getLogger().log(LoggingLevel.FINER,
-							"Events failed, " + "calling method instead.");
+					logger.log(LoggingLevel.FINER, "Events failed, "
+							+ "calling method instead.");
 					loadedPackages.get(toUnload).onUnload();
 				}
 			}
 			else {
-				getLogger().log(LoggingLevel.FINER,
-						"Calling onUnload " + "method of " + toUnload);
+				logger.log(LoggingLevel.FINER, "Calling onUnload "
+						+ "method of " + toUnload);
 				// errors creating message so the event would not work
 				loadedPackages.get(toUnload).onUnload();
 			}
 		}
 		else {
-			getLogger().log(LoggingLevel.FINER,
-					"Calling onUnload " + "method of " + toUnload);
+			logger.log(LoggingLevel.FINER, "Calling onUnload " + "method of "
+					+ toUnload);
 			loadedPackages.get(toUnload).onUnload();
 		}
 
 		loadedPackages.remove(toUnload);
 
-		getLogger()
-				.log(LoggingLevel.FINE, "Package " + toUnload + " unloaded!");
+		logger.log(LoggingLevel.FINE, "Package " + toUnload + " unloaded!");
 		return true;
 	}
 
@@ -461,19 +544,17 @@ public class PackageManager implements Package {
 		 * in this class is modified and not just the package passed to the
 		 * method.
 		 */
-		String type = toUnload.getType();
+		String type = toUnload.getName();
 		if (!isLoaded(type)) {
-			getLogger().log(
-					LoggingLevel.FINE,
-					"Package " + toUnload.getType()
-							+ " is not loaded. Aborting.");
+			logger.log(LoggingLevel.FINE, "Package " + toUnload.getName()
+					+ " is not loaded. Aborting.");
 			return;
 		}
 		unloadPackage(type);
 	}
 
 	/**
-	 * Returns a logger for the system. If one does not exist, it will be
+	 * Returns the logger for the system. If one does not exist, it will be
 	 * created.
 	 *
 	 * @return a logger for the engine
@@ -489,9 +570,8 @@ public class PackageManager implements Package {
 			// this has to work properly
 			pack.onLoad();
 			// enable the package
-			if (PackageSettings.ENABLE_ON_LOAD) {
-				pack.enable();
-			}
+			pack.enable();
+
 		}
 		// safe cast since we know its a LoggingPackage
 		return (LoggingPackage) loadedPackages.get(loggingPackageName);
@@ -514,7 +594,7 @@ public class PackageManager implements Package {
 	}
 
 	@Override
-	public String getType() {
+	public String getName() {
 		return packageName;
 	}
 

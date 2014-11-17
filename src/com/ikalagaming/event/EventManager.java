@@ -7,9 +7,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
+import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.PackageLogger;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -24,6 +25,7 @@ public class EventManager implements Package {
 	private PackageManager packageManager;
 	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
 	private String packageName = "event-manager";
+	private PackageLogger logger;
 
 	/**
 	 * Registers event listeners in the supplied listener.
@@ -68,11 +70,9 @@ public class EventManager implements Package {
 			throw illegalState;
 		}
 		catch (Exception e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("event_queue_full",
-							packageManager.getResourceBundle(),
-							"Event queue full"), LoggingLevel.WARNING,
-					"EventManager.fireEvent(Event)");
+			logger.logError(SafeResourceLoader.getString("event_queue_full",
+					packageManager.getResourceBundle(), "Event queue full"),
+					LoggingLevel.WARNING, "EventManager.fireEvent(Event)");
 		}
 	}
 
@@ -160,7 +160,7 @@ public class EventManager implements Package {
 	}
 
 	@Override
-	public String getType() {
+	public String getName() {
 		return packageName;
 	}
 
@@ -178,10 +178,9 @@ public class EventManager implements Package {
 			this.onEnable();
 		}
 		catch (Exception e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("package_enable_fail",
-							packageManager.getResourceBundle(),
-							"Package failed to enable"), LoggingLevel.SEVERE,
+			logger.logError(SafeResourceLoader.getString("package_enable_fail",
+					packageManager.getResourceBundle(),
+					"Package failed to enable"), LoggingLevel.SEVERE,
 					"EventManager.enable()");
 			// better safe than sorry (probably did not initialize correctly)
 			this.enabled = false;
@@ -200,10 +199,9 @@ public class EventManager implements Package {
 			this.onDisable();
 		}
 		catch (Exception e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("package_disable_fail",
-							packageManager.getResourceBundle(),
-							"Package failed to disable"), LoggingLevel.SEVERE,
+			logger.logError(SafeResourceLoader.getString(
+					"package_disable_fail", packageManager.getResourceBundle(),
+					"Package failed to disable"), LoggingLevel.SEVERE,
 					"EventManager.disable()");
 			this.enabled = true;
 			return false;
@@ -245,22 +243,23 @@ public class EventManager implements Package {
 			dispatcher.join();
 		}
 		catch (InterruptedException e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("thread_interrupted",
-							packageManager.getResourceBundle(),
-							"Thread interrupted"), LoggingLevel.WARNING,
-					"EventManager.onDisable()");
+			logger.logError(SafeResourceLoader.getString("thread_interrupted",
+					packageManager.getResourceBundle(), "Thread interrupted"),
+					LoggingLevel.WARNING, "EventManager.onDisable()");
 		}
 
 	}
 
 	@Override
-	public void onLoad() {}
+	public void onLoad() {
+		logger = new PackageLogger(this);
+	}
 
 	@Override
 	public void onUnload() {
 		// this.resourceBundle = null;
 		this.packageManager = null;
+		logger = null;
 	}
 
 	@Override
@@ -272,4 +271,5 @@ public class EventManager implements Package {
 	public PackageManager getPackageManager() {
 		return this.packageManager;
 	}
+
 }

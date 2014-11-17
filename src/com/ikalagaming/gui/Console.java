@@ -17,15 +17,16 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import com.ikalagaming.core.Localization;
-import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.events.PackageEvent;
+import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.PackageLogger;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -176,6 +177,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	private PackageManager packageManager;
 	private String packageName = "console";
 	private boolean enabled = false;
+	private PackageLogger logger;
 
 	private final double version = 0.1;
 
@@ -287,7 +289,14 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	@Override
 	public boolean enable() {
-		onEnable();
+		Runnable myrunnable = new Runnable() {
+			public void run() {
+				onEnable();
+			}
+		};
+		new Thread(myrunnable).start();// Call it when you need to run the
+										// function
+
 		enabled = true;
 		return true;
 	}
@@ -327,16 +336,15 @@ public class Console extends WindowAdapter implements Package, Listener {
 			return textArea.getLineStartOffset(line);
 		}
 		catch (BadLocationException e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("error_bad_location",
-							resourceBundle, "Bad location"),
-					LoggingLevel.WARNING, "Console.getSafeLineOffset(String)");
+			logger.logError(SafeResourceLoader.getString("error_bad_location",
+					resourceBundle, "Bad location"), LoggingLevel.WARNING,
+					"Console.getSafeLineOffset(String)");
 		}
 		return -1;
 	}
 
 	@Override
-	public String getType() {
+	public String getName() {
 		return packageName;
 	}
 
@@ -451,6 +459,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 		frame.getContentPane().add(new JScrollPane(textArea));
 
 		frame.setVisible(true);
+		System.gc();
 	}
 
 	@Override
@@ -562,7 +571,6 @@ public class Console extends WindowAdapter implements Package, Listener {
 	public void onDisable() {
 		frame.setVisible(false);
 		frame.dispose();
-
 	}
 
 	@Override
@@ -573,6 +581,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	@Override
 	public void onLoad() {
+		logger = new PackageLogger(this);
 		try {
 			resourceBundle =
 					ResourceBundle.getBundle(ResourceLocation.Console,
@@ -580,8 +589,8 @@ public class Console extends WindowAdapter implements Package, Listener {
 		}
 		catch (MissingResourceException missingResource) {
 			// don't localize this since it would fail anyways
-			packageManager.getLogger().logError("Locale not found",
-					LoggingLevel.WARNING, "Console.onLoad()");
+			logger.logError("Locale not found", LoggingLevel.WARNING,
+					"Console.onLoad()");
 		}
 		windowTitle =
 				SafeResourceLoader
@@ -635,7 +644,15 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	@Override
 	public void onUnload() {
+		if (frame != null) {
+			frame.setVisible(false);
+			frame.dispose();
+			frame = null;
+		}
 		resourceBundle = null;
+		history = null;
+		packageManager = null;
+		logger = null;
 	}
 
 	@Override
@@ -669,10 +686,9 @@ public class Console extends WindowAdapter implements Package, Listener {
 			textArea.replaceRange("", 0, end);
 		}
 		catch (BadLocationException e) {
-			packageManager.getLogger().logError(
-					SafeResourceLoader.getString("error_bad_location",
-							resourceBundle, "Bad location"),
-					LoggingLevel.WARNING, "Console.removeTopLine(String)");
+			logger.logError(SafeResourceLoader.getString("error_bad_location",
+					resourceBundle, "Bad location"), LoggingLevel.WARNING,
+					"Console.removeTopLine(String)");
 		}
 	}
 
@@ -704,7 +720,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 			Package pack =
 					packageManager.getCommandRegistry().getParent(firstWord);
 			if (pack != null) {
-				mgr.fireEvent(new CommandFired(pack.getType(), line));
+				mgr.fireEvent(new CommandFired(pack.getName(), line));
 			}
 		}
 	}

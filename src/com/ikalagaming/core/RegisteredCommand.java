@@ -1,6 +1,8 @@
 
 package com.ikalagaming.core;
 
+import com.ikalagaming.core.packages.Package;
+
 /**
  * A command that has been reigstered with the system. This contains a string
  * representing the command and a reference to the owner of the command.

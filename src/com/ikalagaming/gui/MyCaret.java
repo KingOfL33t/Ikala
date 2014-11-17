@@ -68,8 +68,9 @@ public class MyCaret extends DefaultCaret {
 			y = r.y;
 			height = r.height;
 		}
-
-		g.setColor(comp.getCaretColor());
+		if (!(g.getColor() == comp.getCaretColor())) {
+			g.setColor(comp.getCaretColor());
+		}
 		g.setXORMode(comp.getBackground()); // do this to draw in XOR mode
 
 		if (dotChar == '\n') {

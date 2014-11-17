@@ -5,9 +5,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import com.ikalagaming.core.Localization;
-import com.ikalagaming.core.Package;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
+import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -33,13 +33,16 @@ public class LoggingPackage implements Package {
 	/**
 	 * Logs the provided error. Attempts to use localized names for the error
 	 * code and logging level. This only logs errors that are above or equal to
-	 * the threshold.
+	 * the threshold. The package name is listed before the info. <br>
+	 * If the package is not enabled, simply logs straight to System.err
 	 * 
+	 * @param origin The package that is logging the error
 	 * @param error The error that occurred
 	 * @param level what level is the requested log
 	 * @param details additional information about the error
 	 */
-	public void logError(String error, LoggingLevel level, String details) {
+	public void logError(Package origin, String error, LoggingLevel level,
+			String details) {
 		newLog = "";
 		if (!enabled) {
 			System.err.println(level.getName() + " " + error + " " + details);
@@ -54,7 +57,17 @@ public class LoggingPackage implements Package {
 						"[")
 						+ level.getLocalizedName()
 						+ SafeResourceLoader.getString("level_postfix",
-								resourceBundle, "]") + error + " " + details;
+								resourceBundle, "]")
+						+ " "
+						+ SafeResourceLoader.getString("level_prefix",
+								resourceBundle, "[")
+						+ origin.getName()
+						+ SafeResourceLoader.getString("level_postfix",
+								resourceBundle, "]")
+						+ " "
+						+ error
+						+ " "
+						+ details;
 
 		dispatcher.log(newLog);
 	}
@@ -62,12 +75,14 @@ public class LoggingPackage implements Package {
 	/**
 	 * Logs the provided error. Attempts to use localized names for the logging
 	 * level. This only logs information that is above or equal to the logging
-	 * threshold.
+	 * threshold. <br>
+	 * If the package is not enabled, simply logs straight to System.out
 	 * 
+	 * @param origin The package that is logging the info
 	 * @param level what level is the requested log
 	 * @param details what to log
 	 */
-	public void log(LoggingLevel level, String details) {
+	public void log(Package origin, LoggingLevel level, String details) {
 		newLog = "";
 		if (!enabled) {
 			System.out.println(level.getName() + " " + details);
@@ -80,8 +95,13 @@ public class LoggingPackage implements Package {
 			newLog =
 					resourceBundle.getString("level_prefix")
 							+ level.getLocalizedName()
-							+ resourceBundle.getString("level_postfix") + " "
-							+ details;
+							+ resourceBundle.getString("level_postfix")
+							+ " "
+							+ SafeResourceLoader.getString("level_prefix",
+									resourceBundle, "[")
+							+ origin.getName()
+							+ SafeResourceLoader.getString("level_postfix",
+									resourceBundle, "]") + " " + details;
 		}
 		catch (Exception e) {
 			System.err.println(level.getName());
@@ -92,7 +112,7 @@ public class LoggingPackage implements Package {
 	}
 
 	@Override
-	public String getType() {
+	public String getName() {
 		return packageName;
 	}
 
@@ -108,7 +128,7 @@ public class LoggingPackage implements Package {
 			this.onEnable();
 		}
 		catch (Exception e) {
-			logError("Package enable fail", LoggingLevel.SEVERE,
+			logError(this, "Package enable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
 			// better safe than sorry (probably did not initialize correctly)
 			this.enabled = false;
@@ -124,7 +144,7 @@ public class LoggingPackage implements Package {
 			this.onDisable();
 		}
 		catch (Exception e) {
-			logError("package disable fail", LoggingLevel.SEVERE,
+			logError(this, "package disable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
 			return false;
 		}
@@ -159,7 +179,7 @@ public class LoggingPackage implements Package {
 							Localization.getLocale());
 		}
 		catch (MissingResourceException missingResource) {
-			logError("locale not found", LoggingLevel.SEVERE,
+			logError(this, "locale not found", LoggingLevel.SEVERE,
 					"LoggingPackage.onLoad()");
 		}
 		dispatcher = new LogDispatcher(this);

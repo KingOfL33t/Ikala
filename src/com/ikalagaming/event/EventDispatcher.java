@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 
 import com.ikalagaming.core.IQueue;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.PackageLogger;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
@@ -20,6 +21,7 @@ public class EventDispatcher extends Thread {
 	private HandlerList handlers;
 	private EventListener[] listeners;
 	private EventManager manager;
+	private PackageLogger logger;
 
 	private boolean running;
 	private boolean hasEvents;
@@ -35,6 +37,7 @@ public class EventDispatcher extends Thread {
 		this.manager = manager;
 		this.hasEvents = false;
 		this.running = true;
+		logger = new PackageLogger(manager);
 	}
 
 	/**
@@ -57,10 +60,8 @@ public class EventDispatcher extends Thread {
 		}
 		catch (Exception e) {
 			if (manager.getPackageManager() != null) {
-				manager.getPackageManager()
-						.getLogger()
-						.logError("error firing event", LoggingLevel.WARNING,
-								e.toString());
+				logger.logError("error firing event", LoggingLevel.WARNING,
+						e.toString());
 			}
 			else {
 				System.err.println(e.toString());
@@ -114,13 +115,9 @@ public class EventDispatcher extends Thread {
 				}
 				catch (Exception e) {
 					if (manager.getPackageManager() != null) {
-						manager.getPackageManager()
-								.getLogger()
-								.logError(
-										"error running event dispatcher",
-										LoggingLevel.WARNING,
-										e.toString()
-												+ " at EventDispatcher.run()");
+						logger.logError("error running event dispatcher",
+								LoggingLevel.WARNING, e.toString()
+										+ " at EventDispatcher.run()");
 						e.printStackTrace();
 					}
 					else {
@@ -143,5 +140,6 @@ public class EventDispatcher extends Thread {
 		hasEvents = false;
 		running = false;
 		manager = null;// stop memory freeing from being stopped
+		logger = null;
 	}
 }

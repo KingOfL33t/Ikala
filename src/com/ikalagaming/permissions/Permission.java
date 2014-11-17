@@ -12,9 +12,9 @@ import com.ikalagaming.core.PackageManager;
 
 /**
  * Represents a unique permission that may be attached to a {@link Permissible}
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class Permission {
 
@@ -72,7 +72,7 @@ public class Permission {
 
 	/**
 	 * Returns the unique fully qualified name of this Permission
-	 * 
+	 *
 	 * @return Fully qualified name
 	 */
 	public String getName() {
@@ -84,7 +84,7 @@ public class Permission {
 	 * <p>
 	 * If you change this map in any form, you must call
 	 * {@link #recalculatePermissibles()} to recalculate all {@link Permissible}s
-	 * 
+	 *
 	 * @return Permission children
 	 */
 	public Map<String, Boolean> getChildren() {
@@ -93,7 +93,7 @@ public class Permission {
 
 	/**
 	 * Gets the default value of this permission.
-	 * 
+	 *
 	 * @return Default value of this permission.
 	 */
 	public DefaultPermissionValue getDefault() {
@@ -107,7 +107,7 @@ public class Permission {
 	 * server reloads permissions. Changing this default will cause all
 	 * {@link Permissible}s that contain this permission to recalculate their
 	 * permissions
-	 * 
+	 *
 	 * @param value The new default to set
 	 */
 	public void setDefault(DefaultPermissionValue value) {
@@ -120,7 +120,7 @@ public class Permission {
 
 	/**
 	 * Gets a brief description of this permission, if set
-	 * 
+	 *
 	 * @return Brief description of this permission
 	 */
 	public String getDescription() {
@@ -132,7 +132,7 @@ public class Permission {
 	 * <p>
 	 * This will not automatically be saved to disk, and is a temporary
 	 * operation until the server reloads permissions.
-	 * 
+	 *
 	 * @param value The new description to set
 	 */
 	public void setDescription(String value) {
@@ -148,14 +148,14 @@ public class Permission {
 	 * Gets a set containing every {@link Permissible} that has this permission.
 	 * <p>
 	 * This set cannot be modified.
-	 * 
+	 *
 	 * @return Set containing permissibles with this permission
 	 */
 	public Set<Permissible> getPermissibles() {
 		/*
 		 * Get a set containing all subscribed {@link Permissible}s to the given
 		 * permission, by name
-		 * 
+		 *
 		 * Using name
 		 */
 
@@ -184,7 +184,7 @@ public class Permission {
 	 * <p>
 	 * If the parent permission does not exist, it will be created and
 	 * registered.
-	 * 
+	 *
 	 * @param name Name of the parent permission
 	 * @param value The value to set this permission to
 	 * @return Parent permission it created or loaded
@@ -203,7 +203,7 @@ public class Permission {
 
 	/**
 	 * Adds this permission to the given parent permission.
-	 * 
+	 *
 	 * @param perm Parent permission to register with
 	 * @param value The value to set this permission to
 	 */
@@ -220,12 +220,12 @@ public class Permission {
 	 * following keys:
 	 * <ul>
 	 * <li>default: Boolean true or false. If not specified, false.
-	 * <li>children: Map<String, Boolean> of child permissions. If not
+	 * <li>children: Map(String, Boolean) of child permissions. If not
 	 * specified, empty list.
 	 * <li>description: Short string containing a very small description of this
 	 * description. If not specified, empty string.
 	 * </ul>
-	 * 
+	 *
 	 * @param data Map of permissions
 	 * @param error An error message to show if a permission is invalid.
 	 * @param defaultPerm Default permission value to use if missing
@@ -253,11 +253,12 @@ public class Permission {
 	 * The data may contain the following keys:
 	 * <ul>
 	 * <li>default: Boolean true or false. If not specified, false.
-	 * <li>children: Map<String, Boolean> of child permissions. If not
+	 * <li>children: Map(String, Boolean) of child permissions. If not
 	 * specified, empty list.
 	 * <li>description: Short string containing a very small description of this
 	 * description. If not specified, empty string.
-	 * 
+	 * </ul>
+	 *
 	 * @param name Name of the permission
 	 * @param data Map of keys
 	 * @return Permission the permissions object
@@ -274,12 +275,12 @@ public class Permission {
 	 * The data may contain the following keys:
 	 * <ul>
 	 * <li>default: Boolean true or false. If not specified, false.
-	 * <li>children: Map<String, Boolean> of child permissions. If not
+	 * <li>children: Map(String, Boolean) of child permissions. If not
 	 * specified, empty list.
 	 * <li>description: Short string containing a very small description of this
 	 * permission. If not specified, empty string.
 	 * </ul>
-	 * 
+	 *
 	 * @param name Name of the permission
 	 * @param data Map of keys
 	 * @param def Default permission value to use if not set

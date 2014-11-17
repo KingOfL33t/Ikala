@@ -6,9 +6,9 @@ import com.ikalagaming.core.packages.Package;
 /**
  * Provides a reference to the logger package used to log info for a particular
  * package.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class PackageLogger {
 
@@ -17,7 +17,7 @@ public class PackageLogger {
 	/**
 	 * Constructs a new logger for the given package. This logger logs messages
 	 * using the package name.
-	 * 
+	 *
 	 * @param logged the package to log messages for
 	 */
 	public PackageLogger(Package logged) {
@@ -30,7 +30,7 @@ public class PackageLogger {
 	 * Logs the provided error. Attempts to use localized names for the error
 	 * code and logging level. This only logs errors that are above or equal to
 	 * the threshold. The package name is listed before the info.
-	 * 
+	 *
 	 * @param error The error that occurred
 	 * @param level what level is the requested log
 	 * @param details additional information about the error
@@ -58,8 +58,7 @@ public class PackageLogger {
 	 * Logs the provided error. Attempts to use localized names for the logging
 	 * level. This only logs information that is above or equal to the logging
 	 * threshold.
-	 * 
-	 * @param origin The package that is logging the info
+	 *
 	 * @param level what level is the requested log
 	 * @param details what to log
 	 */

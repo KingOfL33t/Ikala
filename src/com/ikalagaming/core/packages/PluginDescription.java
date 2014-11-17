@@ -10,20 +10,20 @@ import java.util.Map;
 import org.magicwerk.brownies.collections.GapList;
 import org.yaml.snakeyaml.Yaml;
 
+import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.permissions.DefaultPermissionValue;
+import com.ikalagaming.permissions.Permissible;
 import com.ikalagaming.permissions.Permission;
-import com.sun.webkit.plugin.Plugin;
-import com.sun.webkit.plugin.PluginManager;
 
 /**
  * Contains data about a particular plugin.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class PluginDescription {
 	private static final ThreadLocal<Yaml> YAML = new ThreadLocal<Yaml>();
-
+//TODO javadoc
 	String rawName = null;
 	private String name = null;
 	private String main = null;
@@ -36,7 +36,6 @@ public class PluginDescription {
 	private String description = null;
 	private List<String> authors = null;
 	private String prefix = null;
-	private boolean database = false;
 	private List<Permission> permissions = null;
 	private Map<?, ?> lazyPermissions = null;
 	private DefaultPermissionValue defaultPerm =
@@ -44,7 +43,7 @@ public class PluginDescription {
 
 	/**
 	 * Returns a plugin description loaded by the given inputstream.
-	 * 
+	 *
 	 * @param stream the steam to load info from
 	 * @throws InvalidDescriptionException if the description is not valid
 	 */
@@ -151,15 +150,6 @@ public class PluginDescription {
 		depend = makePluginNameList(map, "depend");
 		softDepend = makePluginNameList(map, "softdepend");
 		loadBefore = makePluginNameList(map, "loadbefore");
-		if (map.get("database") != null) {
-			try {
-				database = (Boolean) map.get("database");
-			}
-			catch (ClassCastException ex) {
-				throw new InvalidDescriptionException(
-						"database is of wrong type", ex);
-			}
-		}
 		if (map.get("description") != null) {
 			description = map.get("description").toString();
 		}
@@ -258,13 +248,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>name</code>.
 	 * <p>
 	 * Example:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * name: simple-pathfinding
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return the name of the plugin
 	 */
 	public String getName() {
@@ -282,13 +272,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>version</code>.
 	 * <p>
 	 * Example:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * version: 1.2
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return the version of the plugin
 	 */
 	public double getVersion() {
@@ -312,13 +302,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>main</code>.
 	 * <p>
 	 * Example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * main: org.bukkit.plugin.MyPlugin
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return the fully qualified main class for the plugin
 	 */
 	public String getMain() {
@@ -336,13 +326,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>description</code>.
 	 * <p>
 	 * Example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * description: This plugin is so 31337. You can set yourself on fire.
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return description of this plugin, or null if not specified
 	 */
 	public String getDescription() {
@@ -365,62 +355,40 @@ public class PluginDescription {
 	 * <code>authors</code>.
 	 * <p>
 	 * Single author example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * author: CaptainInflamo
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> Multiple author example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * authors: [Cogito, verrier, EvilSeph]
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> When both are specified, author will be the first entry in
 	 * the list, so this example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * author: Grum
 	 * authors:
 	 * - feildmaster
 	 * - amaranth
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> Is equivilant to this example: <blockquote>
-	 * 
-	 * <pre>authors: [Grum, feildmaster, aramanth]
-	 * 
+	 *
 	 * <pre>
+	 * authors: [Grum, feildmaster, aramanth]
+	 *
+	 * </pre>
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return an immutable list of the plugin's authors
 	 */
 	public List<String> getAuthors() {
 		return authors;
-	}
-
-	/**
-	 * Gives if the plugin uses a database.
-	 * <ul>
-	 * <li>Using a database is non-trivial.
-	 * <li>Valid values include <code>true</code> and <code>false</code>
-	 * </ul>
-	 * <p>
-	 * In the plugin.yml, this entry is named <code>database</code>.
-	 * <p>
-	 * Example: <blockquote>
-	 * 
-	 * <pre>
-	 * database: false
-	 * </pre>
-	 * 
-	 * </blockquote>
-	 * 
-	 * @return if this plugin requires a database
-	 * @see Plugin#getDatabase()
-	 */
-	public boolean isDatabaseEnabled() {
-		return database;
 	}
 
 	/**
@@ -441,15 +409,15 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>depend</code>.
 	 * <p>
 	 * Example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * depend:
 	 * - OnePlugin
 	 * - AnotherPlugin
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return immutable list of the plugin's dependencies
 	 */
 	public List<String> getDepend() {
@@ -458,9 +426,9 @@ public class PluginDescription {
 
 	/**
 	 * Gives a list of other plugins that the plugin requires for full
-	 * functionality. The {@link PluginManager} will make best effort to treat
-	 * all entries here as if they were a {@link #getDepend() dependency}, but
-	 * will never fail because of one of these entries.
+	 * functionality. The PluginManager will make best effort to treat all
+	 * entries here as if they were a {@link #getDepend() dependency}, but will
+	 * never fail because of one of these entries.
 	 * <ul>
 	 * <li>Use the value in the {@link #getName()} of the target plugin to
 	 * specify the dependency.
@@ -476,13 +444,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>softdepend</code>.
 	 * <p>
 	 * Example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * softdepend: [OnePlugin, AnotherPlugin]
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return immutable list of the plugin's preferred dependencies
 	 */
 	public List<String> getSoftDepend() {
@@ -506,15 +474,15 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>loadbefore</code>.
 	 * <p>
 	 * Example: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * loadbefore:
 	 * - OnePlugin
 	 * - AnotherPlugin
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return immutable list of plugins that should consider this plugin a
 	 *         soft-dependency
 	 */
@@ -525,7 +493,7 @@ public class PluginDescription {
 	/**
 	 * Gives the token to prefix plugin-specific logging messages with.
 	 * <ul>
-	 * <li>This includes all messages using {@link Plugin#getLogger()}.
+	 * <li>This includes all messages using {@link PackageManager#getLogger()}.
 	 * <li>If not specified, the server uses the plugin's {@link #getName()
 	 * name}.
 	 * <li>This should clearly indicate what plugin is being logged.
@@ -534,13 +502,13 @@ public class PluginDescription {
 	 * In the plugin.yml, this entry is named <code>prefix</code>.
 	 * <p>
 	 * Example:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * prefix: ex-why-zee
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return the prefixed logging token, or null if not specified
 	 */
 	public String getPrefix() {
@@ -551,9 +519,9 @@ public class PluginDescription {
 	 * Gives the map of command-name to command-properties. Each entry in this
 	 * map corresponds to a single command and the respective values are the
 	 * properties of the command. Each property, <i>with the exception of
-	 * aliases</i>, can be defined at runtime using methods in
-	 * {@link PluginCommand} and are defined here only as a convenience.
-	 * <table border=1>
+	 * aliases</i>, can be defined at runtime using methods in plugincommand and
+	 * are defined here only as a convenience.
+	 * <table border=1 summary="">
 	 * <tr>
 	 * <th>Node</th>
 	 * <th>Method</th>
@@ -563,21 +531,21 @@ public class PluginDescription {
 	 * </tr>
 	 * <tr>
 	 * <td><code>description</code></td>
-	 * <td>{@link PluginCommand#setDescription(String)}</td>
+	 * <td>PluginCommand.setDescription(String)</td>
 	 * <td>String</td>
 	 * <td>A user-friendly description for a command. It is useful for
 	 * documentation purposes as well as in-game help.</td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * description: Set yourself on fire
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
 	 * <td><code>aliases</code></td>
-	 * <td>{@link PluginCommand#setAliases(List)}</td>
+	 * <td>PluginCommand.setAliases(List)</td>
 	 * <td>String or <a href="http://en.wikipedia.org/wiki/YAML#Lists">List</a>
 	 * of strings</td>
 	 * <td>Alternative command names, with special usefulness for commands that
@@ -587,47 +555,45 @@ public class PluginDescription {
 	 * <p>
 	 * Note: Command aliases may not have a colon in them.</td>
 	 * <td>Single alias format: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * aliases: combust_me
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> or multiple alias format: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * aliases: [combust_me, combustMe]
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
 	 * <td><code>permission</code></td>
-	 * <td>{@link PluginCommand#setPermission(String)}</td>
+	 * <td>PluginCommand.setPermission(String)</td>
 	 * <td>String</td>
-	 * <td>The name of the {@link Permission} required to use the command. A
-	 * user without the permission will receive the specified message (see
-	 * {@linkplain PluginCommand#setPermissionMessage(String) below}), or a
-	 * standard one if no specific message is defined. Without the permission
-	 * node, no {@link PluginCommand#setExecutor(CommandExecutor)
-	 * CommandExecutor} or {@link PluginCommand#setTabCompleter(TabCompleter)
-	 * TabCompleter} will be called.</td>
+	 * <td>The name of the Permission required to use the command. A user
+	 * without the permission will receive the specified message (see
+	 * PluginCommand.setPermissionMessage(String) ), or a standard one if no
+	 * specific message is defined. Without the permission node, no
+	 * PluginCommand.setExecutor(CommandExecutor) CommandExecutor or
+	 * PluginCommand.setTabCompleter(TabCompleter) TabCompleter will be called.</td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * permission: inferno.flagrate
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
 	 * <td><code>permission-message</code></td>
-	 * <td>{@link PluginCommand#setPermissionMessage(String)}</td>
+	 * <td>setPermissionMessage(String)</td>
 	 * <td>String</td>
 	 * <td>
 	 * <ul>
 	 * <li>Displayed to a player that attempts to use a command, but does not
-	 * have the required permission. See {@link PluginCommand#getPermission()
-	 * above}.
+	 * have the required permission. See plugincommadn getpermission above}.
 	 * <li>&lt;permission&gt; is a macro that is replaced with the permission
 	 * node required to use the command.
 	 * <li>Using empty quotes is a valid way to indicate nothing should be
@@ -635,37 +601,33 @@ public class PluginDescription {
 	 * </ul>
 	 * </td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * permission-message: You do not have /&lt;permission&gt;
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
 	 * <td><code>usage</code></td>
-	 * <td>{@link PluginCommand#setUsage(String)}</td>
+	 * <td>PluginCommand</td>
 	 * <td>String</td>
 	 * <td>This message is displayed to a player when the
-	 * {@link PluginCommand#setExecutor(CommandExecutor)}
-	 * {@linkplain CommandExecutor#onCommand(CommandSender,Command,String,String[])
-	 * returns false}. &lt;command&gt; is a macro that is replaced the command
-	 * issued.</td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * usage: Syntax error! Perhaps you meant /&lt;command&gt; PlayerName?
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> It is worth noting that to use a colon in a yaml, like
 	 * <code>`usage: Usage: /god [player]'</code>, you need to <a
 	 * href="http://yaml.org/spec/current.html#id2503232">surround the message
 	 * with double-quote</a>: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * usage: "Usage: /god [player]"
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * </table>
@@ -677,7 +639,7 @@ public class PluginDescription {
 	 * <p>
 	 * Here is an example bringing together the piecemeal examples above, as
 	 * well as few more definitions:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * commands:
 	 *  flagrate:
@@ -700,9 +662,9 @@ public class PluginDescription {
 	 *  # Having an empty declaration is useful for defining the description, permission, and messages from a configuration dynamically
 	 *  apocalypse:
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> Note: Command names may not have a colon in their name.
-	 * 
+	 *
 	 * @return the commands this plugin will register
 	 */
 	public Map<String, Map<String, Object>> getCommands() {
@@ -719,7 +681,7 @@ public class PluginDescription {
 	 * unlike the {@link #getCommands() commands} above).
 	 * <p>
 	 * A list of optional properties for permissions:
-	 * <table border=1>
+	 * <table border=1 summary="">
 	 * <tr>
 	 * <th>Node</th>
 	 * <th>Description</th>
@@ -729,18 +691,18 @@ public class PluginDescription {
 	 * <td><code>description</code></td>
 	 * <td>Plaintext (user-friendly) description of what the permission is for.</td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * description: Allows you to set yourself on fire
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
 	 * <td><code>default</code></td>
 	 * <td>The default state for the permission, as defined by
 	 * {@link Permission#getDefault()}. If not defined, it will be set to the
-	 * value of {@link PluginDescriptionFile#getPermissionDefault()}.
+	 * value of {@link PluginDescription#getPermissionDefault()}.
 	 * <p>
 	 * For reference:
 	 * <ul>
@@ -755,11 +717,11 @@ public class PluginDescription {
 	 * </ul>
 	 * </td>
 	 * <td><blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * default: true
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote></td>
 	 * </tr>
 	 * <tr>
@@ -794,32 +756,29 @@ public class PluginDescription {
 	 * </ul>
 	 * </td>
 	 * <td>As a list: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * children: [inferno.flagrate, inferno.burningdeaths]
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> Or as a mapping: <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * children:
 	 * inferno.flagrate: true
 	 * inferno.burningdeaths: true
 	 * </pre>
-	 * 
-	 * </blockquote> An additional example showing basic nested values can be
-	 * seen <a href="doc-files/permissions-example_plugin.yml">here</a>.</td>
+	 *
+	 * </blockquote>
 	 * </tr>
 	 * </table>
-	 * The permissions are structured as a hiearchy of <a
-	 * href="http://yaml.org/spec/current.html#id2502325">nested mappings</a>.
-	 * The primary (top-level, no intendentation) node is `
-	 * <code>permissions</code>', while each individual permission name is
-	 * indented, indicating it maps to some value (in our case, the properties
-	 * of the table above).
+	 * The permissions are structured as a hiearchy of nested mappings. The
+	 * primary (top-level, no intendentation) node is ` <code>permissions</code>
+	 * ', while each individual permission name is indented, indicating it maps
+	 * to some value (in our case, the properties of the table above).
 	 * <p>
 	 * Here is an example using some of the properties:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * permissions:
 	 *  inferno.*:
@@ -834,10 +793,9 @@ public class PluginDescription {
 	 *  description: Allows you to see how many times you have burned to death
 	 *  default: true
 	 * </pre>
-	 * 
-	 * </blockquote> Another example, with nested definitions, can be found <a
-	 * href="doc-files/permissions-example_plugin.yml">here</a>.
-	 * 
+	 *
+	 * </blockquote> Another example, with nested definitions, can be found
+	 *
 	 * @return The list of permissions for this plugin
 	 */
 	public List<Permission> getPermissions() {
@@ -861,23 +819,23 @@ public class PluginDescription {
 	 * Gives the default {@link Permission#getDefault() default} state of
 	 * {@link #getPermissions() permissions} registered for the plugin.
 	 * <ul>
-	 * <li>If not specified, it will be {@link PermissionDefault#OP}.
-	 * <li>It is matched using {@link PermissionDefault#getByName(String)}
+	 * <li>If not specified, it will be {@link DefaultPermissionValue#OPERATOR}.
+	 * <li>It is matched using {@link DefaultPermissionValue#getByName(String)}
 	 * <li>It only affects permissions that do not define the
 	 * <code>default</code> node.
-	 * <li>It may be any value in {@link PermissionDefault}.
+	 * <li>It may be any value in {@link DefaultPermissionValue}.
 	 * </ul>
 	 * <p>
 	 * In the plugin.yml, this entry is named <code>default-permission</code>.
 	 * <p>
 	 * Example:<blockquote>
-	 * 
+	 *
 	 * <pre>
 	 * default-permission: NOT_OP
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote>
-	 * 
+	 *
 	 * @return the default value for the plugin's permissions
 	 */
 	public DefaultPermissionValue getPermissionDefault() {
@@ -888,7 +846,7 @@ public class PluginDescription {
 	 * Returns the name of a plugin, including the version. This method is
 	 * provided for convenience; it uses the {@link #getName()} and
 	 * {@link #getVersion()} entries.
-	 * 
+	 *
 	 * @return a descriptive name of the plugin and respective version
 	 */
 	public String getFullName() {

@@ -41,8 +41,6 @@ public class PackageManager implements Package {
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
-	 *
-	 * @param g the game that owns this package manager
 	 */
 	public PackageManager() {
 		loadedPackages = new HashMap<String, Package>();

@@ -9,9 +9,9 @@ import com.ikalagaming.logging.PackageLogger;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class EventDispatcher extends Thread {
 
@@ -29,7 +29,7 @@ public class EventDispatcher extends Thread {
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
-	 * 
+	 *
 	 * @param manager the event manager that this dispatcher belongs to
 	 */
 	public EventDispatcher(EventManager manager) {
@@ -42,7 +42,7 @@ public class EventDispatcher extends Thread {
 
 	/**
 	 * Adds the {@link Event event} to the queue pending dispatch.
-	 * 
+	 *
 	 * @param event The event to send out
 	 * @throws IllegalStateException if the element cannot be added at this time
 	 *             due to capacity restrictions
@@ -85,45 +85,49 @@ public class EventDispatcher extends Thread {
 				e.printStackTrace();
 			}
 			if (hasEvents()) {
-				try {
-					if (queue.isEmpty()) {
-						hasEvents = false;
-					}
-					else if (queue.peek() != null) {
-						currentEvent = queue.remove();
-						handlers = manager.getHandlers(currentEvent);
-						if (handlers != null) {
-							listeners = handlers.getRegisteredListeners();
-							for (EventListener registration : listeners) {
-								try {
-									registration.callEvent(currentEvent);
-								}
-								catch (EventException e) {
-									throw e;
-								}
-							}
+				handleEvent();
+			}
+		}
+	}
+
+	private void handleEvent(){
+		try {
+			if (queue.isEmpty()) {
+				hasEvents = false;
+			}
+			else if (queue.peek() != null) {
+				currentEvent = queue.remove();
+				handlers = manager.getHandlers(currentEvent);
+				if (handlers != null) {
+					listeners = handlers.getRegisteredListeners();
+					for (EventListener registration : listeners) {
+						try {
+							registration.callEvent(currentEvent);
+						}
+						catch (EventException e) {
+							throw e;
 						}
 					}
-					else {
-						continue;
-					}
 				}
-				catch (NoSuchElementException noElement) {
-					// the queue is empty
-					// hasEvents = false;
-					continue;
-				}
-				catch (Exception e) {
-					if (manager.getPackageManager() != null) {
-						logger.logError("error running event dispatcher",
-								LoggingLevel.WARNING, e.toString()
-										+ " at EventDispatcher.run()");
-						e.printStackTrace();
-					}
-					else {
-						System.err.println(e.toString());
-					}
-				}
+			}
+			else {
+				return;
+			}
+		}
+		catch (NoSuchElementException noElement) {
+			// the queue is empty
+			// hasEvents = false;
+			return;
+		}
+		catch (Exception e) {
+			if (manager.getPackageManager() != null) {
+				logger.logError("error running event dispatcher",
+						LoggingLevel.WARNING, e.toString()
+								+ " at EventDispatcher.run()");
+				e.printStackTrace();
+			}
+			else {
+				System.err.println(e.toString());
 			}
 		}
 	}

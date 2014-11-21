@@ -36,12 +36,11 @@ public class PluginDescription {
 	private String prefix = null;
 	private List<Permission> permissions = null;
 	private Map<?, ?> lazyPermissions = null;
-	private DefaultPermissionValue defaultPerm =
-			DefaultPermissionValue.OPERATOR;
+	private DefaultPermissionValue defaultPerm = DefaultPermissionValue.FALSE;
 
-	//TODO finish javadoc
-	//TODO provide examples
-	//TODO list yaml tags
+	// TODO finish javadoc
+	// TODO provide examples
+	// TODO list yaml tags
 	/**
 	 * Returns a plugin description loaded by the given inputstream.
 	 *
@@ -175,10 +174,10 @@ public class PluginDescription {
 			authors = new GapList<String>();
 		}
 		if (map.get("default-permission") != null) {
-			try {
-				defaultPerm =
-						DefaultPermissionValue.getByName(map.get(
-								"default-permission").toString());
+			try {// TODO load permissions
+					// defaultPerm =
+					// DefaultPermissionValue.getByName(map.get(
+					// "default-permission").toString());
 			}
 			catch (ClassCastException ex) {
 				throw new InvalidDescriptionException(
@@ -321,13 +320,13 @@ public class PluginDescription {
 				permissions = new GapList<Permission>();
 			}
 			else {
-				permissions =
-						Permission.loadPermissions(lazyPermissions,
-								"Permission node '%s' in plugin description file for "
-										+ getFullName() + " is invalid",
-								defaultPerm);
+				/*
+				 * permissions = Permission.loadPermissions(lazyPermissions,
+				 * "Permission node '%s' in plugin description file for " +
+				 * getFullName() + " is invalid", defaultPerm);
+				 */
 				lazyPermissions = null;
-			}
+			}// TODO load permissions
 		}
 		return permissions;
 	}

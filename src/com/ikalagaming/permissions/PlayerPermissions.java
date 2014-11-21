@@ -3,19 +3,15 @@ package com.ikalagaming.permissions;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-
-import com.ikalagaming.core.Game;
 
 /**
  * Base Permissions for use in any Permissions object through extension
  *
+ * @deprecated will be removed
  * @author Ches Burks
  *
  */
-public class PlayerPermissions implements Permissible {
-	private Operator oppable = null;
-	private Permissible parent = this;
+public class PlayerPermissions implements PermissionHolder {
 	private final Map<String, Boolean> permissions =
 			new LinkedHashMap<String, Boolean>();
 
@@ -24,41 +20,8 @@ public class PlayerPermissions implements Permissible {
 	 *
 	 * @param opable the entity to create permissions for
 	 */
-	public PlayerPermissions(Operator opable) {
-		this.oppable = opable;
-		if (opable instanceof Permissible) {
-			this.parent = (Permissible) opable;
-		}
+	public PlayerPermissions() {
 		recalculatePermissions();
-	}
-
-	@Override
-	public boolean isOp() {
-		if (oppable == null) {
-			return false;
-		}
-		else {
-			return oppable.isOp();
-		}
-	}
-
-	@Override
-	public void setOp(boolean value) {
-		if (oppable == null) {
-			throw new UnsupportedOperationException(
-					"Cannot change op value as no Operator is set");
-		}
-		else {
-			oppable.setOp(value);
-		}
-	}
-
-	@Override
-	public boolean isPermissionSet(String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Permission name cannot be null");
-		}
-		return permissions.containsKey(name.toLowerCase());
 	}
 
 	@Override
@@ -66,28 +29,7 @@ public class PlayerPermissions implements Permissible {
 		if (perm == null) {
 			throw new IllegalArgumentException("Permission cannot be null");
 		}
-		return isPermissionSet(perm.getName());
-	}
-
-	@Override
-	public boolean hasPermission(String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Permission name cannot be null");
-		}
-		String nameLowercase = name.toLowerCase();
-		if (isPermissionSet(nameLowercase)) {
-			return permissions.get(nameLowercase);
-		}
-		else {
-			Permission perm =
-					Game.getPackageManager().getPermission(nameLowercase);
-			if (perm != null) {
-				return perm.getDefault().getValue(isOp());
-			}
-			else {
-				return Permission.DEFAULT_PERMISSION.getValue(isOp());
-			}
-		}
+		return isPermissionSet(perm);
 	}
 
 	@Override
@@ -96,17 +38,14 @@ public class PlayerPermissions implements Permissible {
 			throw new IllegalArgumentException("Permission cannot be null");
 		}
 		String name = perm.getName().toLowerCase();
-		if (isPermissionSet(name)) {
+		if (isPermissionSet(perm)) {
 			return permissions.get(name);
 		}
-		return perm.getDefault().getValue(isOp());
+		return false;// perm.getDefault().getValue(isOp());
 	}
 
 	public synchronized void clearPermissions() {
-		Set<String> perms = permissions.keySet();
-		for (String name : perms) {
-			Game.getPackageManager().removePermission(name);
-		}
+
 		permissions.clear();
 	}
 

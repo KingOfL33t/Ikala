@@ -2,16 +2,13 @@
 package com.ikalagaming.permissions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.ikalagaming.core.Game;
-import com.ikalagaming.core.PackageManager;
 
 /**
- * Represents a unique permission that may be attached to a {@link Permissible}
+ * Represents a unique permission.
  *
  * @author Ches Burks
  *
@@ -21,292 +18,126 @@ public class Permission {
 	/**
 	 * The default value for a permission.
 	 */
-	public static final DefaultPermissionValue DEFAULT_PERMISSION =
-			DefaultPermissionValue.OPERATOR;
-	private final String name;
-	private final Map<String, Boolean> children =
-			new LinkedHashMap<String, Boolean>();
-	private DefaultPermissionValue defaultValue = DEFAULT_PERMISSION;
-	private String description;
+	private static final boolean DEFAULT_PERMISSION = false;
 
-	/**
-	 * Constructs a new Permission with the given information. The children,
-	 * description and default value default to empty.
-	 *
-	 * @param name the name of the permission
-	 */
-	public Permission(String name) {
-		this(name, null, null, null);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The children and
-	 * default value default to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param description a brief description of the permission
-	 */
-	public Permission(String name, String description) {
-		this(name, description, null, null);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The children and
-	 * description default to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param defaultValue the default value for the permission
-	 */
-	public Permission(String name, DefaultPermissionValue defaultValue) {
-		this(name, null, defaultValue, null);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The children
-	 * default to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param description a brief description of the permission
-	 * @param defaultValue the default value for the permission
-	 */
-	public Permission(String name, String description,
-			DefaultPermissionValue defaultValue) {
-		this(name, description, defaultValue, null);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The default value
-	 * and description default to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param children a map of child permissions
-	 */
-	public Permission(String name, Map<String, Boolean> children) {
-		this(name, null, null, children);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The default value
-	 * defaults to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param description a brief description of the permission
-	 * @param children a map of child permissions
-	 */
-	public Permission(String name, String description,
-			Map<String, Boolean> children) {
-		this(name, description, null, children);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information. The description
-	 * defaults to empty.
-	 *
-	 * @param name the name of the permission
-	 * @param defaultValue the default value for the permission
-	 * @param children a map of child permissions
-	 */
-	public Permission(String name, DefaultPermissionValue defaultValue,
-			Map<String, Boolean> children) {
-		this(name, null, defaultValue, children);
-	}
-
-	/**
-	 * Constructs a new Permission with the given information.
-	 *
-	 * @param name the name of the permission
-	 * @param description a brief description of the permission
-	 * @param defaultValue the default value for the permission
-	 * @param children a map of child permissions
-	 */
-	public Permission(String name, String description,
-			DefaultPermissionValue defaultValue, Map<String, Boolean> children) {
-		this.name = name;
-		this.description = (description == null) ? "" : description;
-		if (defaultValue != null) {
-			this.defaultValue = defaultValue;
+	private static Map<String, Boolean> extractChildren(Map<?, ?> input,
+			String name, boolean defaultPermission, List<Permission> output) {
+		Map<String, Boolean> children = new LinkedHashMap<String, Boolean>();
+		for (Map.Entry<?, ?> entry : input.entrySet()) {
+			if ((entry.getValue() instanceof Boolean)) {
+				children.put(entry.getKey().toString(),
+						(Boolean) entry.getValue());
+			}
+			else if ((entry.getValue() instanceof Map)) {
+				try {
+					Permission perm =
+							loadPermission(entry.getKey().toString(),
+									(Map<?, ?>) entry.getValue(),
+									defaultPermission, output);
+					children.put(name, true);
+					if (output != null) {
+						output.add(perm);
+					}
+				}
+				catch (Throwable ex) {
+					throw new IllegalArgumentException("Permission node '"
+							+ entry.getKey().toString() + "' in child of "
+							+ name + " is invalid", ex);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Child '"
+						+ entry.getKey().toString()
+						+ "' contains invalid value");
+			}
 		}
-		if (children != null) {
-			this.children.putAll(children);
-		}
-		recalculatePermissibles();
-	}
-
-	/**
-	 * Returns the unique fully qualified name of this Permission
-	 *
-	 * @return Fully qualified name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Gets the children of this permission.
-	 * <p>
-	 * If you change this map in any form, you must call
-	 * {@link #recalculatePermissibles()} to recalculate all {@link Permissible}s
-	 *
-	 * @return Permission children
-	 */
-	public Map<String, Boolean> getChildren() {
 		return children;
 	}
 
-	/**
-	 * Gets the default value of this permission.
-	 *
-	 * @return Default value of this permission.
-	 */
-	public DefaultPermissionValue getDefault() {
-		return defaultValue;
-	}
-
-	/**
-	 * Sets the default value of this permission.
-	 * <p>
-	 * This will not be saved to disk, and is a temporary operation until the
-	 * server reloads permissions. Changing this default will cause all
-	 * {@link Permissible}s that contain this permission to recalculate their
-	 * permissions
-	 *
-	 * @param value The new default to set
-	 */
-	public void setDefault(DefaultPermissionValue value) {
-		if (defaultValue == null) {
-			throw new IllegalArgumentException("Default value cannot be null");
+	private static boolean isValidName(String name) {
+		if (name.endsWith(".")) {
+			return false;
 		}
-		defaultValue = value;
-		recalculatePermissibles();
-	}
-
-	/**
-	 * Gets a brief description of this permission, if set
-	 *
-	 * @return Brief description of this permission
-	 */
-	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * Sets the description of this permission.
-	 * <p>
-	 * This will not automatically be saved to disk, and is a temporary
-	 * operation until the server reloads permissions.
-	 *
-	 * @param value The new description to set
-	 */
-	public void setDescription(String value) {
-		if (value == null) {
-			description = "";
+		if (name.startsWith(".")) {
+			return false;
 		}
-		else {
-			description = value;
+		for (char c : name.toCharArray()) {
+			if (!(Character.isLetterOrDigit(c) || c == '.')) {
+				// if the character is not a number, letter or period
+				return false;
+			}
 		}
+		return true;
 	}
 
 	/**
-	 * Gets a set containing every {@link Permissible} that has this permission.
+	 * Loads a Permission from a map, usually used from retrieval from a yaml
+	 * file.
 	 * <p>
-	 * This set cannot be modified.
-	 *
-	 * @return Set containing permissibles with this permission
-	 */
-	public Set<Permissible> getPermissibles() {
-		/*
-		 * Get a set containing all subscribed {@link Permissible}s to the given
-		 * permission, by name
-		 *
-		 * Using name
-		 */
-//TODO finish me
-		return null;
-	}
-
-	/**
-	 * Recalculates all {@link Permissible}s that contain this permission.
-	 * <p>
-	 * This should be called after modifying the children, and is automatically
-	 * called after modifying the default value
-	 */
-	public void recalculatePermissibles() {
-		Set<Permissible> perms = getPermissibles();
-		/*
-		 * Recalculate the defaults for this <p> This will have no effect if the
-		 * specified permission is not registered here.
-		 */
-		//TODO recalculate permissions
-		for (Permissible p : perms) {
-			p.recalculatePermissions();
-		}
-	}
-
-	/**
-	 * Adds this permission to the specified parent permission.
-	 * <p>
-	 * If the parent permission does not exist, it will be created and
-	 * registered.
-	 *
-	 * @param name Name of the parent permission
-	 * @param value The value to set this permission to
-	 * @return Parent permission it created or loaded
-	 */
-	public Permission addParent(String name, boolean value) {
-		PackageManager pm = Game.getPackageManager();
-		String lname = name.toLowerCase();
-		Permission perm = pm.getPermission(lname);
-		if (perm == null) {
-			perm = new Permission(lname);
-			pm.addPermission(perm);
-		}
-		addParent(perm, value);
-		return perm;
-	}
-
-	/**
-	 * Adds this permission to the given parent permission.
-	 *
-	 * @param perm Parent permission to register with
-	 * @param value The value to set this permission to
-	 */
-	public void addParent(Permission perm, boolean value) {
-		perm.getChildren().put(getName(), value);
-		perm.recalculatePermissibles();
-	}
-
-	/**
-	 * Loads a list of Permissions from a map, usually used from retrieval from
-	 * a yaml file.
-	 * <p>
-	 * The data may contain a list of name:data, where the data contains the
-	 * following keys:
+	 * The data may contain the following keys:
 	 * <ul>
 	 * <li>default: Boolean true or false. If not specified, false.
 	 * <li>children: Map(String, Boolean) of child permissions. If not
 	 * specified, empty list.
 	 * <li>description: Short string containing a very small description of this
-	 * description. If not specified, empty string.
+	 * permission. If not specified, empty string.
 	 * </ul>
 	 *
-	 * @param data Map of permissions
-	 * @param error An error message to show if a permission is invalid.
-	 * @param defaultPerm Default permission value to use if missing
-	 * @return Permission object
+	 * @param name Name of the permission
+	 * @param data Map of keys to load from
+	 * @param def Default permission value to use if not set
+	 * @param output A list to append any created child-Permissions to. This may
+	 *            be null
+	 * @return Permission the permissions object
+	 * @throws NullPointerException if the name or data provided is null
+	 * @throws IllegalArgumentException if the permissions had invalid data
 	 */
-	public static List<Permission> loadPermissions(Map<?, ?> data,
-			String error, DefaultPermissionValue defaultPerm) {
-		List<Permission> result = new ArrayList<Permission>();
-		for (Map.Entry<?, ?> entry : data.entrySet()) {
-			try {
-				result.add(Permission.loadPermission(entry.getKey().toString(),
-						(Map<?, ?>) entry.getValue(), defaultPerm, result));
+	public static Permission loadPermission(String name, Map<?, ?> data,
+			boolean def, List<Permission> output) throws NullPointerException,
+			IllegalArgumentException {
+		if (name == null) {
+			throw new NullPointerException("Name cannot be null");
+		}
+		if (data == null) {
+			throw new NullPointerException("Data cannot be null");
+		}
+		String desc = null;
+		Map<String, Boolean> children = null;
+		if (data.get("default") != null) {
+			Object theDefault = data.get("default");
+			if (!DefaultPermissionValue.isValid(theDefault.toString())) {
+				throw new IllegalArgumentException(
+						"'default' key contained unknown value");
 			}
-			catch (Throwable ex) {
-				// TODO log error
+
+			def = DefaultPermissionValue.getByName(theDefault.toString());
+
+		}
+		if (data.get("children") != null) {
+			Object childrenNode = data.get("children");
+			if (childrenNode instanceof Iterable) {
+				children = new LinkedHashMap<String, Boolean>();
+				for (Object child : (Iterable<?>) childrenNode) {
+					if (child != null) {
+						children.put(child.toString(), true);
+					}
+				}
+			}
+			else if (childrenNode instanceof Map) {
+				children =
+						extractChildren((Map<?, ?>) childrenNode, name, def,
+								output);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"'children' key is of wrong type");
 			}
 		}
-		return result;
+		if (data.get("description") != null) {
+			desc = data.get("description").toString();
+		}
+
+		return new Permission(name, desc, def, children);
 	}
 
 	/**
@@ -332,108 +163,398 @@ public class Permission {
 	}
 
 	/**
-	 * Loads a Permission from a map, usually used from retrieval from a yaml
-	 * file.
+	 * Loads a list of Permissions from a map, usually used from retrieval from
+	 * a yaml file.
 	 * <p>
-	 * The data may contain the following keys:
+	 * The data may contain a list of name:data, where the data contains the
+	 * following keys:
 	 * <ul>
 	 * <li>default: Boolean true or false. If not specified, false.
 	 * <li>children: Map(String, Boolean) of child permissions. If not
 	 * specified, empty list.
 	 * <li>description: Short string containing a very small description of this
-	 * permission. If not specified, empty string.
+	 * description. If not specified, empty string.
 	 * </ul>
 	 *
-	 * @param name Name of the permission
-	 * @param data Map of keys
-	 * @param def Default permission value to use if not set
-	 * @param output A list to append any created child-Permissions to, may be
-	 *            null
-	 * @return Permission the permissions object
-	 * @throws NullPointerException if the name or data provided is null
-	 * @throws IllegalArgumentException if the permissions had invalid data
+	 * @param data Map of permissions
+	 * @param error An error message to show if a permission is invalid.
+	 * @param defaultPerm Default permission value to use if missing
+	 * @return Permission object
 	 */
-	public static Permission loadPermission(String name, Map<?, ?> data,
-			DefaultPermissionValue def, List<Permission> output)
-			throws NullPointerException, IllegalArgumentException {
-		if (name == null) {
-			throw new NullPointerException("Name cannot be null");
-		}
-		if (data == null) {
-			throw new NullPointerException("Data cannot be null");
-		}
-		String desc = null;
-		Map<String, Boolean> children = null;
-		if (data.get("default") != null) {
-			DefaultPermissionValue value =
-					DefaultPermissionValue.getByName(data.get("default")
-							.toString());
-			if (value != null) {
-				def = value;
+	public static List<Permission> loadPermissions(Map<?, ?> data,
+			String error, boolean defaultPerm) {
+
+		List<Permission> result = new ArrayList<Permission>();
+
+		for (Map.Entry<?, ?> entry : data.entrySet()) {
+			try {
+				result.add(Permission.loadPermission(entry.getKey().toString(),
+						(Map<?, ?>) entry.getValue(), defaultPerm, result));
 			}
-			else {
-				throw new IllegalArgumentException(
-						"'default' key contained unknown value");
+			catch (Throwable ex) {
+				// TODO log error
+				ex.printStackTrace();
 			}
 		}
-		if (data.get("children") != null) {
-			Object childrenNode = data.get("children");
-			if (childrenNode instanceof Iterable) {
-				children = new LinkedHashMap<String, Boolean>();
-				for (Object child : (Iterable<?>) childrenNode) {
-					if (child != null) {
-						children.put(child.toString(), true);
-					}
-				}
-			}
-			else if (childrenNode instanceof Map) {
-				children =
-						extractChildren((Map<?, ?>) childrenNode, name, def,
-								output);
-			}
-			else {
-				throw new IllegalArgumentException(
-						"'children' key is of wrong type");
-			}
-		}
-		if (data.get("description") != null) {
-			desc = data.get("description").toString();
-		}
-		return new Permission(name, desc, def, children);
+		return result;
 	}
 
-	private static Map<String, Boolean> extractChildren(Map<?, ?> input,
-			String name, DefaultPermissionValue defaultPermission,
-			List<Permission> output) {
-		Map<String, Boolean> children = new LinkedHashMap<String, Boolean>();
-		for (Map.Entry<?, ?> entry : input.entrySet()) {
-			if ((entry.getValue() instanceof Boolean)) {
-				children.put(entry.getKey().toString(),
-						(Boolean) entry.getValue());
-			}
-			else if ((entry.getValue() instanceof Map)) {
-				try {
-					Permission perm =
-							loadPermission(entry.getKey().toString(),
-									(Map<?, ?>) entry.getValue(),
-									defaultPermission, output);
-					children.put(perm.getName(), true);
-					if (output != null) {
-						output.add(perm);
-					}
-				}
-				catch (Throwable ex) {
-					throw new IllegalArgumentException("Permission node '"
-							+ entry.getKey().toString() + "' in child of "
-							+ name + " is invalid", ex);
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Child '"
-						+ entry.getKey().toString()
-						+ "' contains invalid value");
-			}
+	private boolean defaultValue;
+
+	private final String name;
+
+	private final String description;
+
+	/**
+	 * A mapping of child permissions that this permissions includes. Each child
+	 * permission has a boolean assigned to it. If the boolean is true, the
+	 * child permission will inherit this permissions value. If it is false, it
+	 * will inherit the inverse of this permissions value.
+	 */
+	private final Map<String, Boolean> childPermissions;// this is a
+
+	// LinkedHashMap
+	private static HashMap<String, Permission> permissionByName =
+			new HashMap<String, Permission>();
+
+	/**
+	 * Checks to see if a permission with the given name has already been
+	 * created. If it exists, this returns true.
+	 *
+	 * @param permissionName the fully qualified permission name
+	 * @return true if the permission exists
+	 */
+	public static boolean exists(String permissionName) {
+		return permissionByName.containsKey(permissionName);
+	}
+
+	/**
+	 * If the permission named {@link #exists(String) already exists}, returns
+	 * that permission. Returns null if the permission does not already exist.
+	 *
+	 * @param permissionName the fully qualified permission name
+	 * @return the permission with the given name, if it exists
+	 */
+	public static Permission getByName(String permissionName) {
+		if (exists(permissionName)) {
+			return permissionByName.get(permissionName);
 		}
-		return children;
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name. The description defaults to an
+	 * empty string. The default value defaults to the default for permissions.
+	 * The children list defaults to empty.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name) {
+		this(name, null, DEFAULT_PERMISSION, null);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name and default value. The
+	 * description defaults to an empty string. The children list defaults to
+	 * empty.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The default value is a value that determines the default for this
+	 * permission. <br>
+	 * Example: "false"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param defaultValue the default value for the permission
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, boolean defaultValue) {
+		this(name, null, defaultValue, null);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name, default value, and children
+	 * list. The description defaults to an empty string.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The default value is a value that determines the default for this
+	 * permission. <br>
+	 * Example: "false"
+	 * </p>
+	 * <p>
+	 * The children is a list of permissions that are granted or revoked when
+	 * this permission is granted/revoked. Each child permission has a boolean
+	 * assigned to it. If the boolean is true, the child permission will inherit
+	 * this permissions value. If it is false, it will inherit the inverse of
+	 * this permissions value. <br>
+	 * Example: "entity.jump" is mapped to "true"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param defaultValue the default value for the permission
+	 * @param children children this permission includes
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, boolean defaultValue,
+			Map<String, Boolean> children) {
+		this(name, null, defaultValue, children);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name, and children list. The default
+	 * value defaults to the default for permissions. The description defaults
+	 * to an empty string.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The children is a list of permissions that are granted or revoked when
+	 * this permission is granted/revoked. Each child permission has a boolean
+	 * assigned to it. If the boolean is true, the child permission will inherit
+	 * this permissions value. If it is false, it will inherit the inverse of
+	 * this permissions value. <br>
+	 * Example: "entity.jump" is mapped to "true"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param children children this permission includes
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, Map<String, Boolean> children) {
+		this(name, null, DEFAULT_PERMISSION, children);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name and description. The default
+	 * value defaults to the default for permissions. The children list defaults
+	 * to empty.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The description is a short description of what the permission is for. <br>
+	 * Example: "This allows entities to move around the world"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param description A short description of the permissions purpose
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, String description) {
+		this(name, description, DEFAULT_PERMISSION, null);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name, description, and default value.
+	 * The children list defaults to empty.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The description is a short description of what the permission is for. <br>
+	 * Example: "This allows entities to move around the world"
+	 * </p>
+	 * <p>
+	 * The default value is a value that determines the default for this
+	 * permission. <br>
+	 * Example: "false"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param description A short description of the permissions purpose
+	 * @param defaultValue the default value for the permission
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, String description, boolean defaultValue) {
+		this(name, description, defaultValue, null);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name, description, default value, and
+	 * children list.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The description is a short description of what the permission is for. <br>
+	 * Example: "This allows entities to move around the world"
+	 * </p>
+	 * <p>
+	 * The default value is a value that determines the default for this
+	 * permission. <br>
+	 * Example: "false"
+	 * </p>
+	 * <p>
+	 * The children is a list of permissions that are granted or revoked when
+	 * this permission is granted/revoked. Each child permission has a boolean
+	 * assigned to it. If the boolean is true, the child permission will inherit
+	 * this permissions value. If it is false, it will inherit the inverse of
+	 * this permissions value. <br>
+	 * Example: "entity.jump" is mapped to "true"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param description A short description of the permissions purpose
+	 * @param defaultValue the default value for the permission
+	 * @param children children this permission includes
+	 */
+	public Permission(String name, String description, boolean defaultValue,
+			Map<String, Boolean> children) {
+		if (!isValidName(name)) {
+			// TODO error
+		}
+		if (exists(name)) {
+			// TODO error
+		}
+		this.name = name;
+		if (description == null) {
+			this.description = "";
+		}
+		else {
+			this.description = description.isEmpty() ? "" : description;
+		}
+		this.defaultValue = defaultValue;
+		this.childPermissions =
+				children == null ? new LinkedHashMap<String, Boolean>()
+						: children;
+		permissionByName.put(name, this);
+	}
+
+	/**
+	 * <p>
+	 * Constructs a new permission with a name, description, and children list.
+	 * The default value defaults to the default for permissions.<br>
+	 * </p>
+	 * <p>
+	 * The name is a string that identifies the permission, and is the same
+	 * string as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 * </p>
+	 * <p>
+	 * The description is a short description of what the permission is for. <br>
+	 * Example: "This allows entities to move around the world"
+	 * </p>
+	 * <p>
+	 * The children is a list of permissions that are granted or revoked when
+	 * this permission is granted/revoked. Each child permission has a boolean
+	 * assigned to it. If the boolean is true, the child permission will inherit
+	 * this permissions value. If it is false, it will inherit the inverse of
+	 * this permissions value. <br>
+	 * Example: "entity.jump" is mapped to "true"
+	 * </p>
+	 *
+	 * @param name The name of the permission
+	 * @param description A short description of the permissions purpose
+	 * @param children children this permission includes
+	 *
+	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 */
+	public Permission(String name, String description,
+			Map<String, Boolean> children) {
+		this(name, description, DEFAULT_PERMISSION, children);
+	}
+
+	/**
+	 * Returns the children is a list of permissions that are granted or revoked
+	 * when this permission is granted/revoked. Each child permission has a
+	 * boolean assigned to it. If the boolean is true, the child permission will
+	 * inherit this permissions value. If it is false, it will inherit the
+	 * inverse of this permissions value. <br>
+	 * Example: "entity.jump" is mapped to "true"
+	 *
+	 * @return the list of child permissions
+	 */
+	public Map<String, Boolean> getChildPermissions() {
+		return childPermissions;
+	}
+
+	/**
+	 * Returns the default for this permission. <br>
+	 * Example: "false"
+	 *
+	 * @return default value of this permission.
+	 */
+	public boolean getDefault() {
+		return defaultValue;
+	}
+
+	/**
+	 * Returns a short description of the purpose for the permission, if it is
+	 * set. Returns an empty string if it is not set. <br>
+	 * Example: "This allows entities to move around the world"
+	 *
+	 * @return Brief description of this permission
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Returns the name that identifies the permission, which is the same string
+	 * as would be found in permission yaml files. <br>
+	 * Example: "entity.movement"
+	 *
+	 * @return fully qualified name for this permission
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the default value of this permission.
+	 * <p>
+	 * This will not be saved to disk, and is a temporary operation until the
+	 * server reloads permissions. Changing this default will cause all
+	 * {@link PermissionHolder}s that contain this permission to recalculate
+	 * their permissions
+	 *
+	 * @param value The new default to set
+	 */
+	public void setDefault(DefaultPermissionValue value) {
+		defaultValue = value.value();
 	}
 }

@@ -8,9 +8,9 @@ import com.ikalagaming.gui.Console;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class LogDispatcher extends Thread {
 
@@ -23,7 +23,7 @@ public class LogDispatcher extends Thread {
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
-	 * 
+	 *
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
 	public LogDispatcher(LoggingPackage manager) {
@@ -35,7 +35,7 @@ public class LogDispatcher extends Thread {
 
 	/**
 	 * Adds the String to the queue pending logging.
-	 * 
+	 *
 	 * @param log The log message to record
 	 * @throws IllegalStateException if the element cannot be added at this time
 	 *             due to capacity restrictions
@@ -72,40 +72,44 @@ public class LogDispatcher extends Thread {
 				e.printStackTrace();
 			}
 			if (hasEvents()) {
-				try {
-					if (queue.isEmpty()) {
-						hasLogs = false;
-					}
-					else if (queue.peek() != null) {
-						currentStr = queue.remove();
-						// log it to the system output stream
-						System.out.println(currentStr);
+				handleEvent();
+			}
+		}
+	}
 
-						if (manager != null
-								&& manager.getPackageManager() != null
-								&& manager.getPackageManager().isLoaded(
-										"console")) {
-							Console c =
-									(Console) manager.getPackageManager()
-											.getPackage("console");
-							if (c.isEnabled()) {
-								c.appendMessage(currentStr);
-							}
-						}
+	private void handleEvent(){
+		try {
+			if (queue.isEmpty()) {
+				hasLogs = false;
+			}
+			else if (queue.peek() != null) {
+				currentStr = queue.remove();
+				// log it to the system output stream
+				System.out.println(currentStr);
+
+				if (manager != null
+						&& manager.getPackageManager() != null
+						&& manager.getPackageManager().isLoaded(
+								"console")) {
+					Console c =
+							(Console) manager.getPackageManager()
+									.getPackage("console");
+					if (c.isEnabled()) {
+						c.appendMessage(currentStr);
 					}
-					else {
-						continue;
-					}
-				}
-				catch (NoSuchElementException noElement) {
-					// the queue is empty
-					// hasEvents = false;
-					continue;
-				}
-				catch (Exception e) {
-					System.err.println(e.toString());
 				}
 			}
+			else {
+				return;
+			}
+		}
+		catch (NoSuchElementException noElement) {
+			// the queue is empty
+			// hasEvents = false;
+			return;
+		}
+		catch (Exception e) {
+			System.err.println(e.toString());
 		}
 	}
 

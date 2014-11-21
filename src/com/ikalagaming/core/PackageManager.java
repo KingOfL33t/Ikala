@@ -18,7 +18,6 @@ import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.LoggingPackage;
 import com.ikalagaming.logging.PackageLogger;
-import com.ikalagaming.permissions.Permission;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -37,7 +36,6 @@ public class PackageManager implements Package {
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
 	private PackageLogger logger;
-	private HashMap<String, Permission> permissionMap;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -55,7 +53,6 @@ public class PackageManager implements Package {
 		cmdRegistry = new CommandRegistry(this);
 		registerCommands();
 		logger = new PackageLogger(this);
-		permissionMap = new HashMap<String, Permission>();
 	}
 
 	/**
@@ -352,37 +349,6 @@ public class PackageManager implements Package {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Returns the permission assigned to the given string. This is not case
-	 * sensitive and my return null.
-	 *
-	 * @param name the name of the permission
-	 * @return the pemission associated with the string
-	 */
-	public Permission getPermission(String name) {
-		return permissionMap.get(name.toLowerCase());
-	}
-
-	/**
-	 * Removes the permission assigned to the given string.
-	 *
-	 * @param name the name of the permission
-	 */
-	public void removePermission(String name) {
-		if (permissionMap.containsKey(name)) {
-			permissionMap.remove(name);
-		}
-	}
-
-	/**
-	 * Adds the permission to the list of permissions.
-	 *
-	 * @param perm the permission to add
-	 */
-	public void addPermission(Permission perm) {
-		permissionMap.put(perm.getName(), perm);
 	}
 
 	/**

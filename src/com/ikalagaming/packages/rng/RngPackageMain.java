@@ -133,17 +133,16 @@ public class RngPackageMain implements Package {
 
 	@Override
 	public void onEnable() {
-		gen = new Generator();
 		// get the current time of the system
 		long time1 = System.nanoTime();
 		/*
 		 * construct a random number of integers based on the last 3 digits of
 		 * the system time this will take a different amount of time based on
-		 * what value the hash was
+		 * what value the hash was.
 		 */
 		for (int i = 0; i <= time1 % 1000; ++i) {
 			@SuppressWarnings("unused")
-			// not supposed to be used
+			// not supposed to be used, int x is supposed to be inside the loop
 			int x = i + 2;// its value is trashed
 		}
 		// get the current time again
@@ -157,9 +156,7 @@ public class RngPackageMain implements Package {
 			deltaTime = deltaTime - Integer.MAX_VALUE;
 		}
 		timeAsInt = (int) deltaTime;
-
-		gen.initializeGenerator(timeAsInt);
-
+		gen = new Generator(timeAsInt);
 	}
 
 	@Override

@@ -1,4 +1,3 @@
-
 package com.ikalagaming.packages.rng;
 
 /**
@@ -8,8 +7,18 @@ package com.ikalagaming.packages.rng;
  * 
  */
 public class Generator {
-	int[] mt = new int[624];
-	int index = 0;
+	private int[] mt = new int[624];
+	private int index = 0;
+
+	/**
+	 * Constructs a new generator and initializes it using the given seed.
+	 * 
+	 * @param seed
+	 *            the number to seed the generator with.
+	 */
+	public Generator(int seed) {
+		initializeGenerator(seed);
+	}
 
 	/**
 	 * Refill the array with generated numbers.
@@ -39,7 +48,8 @@ public class Generator {
 	 * true. The probability is a float from 0.0f to 1.0f, with 0 being no
 	 * chance of returning true and 1 being a 100% chance of returning true.
 	 * 
-	 * @param probablilty The chance of returning true
+	 * @param probablilty
+	 *            The chance of returning true
 	 * @return The generated boolean
 	 */
 	public boolean getBoolean(float probablilty) {
@@ -79,8 +89,10 @@ public class Generator {
 	/**
 	 * Returns a random {@link Integer int} between the given values, inclusive.
 	 * 
-	 * @param min The minimum number
-	 * @param max The maximum number
+	 * @param min
+	 *            The minimum number
+	 * @param max
+	 *            The maximum number
 	 * @return The generated int
 	 */
 	public int getIntBetween(int min, int max) {
@@ -90,7 +102,8 @@ public class Generator {
 	/**
 	 * Initialize the generator with the given seed.
 	 * 
-	 * @param seed The seed to use
+	 * @param seed
+	 *            The seed to use
 	 */
 	public void initializeGenerator(int seed) {
 		this.index = 0;

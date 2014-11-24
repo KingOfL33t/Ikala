@@ -9,6 +9,9 @@ package com.ikalagaming.util;
  */
 public class ArrayOperations {
 
+	private final static String start = "[";
+	private final static String end = "]";
+	private final static String separator = ",";
 	/**
 	 * Converts the given array into a String that can be output. The String
 	 * will start with '[', end with ']' and have values separated by ','. Empty
@@ -19,9 +22,6 @@ public class ArrayOperations {
 	 * @return the formatted string
 	 */
 	public static String convertToString(Object[] array) {
-		String start = "[";
-		String end = "]";
-		String separator = ",";
 		String output = "";
 
 		if (array == null) {

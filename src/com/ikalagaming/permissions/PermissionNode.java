@@ -6,10 +6,10 @@ import java.util.LinkedList;
 
 /**
  * A permission node can contain mappings of
- *
- *@deprecated this will be removed
+ * 
+ * @deprecated this will be removed
  * @author Ches Burks
- *
+ * 
  */
 public class PermissionNode implements Comparable<PermissionNode> {
 	/**
@@ -29,7 +29,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Constructs a new PermissionNode with the given information. The children,
 	 * description and default value default to empty.
-	 *
+	 * 
 	 * @param name the name of the permission
 	 */
 	public PermissionNode(String name) {
@@ -39,7 +39,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Constructs a new PermissionNode with the given information. The children
 	 * and default value default to empty.
-	 *
+	 * 
 	 * @param name the name of the permission
 	 * @param description a brief description of the permission
 	 */
@@ -50,7 +50,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Constructs a new PermissionNode with the given information. The children
 	 * and description default to empty.
-	 *
+	 * 
 	 * @param name the name of the permission
 	 * @param defaultValue the default value for the permission
 	 */
@@ -60,11 +60,10 @@ public class PermissionNode implements Comparable<PermissionNode> {
 
 	/**
 	 * Constructs a new PermissionNode with the given information.
-	 *
+	 * 
 	 * @param name the name of the permission
 	 * @param description a brief description of the permission
 	 * @param defaultValue the default value for the permission
-	 * @param children a map of child permissions
 	 */
 	public PermissionNode(String name, String description,
 			DefaultPermissionValue defaultValue) {
@@ -79,7 +78,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Adds the given node to this node. Sorts this node's subnodes and
 	 * recursively sorts the added node's subnodes. Fails if the specified node
 	 * already exists. This nodes leaf status is updated if necessary.
-	 *
+	 * 
 	 * @param toAdd the node to add
 	 */
 	public void addNode(PermissionNode toAdd) {
@@ -95,7 +94,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Removes the given node if it exists in this nodes subnodes. This nodes
 	 * leaf status is updated if necessary.
-	 *
+	 * 
 	 * @param toRemove the PermissionNode to remove
 	 */
 	public void removeNode(PermissionNode toRemove) {
@@ -111,7 +110,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Returns true if the given node is contained anywhere in this node. It
 	 * must have the same full name in order to match with a permission node
 	 * contained in this tree.
-	 *
+	 * 
 	 * @param permissionNode the node to check for
 	 * @return true if this contains the given node
 	 */
@@ -127,9 +126,9 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns a list of subnodes owned by this node. This will be null if it is
 	 * a leaf node.
-	 *
+	 * 
 	 * @see #isLeaf()
-	 * @return
+	 * @return any subnodes this node contains
 	 */
 	public LinkedList<PermissionNode> getSubnodes() {
 		return subnodes;
@@ -139,7 +138,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Returns a list of all subnodes attached to this node. Nodes attached to
 	 * the subnodes are not included (this is the first level down on the tree).
 	 * This list is sorted alphabetically.
-	 *
+	 * 
 	 * @return the list of subnodes
 	 */
 	public LinkedList<String> getSubnodeNames() {
@@ -154,7 +153,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns a list of the full names of all subnodes, recursively. This list
 	 * is sorted alphabetically.
-	 *
+	 * 
 	 * @return the list of all subnodes full names
 	 */
 	public LinkedList<String> getSubnodeFullNamesRecursively() {
@@ -169,7 +168,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns a list of all nodes in the tree of subnodes belonging to this
 	 * node. This is recursive.
-	 *
+	 * 
 	 * @return all subnodes belonging to this node
 	 */
 	public LinkedList<PermissionNode> getSubnodesRecursively() {
@@ -188,7 +187,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns true if this is a leaf node (that is, has no subnodes). If this
 	 * has nodes belonging to it, it is not a leaf node.
-	 *
+	 * 
 	 * @return true if this has no subnodes
 	 */
 	public boolean isLeaf() {
@@ -197,7 +196,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 
 	/**
 	 * Gets the default value of this permission.
-	 *
+	 * 
 	 * @return default value of this permission.
 	 */
 	public DefaultPermissionValue getDefault() {
@@ -211,7 +210,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * server reloads permissions. Changing this default will cause all
 	 * {@link PermissionHolder}s that contain this permission to recalculate
 	 * their permissions
-	 *
+	 * 
 	 * @param value the new default to set
 	 */
 	public void setDefault(DefaultPermissionValue value) {
@@ -226,7 +225,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Returns true if this node has a parent node. If this is the root of a
 	 * tree of nodes, it will not have a parent. This returns false if
 	 * {@link #getParent()} will return null.
-	 *
+	 * 
 	 * @return true if this node has a parent
 	 */
 	public boolean hasParent() {
@@ -241,7 +240,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns the value associated with this node. This value may be different
 	 * than the values in subnodes if the subnodes exist.
-	 *
+	 * 
 	 * @return the value for this node
 	 */
 	public boolean getValue() {
@@ -251,7 +250,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	/**
 	 * Returns the parent node, if one exists. If there is no parent node,
 	 * returns null.
-	 *
+	 * 
 	 * @see #hasParent()
 	 * @return the parent node, if any
 	 */
@@ -263,7 +262,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Returns the name of the permission. This is just the name of the current
 	 * node. The full path for the permission includes the names of parent nodes
 	 * if they exist.
-	 *
+	 * 
 	 * @return the name of this node
 	 */
 	public String getName() {
@@ -274,7 +273,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 	 * Returns the full name of the permission. This is the name of the root
 	 * node for this permission tree, followed by subnode names all the way down
 	 * to this node name. Names are separated by a period (".").
-	 *
+	 * 
 	 * @return The full name of this permission
 	 */
 	public String getFullName() {
@@ -291,7 +290,7 @@ public class PermissionNode implements Comparable<PermissionNode> {
 
 	/**
 	 * Returns a brief description of this permission, if set.
-	 *
+	 * 
 	 * @return breif description of this permission
 	 */
 	public String getDescription() {

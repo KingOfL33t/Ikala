@@ -23,9 +23,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 /**
  * Handles loading, unloading and storage of Packages. This is considered a
  * package, but is never loaded.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class PackageManager implements Package {
 
@@ -81,7 +81,7 @@ public class PackageManager implements Package {
 
 	/**
 	 * Returns the {@link CommandRegistry} for this package manager.
-	 *
+	 * 
 	 * @return the command registry
 	 */
 	public CommandRegistry getCommandRegistry() {
@@ -94,7 +94,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns the resource bundle for the package manager. This is not safe and
 	 * could be null.
-	 *
+	 * 
 	 * @return the current resource bundle
 	 */
 	public ResourceBundle getResourceBundle() {
@@ -114,7 +114,7 @@ public class PackageManager implements Package {
 	 * one is loaded in its place. If the versions are equal, or the new package
 	 * is older, then it does not load the new version and returns false.
 	 * </p>
-	 *
+	 * 
 	 * @param toLoad the package to load
 	 * @return true if the package was loaded properly, false otherwise
 	 */
@@ -318,7 +318,7 @@ public class PackageManager implements Package {
 	 * Fires an event with a message to a package type from the package manager.
 	 * If an error occurs, this will return false. The event should not have
 	 * been sent if false was returned.
-	 *
+	 * 
 	 * @param to the package to send the message to
 	 * @param content the message to transfer
 	 * @return true if the event was fired correctly
@@ -354,7 +354,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns true if a package exists with the given type (for example:
 	 * "Graphics")'
-	 *
+	 * 
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -367,7 +367,7 @@ public class PackageManager implements Package {
 	 * Returns true if a package exists that has the same type as the provided
 	 * package (for example: "Graphics"). This is the same as calling
 	 * <code>{@link #isLoaded(String) isLoaded}(Package.getType())</code>
-	 *
+	 * 
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -380,7 +380,7 @@ public class PackageManager implements Package {
 	 * If a package of type exists ({@link #isLoaded(String)}), then the package
 	 * that is of that type is returned. If no package exists of that type, null
 	 * is returned.
-	 *
+	 * 
 	 * @param type The package type
 	 * @return the Package with the given type or null if none exists
 	 */
@@ -396,7 +396,7 @@ public class PackageManager implements Package {
 	/**
 	 * Attempts to unload the package from memory. If no package exists with the
 	 * given name ({@link #isLoaded(String)}), returns false and does nothing.
-	 *
+	 * 
 	 * @param toUnload The type of package to unload
 	 * @return true if the package was unloaded properly
 	 */
@@ -499,7 +499,7 @@ public class PackageManager implements Package {
 	 * Attempts to unload the package from memory. Does nothing if the package
 	 * is not loaded. Packages are disabled before unloading. This calls
 	 * {@link #unloadPackage(String)} using the package type.
-	 *
+	 * 
 	 * @param toUnload The type of package to unload
 	 */
 	public void unloadPackage(Package toUnload) {
@@ -520,7 +520,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns the logger for the system. If one does not exist, it will be
 	 * created.
-	 *
+	 * 
 	 * @return a logger for the engine
 	 */
 	public LoggingPackage getLogger() {

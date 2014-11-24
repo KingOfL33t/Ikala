@@ -3,9 +3,9 @@ package com.ikalagaming.packages.rng;
 
 /**
  * A Mersenne twister algorithm for generating random numbers.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Generator {
 	private int[] mt = new int[624];
@@ -13,7 +13,7 @@ public class Generator {
 
 	/**
 	 * Constructs a new generator and initializes it using the given seed.
-	 *
+	 * 
 	 * @param seed the number to seed the generator with.
 	 */
 	public Generator(int seed) {
@@ -36,7 +36,7 @@ public class Generator {
 
 	/**
 	 * Returns the next random {@link Boolean boolean}.
-	 *
+	 * 
 	 * @return The next boolean
 	 */
 	public boolean getBoolean() {
@@ -47,7 +47,7 @@ public class Generator {
 	 * Generates a {@link Boolean boolean} with a given probability of being
 	 * true. The probability is a float from 0.0f to 1.0f, with 0 being no
 	 * chance of returning true and 1 being a 100% chance of returning true.
-	 *
+	 * 
 	 * @param probablilty The chance of returning true
 	 * @return The generated boolean
 	 */
@@ -60,7 +60,7 @@ public class Generator {
 
 	/**
 	 * Returns the next random {@link Float float}.
-	 *
+	 * 
 	 * @return The next float
 	 */
 	public float getFloat() {
@@ -69,7 +69,7 @@ public class Generator {
 
 	/**
 	 * Returns the next random {@link Integer integer}.
-	 *
+	 * 
 	 * @return The next int
 	 */
 	public int getInt() {
@@ -87,7 +87,7 @@ public class Generator {
 
 	/**
 	 * Returns a random {@link Integer int} between the given values, inclusive.
-	 *
+	 * 
 	 * @param min The minimum number
 	 * @param max The maximum number
 	 * @return The generated int
@@ -98,7 +98,7 @@ public class Generator {
 
 	/**
 	 * Initialize the generator with the given seed.
-	 *
+	 * 
 	 * @param seed The seed to use
 	 */
 	public void initializeGenerator(int seed) {

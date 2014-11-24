@@ -7,9 +7,9 @@ import com.ikalagaming.packages.userinput.InputPackage;
 
 /**
  * The entrypoint of the program.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Main {
 	private static final String noConsoleArg = "nogui";
@@ -18,7 +18,7 @@ public class Main {
 	/**
 	 * The entrypoint of the program. This is the main method that is run when
 	 * the game is run.
-	 *
+	 * 
 	 * @param args arguments to be passed to the program via command line
 	 */
 	public static void main(String[] args) {
@@ -59,7 +59,7 @@ public class Main {
 				Game.getPackageManager().getPackage("user-input").enable();
 			}
 		}
-		//Game.getPackageManager().loadPlugin("minecraft");
+		// Game.getPackageManager().loadPlugin("minecraft");
 
 	}
 }

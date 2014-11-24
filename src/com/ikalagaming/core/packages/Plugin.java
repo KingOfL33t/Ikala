@@ -6,9 +6,9 @@ import com.ikalagaming.core.config.FileConfiguration;
 
 /**
  * A package that is loaded from an external source.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Plugin implements IPlugin {
 

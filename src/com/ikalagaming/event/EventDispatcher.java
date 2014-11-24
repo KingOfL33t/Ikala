@@ -9,9 +9,9 @@ import com.ikalagaming.logging.PackageLogger;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class EventDispatcher extends Thread {
 
@@ -29,7 +29,7 @@ public class EventDispatcher extends Thread {
 	/**
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
-	 *
+	 * 
 	 * @param manager the event manager that this dispatcher belongs to
 	 */
 	public EventDispatcher(EventManager manager) {
@@ -42,7 +42,7 @@ public class EventDispatcher extends Thread {
 
 	/**
 	 * Adds the {@link Event event} to the queue pending dispatch.
-	 *
+	 * 
 	 * @param event The event to send out
 	 * @throws IllegalStateException if the element cannot be added at this time
 	 *             due to capacity restrictions
@@ -90,7 +90,7 @@ public class EventDispatcher extends Thread {
 		}
 	}
 
-	private void handleEvent(){
+	private void handleEvent() {
 		try {
 			if (queue.isEmpty()) {
 				hasEvents = false;

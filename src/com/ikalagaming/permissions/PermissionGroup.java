@@ -10,9 +10,9 @@ import java.util.HashMap;
  * Groups may have a parent group which they inherit permissions from.
  * Permissions set in a group override permissions set in a parent group if
  * there are any conflicts.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class PermissionGroup implements PermissionHolder {
 
@@ -28,8 +28,13 @@ public class PermissionGroup implements PermissionHolder {
 	private final HashMap<Permission, Boolean> permissions;
 	private final String description;
 
-	public PermissionGroup(){
-		//TODO remove this constructor
+	/**
+	 * Constructs a permisisonGroup.
+	 * 
+	 * @deprecated this will be replaced with several constructors
+	 */
+	public PermissionGroup() {
+		// TODO remove this constructor
 		groupName = "";
 		parent = null;
 		permissions = null;
@@ -37,10 +42,21 @@ public class PermissionGroup implements PermissionHolder {
 		// TODO constructors
 	}
 
+	/**
+	 * Returns true if this has a parent. If this groups parent is null, returns
+	 * false.
+	 * 
+	 * @return true if this group has a parent group
+	 */
 	public boolean hasParent() {
 		return parent != null;
 	}
 
+	/**
+	 * Return the parent, if it exists. May return null.
+	 * 
+	 * @return this groups parent group
+	 */
 	public PermissionGroup getParent() {
 		return parent;
 	}

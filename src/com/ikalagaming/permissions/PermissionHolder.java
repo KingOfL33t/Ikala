@@ -3,16 +3,16 @@ package com.ikalagaming.permissions;
 
 /**
  * Represents an object that can be assigned permissions
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public interface PermissionHolder {
 
 	/**
 	 * Checks if this object contains an override for the specified
 	 * {@link Permission}
-	 *
+	 * 
 	 * @param perm Permission to check
 	 * @return true if the permission is set, otherwise false
 	 */
@@ -23,7 +23,7 @@ public interface PermissionHolder {
 	 * <p>
 	 * If a the permission is not overridden on this object, the default value
 	 * of the permission will be returned
-	 *
+	 * 
 	 * @param perm Permission to get
 	 * @return Value of the permission
 	 */

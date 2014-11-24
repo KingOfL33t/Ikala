@@ -7,9 +7,9 @@ import java.util.Map;
 /**
  * Contains mappings of values to either true or false. This is used in loading
  * from YAML files.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public enum DefaultPermissionValue {
 	/**
@@ -32,7 +32,7 @@ public enum DefaultPermissionValue {
 
 	/**
 	 * Looks up a DefaultPermissionValue by name
-	 *
+	 * 
 	 * @param name Name of the default
 	 * @return Specified value, or false if it does not exist
 	 */
@@ -45,7 +45,7 @@ public enum DefaultPermissionValue {
 
 	/**
 	 * Returns true if the given name is registered to a value.
-	 *
+	 * 
 	 * @param name Name of the default
 	 * @return true if the name exists, false otherwise
 	 */
@@ -55,7 +55,7 @@ public enum DefaultPermissionValue {
 
 	/**
 	 * Returns the boolean value for this object.
-	 *
+	 * 
 	 * @return a boolean representing the value of this object
 	 */
 	public boolean value() {

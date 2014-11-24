@@ -20,6 +20,34 @@ public class Permission {
 	 */
 	private static final boolean DEFAULT_PERMISSION = false;
 
+	private boolean defaultValue;
+
+	private final String name;
+
+	private final String description;
+
+	/**
+	 * A mapping of child permissions that this permissions includes. Each child
+	 * permission has a boolean assigned to it. If the boolean is true, the
+	 * child permission will inherit this permissions value. If it is false, it
+	 * will inherit the inverse of this permissions value.
+	 */
+	private final Map<String, Boolean> childPermissions;
+
+	private static HashMap<String, Permission> permissionByName =
+			new HashMap<String, Permission>();
+
+	/**
+	 * Checks to see if a permission with the given name has already been
+	 * created. If it exists, this returns true.
+	 *
+	 * @param permissionName the fully qualified permission name
+	 * @return true if the permission exists
+	 */
+	public static boolean exists(String permissionName) {
+		return permissionByName.containsKey(permissionName);
+	}
+
 	private static Map<String, Boolean> extractChildren(Map<?, ?> input,
 			String name, boolean defaultPermission, List<Permission> output) {
 		Map<String, Boolean> children = new LinkedHashMap<String, Boolean>();
@@ -52,6 +80,22 @@ public class Permission {
 			}
 		}
 		return children;
+	}
+
+	/**
+	 * If the permission named {@link #exists(String) already exists}, returns
+	 * that permission. Returns null if the permission does not already exist.
+	 *
+	 * @param permissionName the fully qualified permission name
+	 * @return the permission with the given name, if it exists
+	 */
+	public static Permission getByName(String permissionName) {
+		if (exists(permissionName)) {
+			return permissionByName.get(permissionName);
+		}
+		else {
+			return null;
+		}
 	}
 
 	private static boolean isValidName(String name) {
@@ -199,51 +243,6 @@ public class Permission {
 		return result;
 	}
 
-	private boolean defaultValue;
-
-	private final String name;
-
-	private final String description;
-
-	/**
-	 * A mapping of child permissions that this permissions includes. Each child
-	 * permission has a boolean assigned to it. If the boolean is true, the
-	 * child permission will inherit this permissions value. If it is false, it
-	 * will inherit the inverse of this permissions value.
-	 */
-	private final Map<String, Boolean> childPermissions;// this is a
-
-	// LinkedHashMap
-	private static HashMap<String, Permission> permissionByName =
-			new HashMap<String, Permission>();
-
-	/**
-	 * Checks to see if a permission with the given name has already been
-	 * created. If it exists, this returns true.
-	 *
-	 * @param permissionName the fully qualified permission name
-	 * @return true if the permission exists
-	 */
-	public static boolean exists(String permissionName) {
-		return permissionByName.containsKey(permissionName);
-	}
-
-	/**
-	 * If the permission named {@link #exists(String) already exists}, returns
-	 * that permission. Returns null if the permission does not already exist.
-	 *
-	 * @param permissionName the fully qualified permission name
-	 * @return the permission with the given name, if it exists
-	 */
-	public static Permission getByName(String permissionName) {
-		if (exists(permissionName)) {
-			return permissionByName.get(permissionName);
-		}
-		else {
-			return null;
-		}
-	}
-
 	/**
 	 * <p>
 	 * Constructs a new permission with a name. The description defaults to an
@@ -258,7 +257,7 @@ public class Permission {
 	 *
 	 * @param name The name of the permission
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name) {
 		this(name, null, DEFAULT_PERMISSION, null);
@@ -284,7 +283,7 @@ public class Permission {
 	 * @param name The name of the permission
 	 * @param defaultValue the default value for the permission
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, boolean defaultValue) {
 		this(name, null, defaultValue, null);
@@ -318,7 +317,7 @@ public class Permission {
 	 * @param defaultValue the default value for the permission
 	 * @param children children this permission includes
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, boolean defaultValue,
 			Map<String, Boolean> children) {
@@ -348,7 +347,7 @@ public class Permission {
 	 * @param name The name of the permission
 	 * @param children children this permission includes
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, Map<String, Boolean> children) {
 		this(name, null, DEFAULT_PERMISSION, children);
@@ -373,7 +372,7 @@ public class Permission {
 	 * @param name The name of the permission
 	 * @param description A short description of the permissions purpose
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description) {
 		this(name, description, DEFAULT_PERMISSION, null);
@@ -403,7 +402,7 @@ public class Permission {
 	 * @param description A short description of the permissions purpose
 	 * @param defaultValue the default value for the permission
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description, boolean defaultValue) {
 		this(name, description, defaultValue, null);
@@ -491,7 +490,7 @@ public class Permission {
 	 * @param description A short description of the permissions purpose
 	 * @param children children this permission includes
 	 *
-	 * @see #Permission(String, String, DefaultPermissionValue, Map)
+	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description,
 			Map<String, Boolean> children) {

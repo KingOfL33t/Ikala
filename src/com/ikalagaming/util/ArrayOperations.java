@@ -12,6 +12,7 @@ public class ArrayOperations {
 	private final static String start = "[";
 	private final static String end = "]";
 	private final static String separator = ",";
+
 	/**
 	 * Converts the given array into a String that can be output. The String
 	 * will start with '[', end with ']' and have values separated by ','. Empty

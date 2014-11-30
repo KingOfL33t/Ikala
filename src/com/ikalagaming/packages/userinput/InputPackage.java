@@ -4,7 +4,9 @@ package com.ikalagaming.packages.userinput;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import com.ikalagaming.core.IQueue;
 import com.ikalagaming.core.PackageManager;
@@ -21,9 +23,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 /**
  * The main interface for the package that handles input from the console and
  * from the System.in stream.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class InputPackage implements Package, Listener {
 
@@ -38,7 +40,7 @@ public class InputPackage implements Package, Listener {
 
 	/**
 	 * Adds the given string to the buffer pending processing.
-	 * 
+	 *
 	 * @param str the string to add
 	 */
 	public void addToInputBuffer(String str) {
@@ -76,7 +78,7 @@ public class InputPackage implements Package, Listener {
 			logger.logError(
 					SafeResourceLoader.getString("command_unknown",
 							parent.getResourceBundle(), "Unknown command"),
-					LoggingLevel.INFO, firstWord);
+							LoggingLevel.INFO, firstWord);
 		}
 
 	}
@@ -175,7 +177,7 @@ public class InputPackage implements Package, Listener {
 
 	/**
 	 * Called when a package event is sent out by the event system.
-	 * 
+	 *
 	 * @param event the event that was fired
 	 */
 	@EventHandler
@@ -195,7 +197,7 @@ public class InputPackage implements Package, Listener {
 		SafeResourceLoader.getString("CMD_CALL", packageBundle, "call");
 		SafeResourceLoader.getString("ARG_ON_LOAD", packageBundle, "onLoad");
 		SafeResourceLoader
-				.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
+		.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
 		SafeResourceLoader.getString("ARG_ENABLE", packageBundle, "enable");
 		SafeResourceLoader.getString("ARG_DISABLE", packageBundle, "disable");
 
@@ -215,5 +217,12 @@ public class InputPackage implements Package, Listener {
 				disable();
 			}
 		}
+	}
+
+	@Override
+	public Set<Listener> getListeners() {
+		HashSet<Listener> listeners = new HashSet<Listener>();
+		listeners.add(this);
+		return listeners;
 	}
 }

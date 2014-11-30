@@ -1,14 +1,18 @@
 
 package com.ikalagaming.packages.rng;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.event.Listener;
 
 /**
  * The main interface for the rng package.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class RngPackageMain implements Package {
 
@@ -35,7 +39,7 @@ public class RngPackageMain implements Package {
 	/**
 	 * Returns a random {@link Boolean boolean} if the package is enabled.
 	 * Returns false if it is not enabled.
-	 * 
+	 *
 	 * @return a boolean
 	 */
 	public boolean getBoolean() {
@@ -50,7 +54,7 @@ public class RngPackageMain implements Package {
 	 * {@link Boolean boolean} with a given probability of being true. The
 	 * probability is a float from 0.0f to 1.0f, with 0 being no chance of
 	 * returning true and 1 being a 100% chance of returning true.
-	 * 
+	 *
 	 * @param probablilty The chance of returning true
 	 * @return a boolean
 	 */
@@ -63,9 +67,9 @@ public class RngPackageMain implements Package {
 
 	/**
 	 * If the package is not enabled, returns 0.
-	 * 
+	 *
 	 * Returns a random {@link Float float}.
-	 * 
+	 *
 	 * @return a random float
 	 */
 	public float getFloat() {
@@ -76,10 +80,10 @@ public class RngPackageMain implements Package {
 	}
 
 	/**
-	 * 
+	 *
 	 * Returns a random integer if the package is enabled. If it is not enabled,
 	 * returns 0.
-	 * 
+	 *
 	 * @return a random int
 	 */
 	public int getInt() {
@@ -94,7 +98,7 @@ public class RngPackageMain implements Package {
 	 * {@link Integer int} between the given values, inclusive. <br>
 	 * For example: a call {@code getIntBetween(2,6)} will return either
 	 * {@code 2, 3, 4, 5 or 6}.
-	 * 
+	 *
 	 * @param min The minimum number
 	 * @param max The maximum number
 	 * @return a random integer
@@ -175,5 +179,10 @@ public class RngPackageMain implements Package {
 	@Override
 	public void setPackageManager(PackageManager parent) {
 		this.parent = parent;
+	}
+
+	@Override
+	public Set<Listener> getListeners() {
+		return new HashSet<Listener>();
 	}
 }

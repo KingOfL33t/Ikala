@@ -2,17 +2,17 @@
 package com.ikalagaming.core;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.ListIterator;
+import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.jar.JarFile;
+import java.util.Set;
 
 import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageSettings;
+import com.ikalagaming.event.Event;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
@@ -23,9 +23,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 /**
  * Handles loading, unloading and storage of Packages. This is considered a
  * package, but is never loaded.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class PackageManager implements Package {
 
@@ -36,6 +36,7 @@ public class PackageManager implements Package {
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
 	private PackageLogger logger;
+	private PMEventListener listener = new PMEventListener(this);
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -81,7 +82,7 @@ public class PackageManager implements Package {
 
 	/**
 	 * Returns the {@link CommandRegistry} for this package manager.
-	 * 
+	 *
 	 * @return the command registry
 	 */
 	public CommandRegistry getCommandRegistry() {
@@ -94,7 +95,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns the resource bundle for the package manager. This is not safe and
 	 * could be null.
-	 * 
+	 *
 	 * @return the current resource bundle
 	 */
 	public ResourceBundle getResourceBundle() {
@@ -114,7 +115,7 @@ public class PackageManager implements Package {
 	 * one is loaded in its place. If the versions are equal, or the new package
 	 * is older, then it does not load the new version and returns false.
 	 * </p>
-	 * 
+	 *
 	 * @param toLoad the package to load
 	 * @return true if the package was loaded properly, false otherwise
 	 */
@@ -147,13 +148,13 @@ public class PackageManager implements Package {
 				EventManager manager =
 						(EventManager) getPackage("event-manager");
 				if (manager.isEnabled()) {
-					if (toLoad instanceof Listener) {
-						manager.registerEventListeners((Listener) toLoad);
-						logger.log(
-								LoggingLevel.FINER,
-								"Registered event listeners for "
-										+ toLoad.getName());
+					for (Listener l : toLoad.getListeners()) {
+						manager.registerEventListeners(l);
 					}
+					logger.log(
+							LoggingLevel.FINER,
+							"Registered event listeners for "
+									+ toLoad.getName());
 				}
 			}
 		}
@@ -179,7 +180,7 @@ public class PackageManager implements Package {
 				 * Tries to send the event. If the return value is false, it
 				 * failed and therefore we must load manually
 				 */
-				if (!fireEvent(toLoad.getName(), toSend)) {
+				if (!firePackageEvent(toLoad.getName(), toSend)) {
 					logger.log(LoggingLevel.FINER, "Event failed, "
 							+ "calling method directly.");
 					toLoad.onLoad();
@@ -219,7 +220,7 @@ public class PackageManager implements Package {
 					 * Tries to send the event. If the return value is false, it
 					 * failed and therefore we must load manually
 					 */
-					if (!fireEvent(toLoad.getName(), toSend)) {
+					if (!firePackageEvent(toLoad.getName(), toSend)) {
 						logger.log(LoggingLevel.FINER, "Event failed, "
 								+ "calling method directly.");
 						toLoad.enable();
@@ -241,10 +242,30 @@ public class PackageManager implements Package {
 		}
 		logger.log(LoggingLevel.FINE, "Package " + toLoad.getName() + " (V"
 				+ toLoad.getVersion() + ")" + " loaded!");
+
+		if (toLoad.getName() == "event-manager") {
+			logger.log(LoggingLevel.FINER, "Registering package manager "
+					+ "listeners with event manager.");
+			EventManager manager = (EventManager) getPackage("event-manager");
+			if (manager.isEnabled()) {
+				for (Listener l : getListeners()) {
+					manager.registerEventListeners(l);
+				}
+				logger.log(LoggingLevel.FINER,
+						"Registered event listeners for " + getName());
+			}
+		}
 		return true;
 	}
 
+	/**
+	 * Loads a plugin from a name
+	 *
+	 * @param name the filename to load from
+	 * @return true on success, false if it failed
+	 */
 	public boolean loadPlugin(String name) {
+		// TODO javadoc
 		// TODO load a package from file
 		/*
 		 * Check for being a jar file check for package info file load and check
@@ -290,40 +311,39 @@ public class PackageManager implements Package {
 			return false;
 		}
 
-		ListIterator<File> iterator = files.listIterator();
-		File tmp;
-		while (iterator.hasNext()) {
-			tmp = iterator.next();
-
-		}
+		/*
+		 * ListIterator<File> iterator = files.listIterator(); File tmp; while
+		 * (iterator.hasNext()) { tmp = iterator.next(); }
+		 */
 		return false;
 	}
 
-	private void getPluginDescription(File jarfile) {
-		JarFile jar = null;
-		InputStream stream = null;
-		/*
-		 * try { jar = new JarFile(jarfile); JarEntry entry =
-		 * jar.getJarEntry("plugin.yml"); if (entry == null) { //TODO log error
-		 * no plugin.yml jar.close(); } stream = jar.getInputStream(entry);
-		 * return new PluginDescriptionFile(stream); } catch (IOException ex) {
-		 * throw new InvalidDescriptionException(ex); } catch (YAMLException ex)
-		 * { throw new InvalidDescriptionException(ex); } finally { if (jar !=
-		 * null) { try { jar.close(); } catch (IOException e) { } } if (stream
-		 * != null) { try { stream.close(); } catch (IOException e) { } } }
-		 */
-	}
+	/*
+	 * private void getPluginDescription(File jarfile) { JarFile jar = null;
+	 * InputStream stream = null;
+	 *
+	 * try { jar = new JarFile(jarfile); JarEntry entry =
+	 * jar.getJarEntry("plugin.yml"); if (entry == null) { //TODO log error no
+	 * plugin.yml jar.close(); } stream = jar.getInputStream(entry); return new
+	 * PluginDescriptionFile(stream); } catch (IOException ex) { throw new
+	 * InvalidDescriptionException(ex); } catch (YAMLException ex) { throw new
+	 * InvalidDescriptionException(ex); } finally { if (jar != null) { try {
+	 * jar.close(); } catch (IOException e) { } } if (stream != null) { try {
+	 * stream.close(); } catch (IOException e) { } } }
+	 *
+	 * }
+	 */
 
 	/**
 	 * Fires an event with a message to a package type from the package manager.
 	 * If an error occurs, this will return false. The event should not have
 	 * been sent if false was returned.
-	 * 
+	 *
 	 * @param to the package to send the message to
 	 * @param content the message to transfer
 	 * @return true if the event was fired correctly
 	 */
-	private boolean fireEvent(String to, String content) {
+	private boolean firePackageEvent(String to, String content) {
 
 		if (!isLoaded("event-manager")) {
 			logger.logError(SafeResourceLoader.getString("package_not_loaded",
@@ -352,9 +372,41 @@ public class PackageManager implements Package {
 	}
 
 	/**
+	 * Fires an event with a message to a package type from the package manager.
+	 * If an error occurs, this will return false. The event should not have
+	 * been sent if false was returned.
+	 *
+	 * @param event the event to fire
+	 *
+	 * @return true if the event was fired correctly
+	 */
+	public boolean fireEvent(Event event) {
+		if (!isLoaded("event-manager")) {
+			logger.logError(SafeResourceLoader.getString("package_not_loaded",
+					resourceBundle, "Package not loaded"),
+					LoggingLevel.WARNING, "event-manager");
+			return false;
+		}
+
+		if (!getPackage("event-manager").isEnabled()) {
+			logger.logError(SafeResourceLoader.getString("package_not_enabled",
+					resourceBundle, "Package not enabled"),
+					LoggingLevel.WARNING, "event-manager");
+			return false;
+		}
+
+		if (event != null) {// just in case the assignment failed
+			((EventManager) getPackage("event-manager")).fireEvent(event);
+
+		}
+
+		return true;
+	}
+
+	/**
 	 * Returns true if a package exists with the given type (for example:
 	 * "Graphics")'
-	 * 
+	 *
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -367,7 +419,7 @@ public class PackageManager implements Package {
 	 * Returns true if a package exists that has the same type as the provided
 	 * package (for example: "Graphics"). This is the same as calling
 	 * <code>{@link #isLoaded(String) isLoaded}(Package.getType())</code>
-	 * 
+	 *
 	 * @param type the package type
 	 * @return true if the package is loaded in memory, false if it does not
 	 *         exist
@@ -380,7 +432,7 @@ public class PackageManager implements Package {
 	 * If a package of type exists ({@link #isLoaded(String)}), then the package
 	 * that is of that type is returned. If no package exists of that type, null
 	 * is returned.
-	 * 
+	 *
 	 * @param type The package type
 	 * @return the Package with the given type or null if none exists
 	 */
@@ -396,7 +448,7 @@ public class PackageManager implements Package {
 	/**
 	 * Attempts to unload the package from memory. If no package exists with the
 	 * given name ({@link #isLoaded(String)}), returns false and does nothing.
-	 * 
+	 *
 	 * @param toUnload The type of package to unload
 	 * @return true if the package was unloaded properly
 	 */
@@ -430,7 +482,7 @@ public class PackageManager implements Package {
 						 * Tries to send the event. If the return value is
 						 * false, it failed and therefore we must load manually
 						 */
-						if (!fireEvent(toUnload, toSend)) {
+						if (!firePackageEvent(toUnload, toSend)) {
 							logger.log(LoggingLevel.FINER, "Events failed, "
 									+ "calling method instead.");
 							loadedPackages.get(toUnload).disable();
@@ -470,7 +522,7 @@ public class PackageManager implements Package {
 				 * Tries to send the event. If the return value is false, it
 				 * failed and therefore we must load manually
 				 */
-				if (!fireEvent(toUnload, toSend)) {
+				if (!firePackageEvent(toUnload, toSend)) {
 					logger.log(LoggingLevel.FINER, "Events failed, "
 							+ "calling method instead.");
 					loadedPackages.get(toUnload).onUnload();
@@ -489,6 +541,17 @@ public class PackageManager implements Package {
 			loadedPackages.get(toUnload).onUnload();
 		}
 
+		if (isLoaded("event-manager")) {
+			EventManager manager = (EventManager) getPackage("event-manager");
+			if (manager.isEnabled()) {
+				for (Listener l : loadedPackages.get(toUnload).getListeners()) {
+					manager.unregisterEventListeners(l);
+				}
+				logger.log(LoggingLevel.FINER,
+						"Unregistered event listeners for " + toUnload);
+			}
+		}
+
 		loadedPackages.remove(toUnload);
 
 		logger.log(LoggingLevel.FINE, "Package " + toUnload + " unloaded!");
@@ -499,7 +562,7 @@ public class PackageManager implements Package {
 	 * Attempts to unload the package from memory. Does nothing if the package
 	 * is not loaded. Packages are disabled before unloading. This calls
 	 * {@link #unloadPackage(String)} using the package type.
-	 * 
+	 *
 	 * @param toUnload The type of package to unload
 	 */
 	public void unloadPackage(Package toUnload) {
@@ -520,7 +583,7 @@ public class PackageManager implements Package {
 	/**
 	 * Returns the logger for the system. If one does not exist, it will be
 	 * created.
-	 * 
+	 *
 	 * @return a logger for the engine
 	 */
 	public LoggingPackage getLogger() {
@@ -540,6 +603,16 @@ public class PackageManager implements Package {
 		// safe cast since we know its a LoggingPackage
 		return (LoggingPackage) loadedPackages.get(loggingPackageName);
 
+	}
+
+	/**
+	 * Returns the map of package name to package of the currently loaded
+	 * packages.
+	 *
+	 * @return the package map
+	 */
+	public HashMap<String, Package> getLoadedPackages() {
+		return loadedPackages;
 	}
 
 	@Override
@@ -591,4 +664,11 @@ public class PackageManager implements Package {
 
 	@Override
 	public void setPackageManager(PackageManager parent) {}
+
+	@Override
+	public Set<Listener> getListeners() {
+		HashSet<Listener> listeners = new HashSet<Listener>();
+		listeners.add(listener);
+		return listeners;
+	}
 }

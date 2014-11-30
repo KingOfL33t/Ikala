@@ -2,13 +2,13 @@
 package com.ikalagaming.event;
 
 /**
- * An interface for executing events.
+ * An interface for events call backs.
  */
 public interface EventExecutor {
 
 	/**
 	 * Executes the event using a given {@link Listener listener}.
-	 * 
+	 *
 	 * @param listener The listener to use
 	 * @param event The event to execute
 	 * @throws EventException If the listener throws an exception

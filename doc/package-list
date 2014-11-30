@@ -4,6 +4,7 @@ com.ikalagaming.core.events
 com.ikalagaming.core.packages
 com.ikalagaming.event
 com.ikalagaming.gui
+com.ikalagaming.gui.events
 com.ikalagaming.logging
 com.ikalagaming.packages.rng
 com.ikalagaming.packages.userinput

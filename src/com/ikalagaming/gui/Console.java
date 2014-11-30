@@ -6,8 +6,10 @@ import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
+import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.swing.ActionMap;
 import javax.swing.JFrame;
@@ -20,10 +22,7 @@ import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.events.CommandFired;
-import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.core.packages.Package;
-import com.ikalagaming.event.EventHandler;
-import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.PackageLogger;
@@ -31,11 +30,11 @@ import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * A simple console.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
-public class Console extends WindowAdapter implements Package, Listener {
+public class Console extends WindowAdapter implements Package {
 	private class ConsoleKeyListener extends KeyAdapter {
 
 		@Override
@@ -153,6 +152,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	}
 
 	private ResourceBundle resourceBundle;
+	private ConsoleListener listener = new ConsoleListener(this);
 	private String windowTitle;
 	private int width = 680;
 	private int height = 350;
@@ -183,7 +183,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Adds a char to the end of the current string and console line
-	 * 
+	 *
 	 * @param c the char to add
 	 */
 	private void addChar(char c) {
@@ -198,7 +198,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 		// how many lines the current line takes up
 		currentLine =
 				currentLine.substring(0, posInString) + c
-						+ currentLine.substring(posInString);
+				+ currentLine.substring(posInString);
 		moveRight();
 	}
 
@@ -214,7 +214,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	/**
 	 * Adds a String to the bottom of the console. Removes the top lines
 	 * if/while they exceed the maximum line count.
-	 * 
+	 *
 	 * @param message The message to append
 	 */
 	public synchronized void appendMessage(String message) {
@@ -271,12 +271,12 @@ public class Console extends WindowAdapter implements Package, Listener {
 		}
 		int pos =
 				getSafeLineStartOffset(currentIndicatorLine) + cursorY
-						+ ((posInString + 1) % charWidth);
+				+ ((posInString + 1) % charWidth);
 		textArea.replaceRange("", pos - 1, pos);
 
 		currentLine =
 				currentLine.substring(0, posInString - 1)
-						+ currentLine.substring(posInString);
+				+ currentLine.substring(posInString);
 		moveLeft();
 	}
 
@@ -295,7 +295,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 			}
 		};
 		new Thread(myrunnable).start();// Call it when you need to run the
-										// function
+		// function
 
 		enabled = true;
 		return true;
@@ -304,7 +304,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	/**
 	 * Returns the window height. This is the height of the frame the console is
 	 * in.
-	 * 
+	 *
 	 * @return the height of the frame
 	 */
 	public int getHeight() {
@@ -313,7 +313,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the maximum number of lines that are stored in the window.
-	 * 
+	 *
 	 * @return the max number of lines
 	 */
 	public int getMaxLineCount() {
@@ -327,7 +327,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the lineStartOffset of the given line and handles errors.
-	 * 
+	 *
 	 * @param line the line to find
 	 * @return the offset of the start of the line
 	 */
@@ -355,7 +355,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns window width. This is the width of the frame the console is in.
-	 * 
+	 *
 	 * @return the width of the frame
 	 */
 	public int getWidth() {
@@ -364,7 +364,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Returns the window title.
-	 * 
+	 *
 	 * @return the String that is used as the title
 	 */
 	public String getWindowTitle() {
@@ -553,20 +553,6 @@ public class Console extends WindowAdapter implements Package, Listener {
 		}
 	}
 
-	/**
-	 * Called when a command event is sent.
-	 * 
-	 * @param event the command sent
-	 */
-	@EventHandler
-	public void onCommand(CommandFired event) {
-		appendMessage("got cmd " + event.getMessage());
-		if (!event.getTo().equalsIgnoreCase(packageName)) {
-			return;
-		}
-
-	}
-
 	@Override
 	public void onDisable() {
 		frame.setVisible(false);
@@ -594,52 +580,8 @@ public class Console extends WindowAdapter implements Package, Listener {
 		}
 		windowTitle =
 				SafeResourceLoader
-						.getString("title", resourceBundle, "Console");
+				.getString("title", resourceBundle, "Console");
 
-	}
-
-	/**
-	 * Called when a package event is sent out by the event system.
-	 * 
-	 * @param event the event that was fired
-	 */
-	@EventHandler
-	public void onPackageEvent(PackageEvent event) {
-		if (event.getTo() != packageName) {
-			return;
-		}
-		String callMethod = "call";
-		String onLoad = "onLoad";
-		String onUnload = "onUnload";
-		String enable = "enable";
-		String disable = "disable";
-
-		ResourceBundle packageBundle;
-		packageBundle = packageManager.getResourceBundle();
-
-		SafeResourceLoader.getString("CMD_CALL", packageBundle, "call");
-		SafeResourceLoader.getString("ARG_ON_LOAD", packageBundle, "onLoad");
-		SafeResourceLoader
-				.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
-		SafeResourceLoader.getString("ARG_ENABLE", packageBundle, "enable");
-		SafeResourceLoader.getString("ARG_DISABLE", packageBundle, "disable");
-
-		if (event.getMessage().startsWith(callMethod)) {
-			String trimmed = event.getMessage().replaceFirst(callMethod, "");
-			trimmed = trimmed.replaceFirst(" ", "");
-			if (trimmed.startsWith(onLoad)) {
-				onLoad();
-			}
-			else if (trimmed.startsWith(onUnload)) {
-				onUnload();
-			}
-			else if (trimmed.startsWith(enable)) {
-				enable();
-			}
-			else if (trimmed.startsWith(disable)) {
-				disable();
-			}
-		}
 	}
 
 	@Override
@@ -713,16 +655,13 @@ public class Console extends WindowAdapter implements Package, Listener {
 			appendMessage(resourceBundle.getString("unknown_command") + " "
 					+ firstWord);
 		}
-		if (packageManager.isLoaded("event-manager")) {
-			EventManager mgr =
-					(EventManager) packageManager.getPackage("event-manager");
 
-			Package pack =
-					packageManager.getCommandRegistry().getParent(firstWord);
-			if (pack != null) {
-				mgr.fireEvent(new CommandFired(pack.getName(), line));
-			}
+		Package pack =
+				packageManager.getCommandRegistry().getParent(firstWord);
+		if (pack != null) {
+			packageManager.fireEvent(new CommandFired(pack.getName(), line));
 		}
+
 	}
 
 	/**
@@ -744,7 +683,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the frame height. This is the height of the frame the console is in.
-	 * 
+	 *
 	 * @param height The new height
 	 */
 	public void setHeight(int height) {
@@ -754,7 +693,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the maximum number of lines stored in the window.
-	 * 
+	 *
 	 * @param maxLineCount the maximum number of lines to store
 	 */
 	public void setMaxLineCount(int maxLineCount) {
@@ -768,7 +707,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the frame width. This is the width of the frame the console is in.
-	 * 
+	 *
 	 * @param width The new width
 	 */
 	public void setWidth(int width) {
@@ -778,7 +717,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 
 	/**
 	 * Sets the title of the window.
-	 * 
+	 *
 	 * @param windowTitle the String to use as the title
 	 */
 	public void setWindowTitle(String windowTitle) {
@@ -792,7 +731,7 @@ public class Console extends WindowAdapter implements Package, Listener {
 	private void updateCaretPosition() {
 		int position =
 				getSafeLineStartOffset(currentIndicatorLine + cursorY)
-						+ cursorX;
+				+ cursorX;
 		if (position >= textArea.getText().length()) {
 			position = textArea.getText().length();
 		}
@@ -826,6 +765,13 @@ public class Console extends WindowAdapter implements Package, Listener {
 		if (posInString > currentLine.length()) {
 			posInString = currentLine.length();
 		}
+	}
+
+	@Override
+	public Set<Listener> getListeners() {
+		HashSet<Listener> listeners = new HashSet<Listener>();
+		listeners.add(listener);
+		return listeners;
 	}
 
 }

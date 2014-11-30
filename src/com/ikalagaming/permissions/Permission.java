@@ -33,6 +33,14 @@ public class Permission {
 	 * will inherit the inverse of this permissions value.
 	 */
 	private final Map<String, Boolean> childPermissions;
+	/**
+	 * A map of the full list of subchildren, calculated recursively.
+	 */
+	private HashMap<String, Boolean> fullChildMap;
+	/**
+	 * Used so that the subchild map is only calculated once to save memory.
+	 */
+	private boolean childrenCalculated = false;
 
 	private static HashMap<String, Permission> permissionByName =
 			new HashMap<String, Permission>();
@@ -509,6 +517,60 @@ public class Permission {
 	 */
 	public Map<String, Boolean> getChildPermissions() {
 		return childPermissions;
+	}
+
+	/**
+	 * Returns a complete list of permissions this permission grants or revokes.
+	 * It recursively finds all subpermissions, with parents overriding child
+	 * permissions.
+	 *
+	 * @return the full list of child permissions
+	 * @see #getChildPermissions()
+	 */
+	public HashMap<String, Boolean> getAllSubpermissions() {
+		if (childrenCalculated) {
+			return fullChildMap;
+		}
+		Map<String, Boolean> perms = getChildPermissions();
+		HashMap<String, Boolean> submap;
+		for (String s : perms.keySet()) {
+			if (!Permission.exists(s)) {
+				System.out.println(s + " does not exist");
+				// TODO log this
+				continue;// it was not created somehow
+			}
+			// this is recursive
+			submap = Permission.getByName(s).getAllSubpermissions();
+			for (String submapString : submap.keySet()) {
+				if (!perms.containsKey(submapString)) {
+					// add the permission if it does not exist
+					// this will prevent subperms overriding the parents
+					perms.put(submapString, submap.get(submapString));
+				}
+			}
+		}
+		fullChildMap = new HashMap<String, Boolean>();
+		fullChildMap.putAll(perms);
+		childrenCalculated = true;
+		return fullChildMap;
+	}
+
+	/**
+	 * Returns true if the permission or one of the subpermissions contains the
+	 * given permission. If the permission is the same as this one, it returns
+	 * true as well.
+	 *
+	 * @param other the permission to search for
+	 * @return true if this permission contains or equals the given permission
+	 */
+	public boolean contains(Permission other) {
+		if (this.equals(other)) {
+			return true;
+		}
+		if (getAllSubpermissions().containsKey(other.getName())) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

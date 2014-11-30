@@ -1,14 +1,18 @@
 
 package com.ikalagaming.core.packages;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.config.FileConfiguration;
+import com.ikalagaming.event.Listener;
 
 /**
  * A package that is loaded from an external source.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class Plugin implements IPlugin {
 
@@ -114,6 +118,11 @@ public class Plugin implements IPlugin {
 	@Override
 	public void reloadConfig() {
 		config.nop();
+	}
+
+	@Override
+	public Set<Listener> getListeners() {
+		return new HashSet<Listener>();
 	}
 
 }

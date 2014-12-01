@@ -11,9 +11,9 @@ import javax.swing.text.JTextComponent;
 /**
  * A custom caret that looks better than the default one. This code is from
  * http://www.java2s.com/Code/Java/Swing-JFC/Fanciercustomcaretclass.htm
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class MyCaret extends DefaultCaret {
 
@@ -21,6 +21,7 @@ public class MyCaret extends DefaultCaret {
 
 	@Override
 	protected synchronized void damage(Rectangle r) {
+		super.damage(r);
 		if (r == null)
 			return;
 
@@ -41,6 +42,7 @@ public class MyCaret extends DefaultCaret {
 
 	@Override
 	public void paint(Graphics g) {
+		super.paint(g);
 		JTextComponent comp = getComponent();
 		if (comp == null)
 			return;
@@ -101,5 +103,6 @@ public class MyCaret extends DefaultCaret {
 		width = g.getFontMetrics().charWidth(dotChar);
 		if (isVisible())
 			g.fillRect(r.x, r.y, width, r.height);
+
 	}
 }

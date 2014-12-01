@@ -459,6 +459,7 @@ public class Console extends WindowAdapter implements Package {
 		frame.getContentPane().add(new JScrollPane(textArea));
 
 		frame.setVisible(true);
+
 		System.gc();
 	}
 

@@ -36,7 +36,7 @@ public class PackageManager implements Package {
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
 	private PackageLogger logger;
-	private PMEventListener listener = new PMEventListener(this);
+	private PMEventListener listener;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -54,6 +54,7 @@ public class PackageManager implements Package {
 		cmdRegistry = new CommandRegistry(this);
 		registerCommands();
 		logger = new PackageLogger(this);
+		listener = new PMEventListener(this);
 	}
 
 	/**

@@ -198,7 +198,7 @@ public class Console extends WindowAdapter implements Package {
 		// how many lines the current line takes up
 		currentLine =
 				currentLine.substring(0, posInString) + c
-				+ currentLine.substring(posInString);
+						+ currentLine.substring(posInString);
 		moveRight();
 	}
 
@@ -271,12 +271,12 @@ public class Console extends WindowAdapter implements Package {
 		}
 		int pos =
 				getSafeLineStartOffset(currentIndicatorLine) + cursorY
-				+ ((posInString + 1) % charWidth);
+						+ ((posInString + 1) % charWidth);
 		textArea.replaceRange("", pos - 1, pos);
 
 		currentLine =
 				currentLine.substring(0, posInString - 1)
-				+ currentLine.substring(posInString);
+						+ currentLine.substring(posInString);
 		moveLeft();
 	}
 
@@ -580,7 +580,7 @@ public class Console extends WindowAdapter implements Package {
 		}
 		windowTitle =
 				SafeResourceLoader
-				.getString("title", resourceBundle, "Console");
+						.getString("title", resourceBundle, "Console");
 
 	}
 
@@ -652,12 +652,19 @@ public class Console extends WindowAdapter implements Package {
 		String firstWord = line.trim().split("\\s+")[0];
 
 		if (!packageManager.getCommandRegistry().contains(firstWord)) {
-			appendMessage(resourceBundle.getString("unknown_command") + " "
-					+ firstWord);
+			appendMessage(SafeResourceLoader.getString("unknown_command",
+					resourceBundle, "Unknown command")
+					+ " '"
+					+ firstWord
+					+ "'. "
+					+ SafeResourceLoader.getString("try_cmd", resourceBundle,
+							"For a list of available commands, type")
+					+ " '"
+					+ SafeResourceLoader.getString("COMMAND_HELP",
+							packageManager.getResourceBundle(), "help") + "'");
 		}
 
-		Package pack =
-				packageManager.getCommandRegistry().getParent(firstWord);
+		Package pack = packageManager.getCommandRegistry().getParent(firstWord);
 		if (pack != null) {
 			packageManager.fireEvent(new CommandFired(pack.getName(), line));
 		}
@@ -731,7 +738,7 @@ public class Console extends WindowAdapter implements Package {
 	private void updateCaretPosition() {
 		int position =
 				getSafeLineStartOffset(currentIndicatorLine + cursorY)
-				+ cursorX;
+						+ cursorX;
 		if (position >= textArea.getText().length()) {
 			position = textArea.getText().length();
 		}

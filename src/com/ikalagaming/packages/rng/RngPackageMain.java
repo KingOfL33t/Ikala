@@ -14,7 +14,7 @@ import com.ikalagaming.event.Listener;
  * @author Ches Burks
  *
  */
-public class RngPackageMain implements Package {
+public class RngPackageMain implements Package, Listener{
 
 	private Generator gen;
 	private PackageManager parent;
@@ -185,4 +185,5 @@ public class RngPackageMain implements Package {
 	public Set<Listener> getListeners() {
 		return new HashSet<Listener>();
 	}
+
 }

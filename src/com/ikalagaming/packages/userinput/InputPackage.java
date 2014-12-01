@@ -5,15 +5,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.ikalagaming.core.IQueue;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.events.CommandFired;
-import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.core.packages.Package;
-import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
@@ -173,50 +170,6 @@ public class InputPackage implements Package, Listener {
 	@Override
 	public void setPackageManager(PackageManager parent) {
 		this.parent = parent;
-	}
-
-	/**
-	 * Called when a package event is sent out by the event system.
-	 *
-	 * @param event the event that was fired
-	 */
-	@EventHandler
-	public void onPackageEvent(PackageEvent event) {
-		if (event.getTo() != packageName) {
-			return;
-		}
-		String callMethod = "call";
-		String onLoad = "onLoad";
-		String onUnload = "onUnload";
-		String enable = "enable";
-		String disable = "disable";
-
-		ResourceBundle packageBundle;
-		packageBundle = parent.getResourceBundle();
-
-		SafeResourceLoader.getString("CMD_CALL", packageBundle, "call");
-		SafeResourceLoader.getString("ARG_ON_LOAD", packageBundle, "onLoad");
-		SafeResourceLoader
-		.getString("ARG_ON_UNLOAD", packageBundle, "onUnload");
-		SafeResourceLoader.getString("ARG_ENABLE", packageBundle, "enable");
-		SafeResourceLoader.getString("ARG_DISABLE", packageBundle, "disable");
-
-		if (event.getMessage().startsWith(callMethod)) {
-			String trimmed = event.getMessage().replaceFirst(callMethod, "");
-			trimmed = trimmed.replaceFirst(" ", "");
-			if (trimmed.startsWith(onLoad)) {
-				onLoad();
-			}
-			else if (trimmed.startsWith(onUnload)) {
-				onUnload();
-			}
-			else if (trimmed.startsWith(enable)) {
-				enable();
-			}
-			else if (trimmed.startsWith(disable)) {
-				disable();
-			}
-		}
 	}
 
 	@Override

@@ -15,9 +15,9 @@ import com.ikalagaming.permissions.Permission;
 
 /**
  * Contains data about a particular plugin.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class PluginDescription {
 	private static final ThreadLocal<Yaml> YAML = new ThreadLocal<Yaml>();
@@ -43,7 +43,7 @@ public class PluginDescription {
 	// TODO list yaml tags
 	/**
 	 * Returns a plugin description loaded by the given inputstream.
-	 *
+	 * 
 	 * @param stream the steam to load info from
 	 * @throws InvalidDescriptionException if the description is not valid
 	 */
@@ -233,7 +233,7 @@ public class PluginDescription {
 	 * <li>hyphen
 	 * <li>underscore
 	 * </ul>
-	 *
+	 * 
 	 * @return the name of the plugin
 	 */
 	public String getName() {
@@ -244,7 +244,7 @@ public class PluginDescription {
 	 * The version of the plugin. This value is a double that follows the
 	 * MajorVersion.MinorVersion format. It should be increased when new
 	 * features are added or bugs are fixed.
-	 *
+	 * 
 	 * @return the version of the plugin
 	 */
 	public double getVersion() {
@@ -256,7 +256,7 @@ public class PluginDescription {
 	 * the class name. The format should follow the
 	 * {@link ClassLoader#loadClass(String)} syntax. Typically this will be the
 	 * class that implements {@link Plugin}.
-	 *
+	 * 
 	 * @return the absolute path to the main method of the plugin
 	 */
 	public String getMain() {
@@ -266,7 +266,7 @@ public class PluginDescription {
 	/**
 	 * This is a short human-friendly description of what the plugin does. It
 	 * may be multiple lines.
-	 *
+	 * 
 	 * @return the plugins description
 	 */
 	public String getDescription() {
@@ -276,7 +276,7 @@ public class PluginDescription {
 	/**
 	 * Returns the list of authors for the program. This is used to give credit
 	 * to developers.
-	 *
+	 * 
 	 * @return the list of authors for the plugin
 	 */
 	public List<String> getAuthors() {
@@ -291,16 +291,17 @@ public class PluginDescription {
 	 * and they create a <a
 	 * href="https://en.wikipedia.org/wiki/Circular_dependency">circular
 	 * dependency</a>, none of the plugins will load.
-	 *
+	 * 
 	 * @return the list of plugins this depends on
 	 */
 	public List<String> getDependencies() {
 		return depend;
 	}
 
-	//TODO javadoc after this point. The javadoc in place is just a placeholder
+	// TODO javadoc after this point. The javadoc in place is just a placeholder
 	/**
 	 * Returns a list of dependencies that are not needed to run
+	 * 
 	 * @return soft dependencies
 	 */
 	public List<String> getSoftDependencies() {
@@ -309,6 +310,7 @@ public class PluginDescription {
 
 	/**
 	 * plugins to load before this plugin
+	 * 
 	 * @return a list of plugins that should be loaded first
 	 */
 	public List<String> getLoadBefore() {
@@ -317,6 +319,7 @@ public class PluginDescription {
 
 	/**
 	 * returns the prefix to use in logging
+	 * 
 	 * @return this plugins prefix
 	 */
 	public String getPrefix() {
@@ -325,6 +328,7 @@ public class PluginDescription {
 
 	/**
 	 * A map of strings to commands
+	 * 
 	 * @return the command map
 	 */
 	public Map<String, Map<String, Object>> getCommands() {
@@ -332,7 +336,8 @@ public class PluginDescription {
 	}
 
 	/**
-	 *returns permissions for this plugin
+	 * returns permissions for this plugin
+	 * 
 	 * @return this plugins permissions
 	 */
 	public List<Permission> getPermissions() {
@@ -354,6 +359,7 @@ public class PluginDescription {
 
 	/**
 	 * Returns the default permission value for this plugin
+	 * 
 	 * @return the default permission value
 	 */
 	public DefaultPermissionValue getPermissionDefault() {
@@ -362,6 +368,7 @@ public class PluginDescription {
 
 	/**
 	 * Returns the full name of the plugin
+	 * 
 	 * @return the full name
 	 */
 	public String getFullName() {

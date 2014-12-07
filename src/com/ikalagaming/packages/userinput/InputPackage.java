@@ -20,9 +20,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 /**
  * The main interface for the package that handles input from the console and
  * from the System.in stream.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class InputPackage implements Package, Listener {
 
@@ -37,7 +37,7 @@ public class InputPackage implements Package, Listener {
 
 	/**
 	 * Adds the given string to the buffer pending processing.
-	 *
+	 * 
 	 * @param str the string to add
 	 */
 	public void addToInputBuffer(String str) {
@@ -75,7 +75,7 @@ public class InputPackage implements Package, Listener {
 			logger.logError(
 					SafeResourceLoader.getString("command_unknown",
 							parent.getResourceBundle(), "Unknown command"),
-							LoggingLevel.INFO, firstWord);
+					LoggingLevel.INFO, firstWord);
 		}
 
 	}

@@ -1,3 +1,4 @@
+
 package com.ikalagaming.util;
 
 /**
@@ -11,10 +12,8 @@ public class StringOperations {
 	 * Counts the number of times the given string (toFind) occurs in str. If
 	 * str is empty or does not contain the substring, 0 is returned.
 	 * 
-	 * @param toSearch
-	 *            the string to search
-	 * @param toFind
-	 *            the string to count
+	 * @param toSearch the string to search
+	 * @param toFind the string to count
 	 * @return how many times the substring appears in the string
 	 */
 	public static int countOccurances(String toSearch, String toFind) {
@@ -32,10 +31,8 @@ public class StringOperations {
 	 * Counts the number of times the given character (toFind) occurs in str. If
 	 * str is empty or does not contain the substring, 0 is returned.
 	 * 
-	 * @param toSearch
-	 *            the string to search
-	 * @param toFind
-	 *            the character to count
+	 * @param toSearch the string to search
+	 * @param toFind the character to count
 	 * @return how many times the character appears in the string
 	 */
 	public static int countOccurances(String toSearch, char toFind) {

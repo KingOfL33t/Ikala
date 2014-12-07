@@ -12,11 +12,11 @@ import com.ikalagaming.event.Listener;
 
 /**
  * The main interface for the rng package.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
-public class RngPackageMain implements Package, Listener{
+public class RngPackageMain implements Package, Listener {
 
 	private Generator gen;
 	private PackageManager parent;
@@ -41,7 +41,7 @@ public class RngPackageMain implements Package, Listener{
 	/**
 	 * Returns a random {@link Boolean boolean} if the package is enabled.
 	 * Returns false if it is not enabled.
-	 *
+	 * 
 	 * @return a boolean
 	 */
 	public boolean getBoolean() {
@@ -56,7 +56,7 @@ public class RngPackageMain implements Package, Listener{
 	 * {@link Boolean boolean} with a given probability of being true. The
 	 * probability is a float from 0.0f to 1.0f, with 0 being no chance of
 	 * returning true and 1 being a 100% chance of returning true.
-	 *
+	 * 
 	 * @param probablilty The chance of returning true
 	 * @return a boolean
 	 */
@@ -69,9 +69,9 @@ public class RngPackageMain implements Package, Listener{
 
 	/**
 	 * If the package is not enabled, returns 0.
-	 *
+	 * 
 	 * Returns a random {@link Float float}.
-	 *
+	 * 
 	 * @return a random float
 	 */
 	public float getFloat() {
@@ -82,10 +82,10 @@ public class RngPackageMain implements Package, Listener{
 	}
 
 	/**
-	 *
+	 * 
 	 * Returns a random integer if the package is enabled. If it is not enabled,
 	 * returns 0.
-	 *
+	 * 
 	 * @return a random int
 	 */
 	public int getInt() {
@@ -100,7 +100,7 @@ public class RngPackageMain implements Package, Listener{
 	 * {@link Integer int} between the given values, inclusive. <br>
 	 * For example: a call {@code getIntBetween(2,6)} will return either
 	 * {@code 2, 3, 4, 5 or 6}.
-	 *
+	 * 
 	 * @param min The minimum number
 	 * @param max The maximum number
 	 * @return a random integer

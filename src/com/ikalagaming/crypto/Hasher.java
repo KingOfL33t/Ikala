@@ -1,3 +1,4 @@
+
 package com.ikalagaming.crypto;
 
 import java.math.BigInteger;
@@ -77,13 +78,10 @@ public class Hasher {
 	/**
 	 * Returns a salted PBKDF2 hash of the password using a random salt.
 	 * 
-	 * @param password
-	 *            the password to hash
+	 * @param password the password to hash
 	 * @return a salted PBKDF2 hash of the password
-	 * @throws NoSuchAlgorithmException
-	 *             if a nonexistent algorithm was used
-	 * @throws InvalidKeySpecException
-	 *             if the keyspec is wrong
+	 * @throws NoSuchAlgorithmException if a nonexistent algorithm was used
+	 * @throws InvalidKeySpecException if the keyspec is wrong
 	 */
 	public static String createHash(String password)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -93,13 +91,10 @@ public class Hasher {
 	/**
 	 * Returns a salted PBKDF2 hash of the password using a random salt.
 	 * 
-	 * @param password
-	 *            the password to hash
+	 * @param password the password to hash
 	 * @return a salted PBKDF2 hash of the password
-	 * @throws NoSuchAlgorithmException
-	 *             if a nonexistent algorithm was used
-	 * @throws InvalidKeySpecException
-	 *             if the keyspec is wrong
+	 * @throws NoSuchAlgorithmException if a nonexistent algorithm was used
+	 * @throws InvalidKeySpecException if the keyspec is wrong
 	 */
 	public static String createHash(char[] password)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -111,15 +106,11 @@ public class Hasher {
 	/**
 	 * Returns a salted PBKDF2 hash of the password using the provided salt.
 	 * 
-	 * @param password
-	 *            the password to hash
-	 * @param salt
-	 *            the salt to use
+	 * @param password the password to hash
+	 * @param salt the salt to use
 	 * @return a salted PBKDF2 hash of the password
-	 * @throws NoSuchAlgorithmException
-	 *             if a nonexistent algorithm was used
-	 * @throws InvalidKeySpecException
-	 *             if the keyspec is wrong
+	 * @throws NoSuchAlgorithmException if a nonexistent algorithm was used
+	 * @throws InvalidKeySpecException if the keyspec is wrong
 	 */
 	public static String createHash(char[] password, byte[] salt)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -132,15 +123,11 @@ public class Hasher {
 	/**
 	 * Validates a password using a hash.
 	 * 
-	 * @param password
-	 *            the password to check
-	 * @param correctHash
-	 *            the hash of the valid password
+	 * @param password the password to check
+	 * @param correctHash the hash of the valid password
 	 * @return true if the password is correct, false if not
-	 * @throws NoSuchAlgorithmException
-	 *             if a nonexistent algorithm was used
-	 * @throws InvalidKeySpecException
-	 *             if the keyspec is wrong
+	 * @throws NoSuchAlgorithmException if a nonexistent algorithm was used
+	 * @throws InvalidKeySpecException if the keyspec is wrong
 	 */
 	public static boolean validatePassword(String password, String correctHash)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -150,15 +137,11 @@ public class Hasher {
 	/**
 	 * Validates a password using a hash.
 	 * 
-	 * @param password
-	 *            the password to check
-	 * @param correctHash
-	 *            the hash of the valid password
+	 * @param password the password to check
+	 * @param correctHash the hash of the valid password
 	 * @return true if the password is correct, false if not
-	 * @throws NoSuchAlgorithmException
-	 *             if a nonexistent algorithm was used
-	 * @throws InvalidKeySpecException
-	 *             if the keyspec is wrong
+	 * @throws NoSuchAlgorithmException if a nonexistent algorithm was used
+	 * @throws InvalidKeySpecException if the keyspec is wrong
 	 */
 	public static boolean validatePassword(char[] password, String correctHash)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -180,10 +163,8 @@ public class Hasher {
 	 * is used so that password hashes cannot be extracted from an on-line
 	 * system using a timing attack and then attacked off-line.
 	 * 
-	 * @param a
-	 *            the first byte array
-	 * @param b
-	 *            the second byte array
+	 * @param a the first byte array
+	 * @param b the second byte array
 	 * @return true if both byte arrays are the same, false if not
 	 */
 	private static boolean slowEquals(byte[] a, byte[] b) {
@@ -196,14 +177,10 @@ public class Hasher {
 	/**
 	 * Computes the PBKDF2 hash of a password.
 	 * 
-	 * @param password
-	 *            the password to hash.
-	 * @param salt
-	 *            the salt
-	 * @param iterations
-	 *            the iteration count (slowness factor)
-	 * @param bytes
-	 *            the length of the hash to compute in bytes
+	 * @param password the password to hash.
+	 * @param salt the salt
+	 * @param iterations the iteration count (slowness factor)
+	 * @param bytes the length of the hash to compute in bytes
 	 * @return the PBDKF2 hash of the password
 	 */
 	private static byte[] pbkdf2(char[] password, byte[] salt, int iterations,
@@ -216,15 +193,15 @@ public class Hasher {
 	/**
 	 * Converts a string of hexadecimal characters into a byte array.
 	 * 
-	 * @param hex
-	 *            the hex string
+	 * @param hex the hex string
 	 * @return the hex string decoded into a byte array
 	 */
 	public static byte[] fromHex(String hex) {
 		byte[] binary = new byte[hex.length() / 2];
 		for (int i = 0; i < binary.length; i++) {
-			binary[i] = (byte) Integer.parseInt(
-					hex.substring(2 * i, 2 * i + 2), 16);
+			binary[i] =
+					(byte) Integer
+							.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
 		}
 		return binary;
 	}
@@ -232,8 +209,7 @@ public class Hasher {
 	/**
 	 * Converts a byte array into a hexadecimal string.
 	 * 
-	 * @param array
-	 *            the byte array to convert
+	 * @param array the byte array to convert
 	 * @return a length*2 character string encoding the byte array
 	 */
 	public static String toHex(byte[] array) {

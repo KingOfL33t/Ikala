@@ -9,9 +9,9 @@ import java.util.Map;
 
 /**
  * Represents a unique permission.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Permission {
 
@@ -48,7 +48,7 @@ public class Permission {
 	/**
 	 * Checks to see if a permission with the given name has already been
 	 * created. If it exists, this returns true.
-	 *
+	 * 
 	 * @param permissionName the fully qualified permission name
 	 * @return true if the permission exists
 	 */
@@ -93,7 +93,7 @@ public class Permission {
 	/**
 	 * If the permission named {@link #exists(String) already exists}, returns
 	 * that permission. Returns null if the permission does not already exist.
-	 *
+	 * 
 	 * @param permissionName the fully qualified permission name
 	 * @return the permission with the given name, if it exists
 	 */
@@ -134,7 +134,7 @@ public class Permission {
 	 * <li>description: Short string containing a very small description of this
 	 * permission. If not specified, empty string.
 	 * </ul>
-	 *
+	 * 
 	 * @param name Name of the permission
 	 * @param data Map of keys to load from
 	 * @param def Default permission value to use if not set
@@ -204,7 +204,7 @@ public class Permission {
 	 * <li>description: Short string containing a very small description of this
 	 * description. If not specified, empty string.
 	 * </ul>
-	 *
+	 * 
 	 * @param name Name of the permission
 	 * @param data Map of keys
 	 * @return Permission the permissions object
@@ -227,7 +227,7 @@ public class Permission {
 	 * <li>description: Short string containing a very small description of this
 	 * description. If not specified, empty string.
 	 * </ul>
-	 *
+	 * 
 	 * @param data Map of permissions
 	 * @param error An error message to show if a permission is invalid.
 	 * @param defaultPerm Default permission value to use if missing
@@ -262,9 +262,9 @@ public class Permission {
 	 * string as would be found in permission yaml files. <br>
 	 * Example: "entity.movement"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name) {
@@ -287,10 +287,10 @@ public class Permission {
 	 * permission. <br>
 	 * Example: "false"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param defaultValue the default value for the permission
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, boolean defaultValue) {
@@ -320,11 +320,11 @@ public class Permission {
 	 * this permissions value. <br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param defaultValue the default value for the permission
 	 * @param children children this permission includes
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, boolean defaultValue,
@@ -351,10 +351,10 @@ public class Permission {
 	 * this permissions value. <br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param children children this permission includes
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, Map<String, Boolean> children) {
@@ -376,10 +376,10 @@ public class Permission {
 	 * The description is a short description of what the permission is for. <br>
 	 * Example: "This allows entities to move around the world"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param description A short description of the permissions purpose
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description) {
@@ -405,11 +405,11 @@ public class Permission {
 	 * permission. <br>
 	 * Example: "false"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param description A short description of the permissions purpose
 	 * @param defaultValue the default value for the permission
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description, boolean defaultValue) {
@@ -443,7 +443,7 @@ public class Permission {
 	 * this permissions value. <br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param description A short description of the permissions purpose
 	 * @param defaultValue the default value for the permission
@@ -493,11 +493,11 @@ public class Permission {
 	 * this permissions value. <br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the permission
 	 * @param description A short description of the permissions purpose
 	 * @param children children this permission includes
-	 *
+	 * 
 	 * @see #Permission(String, String, boolean, Map)
 	 */
 	public Permission(String name, String description,
@@ -512,7 +512,7 @@ public class Permission {
 	 * inherit this permissions value. If it is false, it will inherit the
 	 * inverse of this permissions value. <br>
 	 * Example: "entity.jump" is mapped to "true"
-	 *
+	 * 
 	 * @return the list of child permissions
 	 */
 	public Map<String, Boolean> getChildPermissions() {
@@ -523,7 +523,7 @@ public class Permission {
 	 * Returns a complete list of permissions this permission grants or revokes.
 	 * It recursively finds all subpermissions, with parents overriding child
 	 * permissions.
-	 *
+	 * 
 	 * @return the full list of child permissions
 	 * @see #getChildPermissions()
 	 */
@@ -559,7 +559,7 @@ public class Permission {
 	 * Returns true if the permission or one of the subpermissions contains the
 	 * given permission. If the permission is the same as this one, it returns
 	 * true as well.
-	 *
+	 * 
 	 * @param other the permission to search for
 	 * @return true if this permission contains or equals the given permission
 	 */
@@ -576,7 +576,7 @@ public class Permission {
 	/**
 	 * Returns the default for this permission. <br>
 	 * Example: "false"
-	 *
+	 * 
 	 * @return default value of this permission.
 	 */
 	public boolean getDefault() {
@@ -587,7 +587,7 @@ public class Permission {
 	 * Returns a short description of the purpose for the permission, if it is
 	 * set. Returns an empty string if it is not set. <br>
 	 * Example: "This allows entities to move around the world"
-	 *
+	 * 
 	 * @return Brief description of this permission
 	 */
 	public String getDescription() {
@@ -598,7 +598,7 @@ public class Permission {
 	 * Returns the name that identifies the permission, which is the same string
 	 * as would be found in permission yaml files. <br>
 	 * Example: "entity.movement"
-	 *
+	 * 
 	 * @return fully qualified name for this permission
 	 */
 	public String getName() {
@@ -612,7 +612,7 @@ public class Permission {
 	 * server reloads permissions. Changing this default will cause all
 	 * {@link PermissionHolder}s that contain this permission to recalculate
 	 * their permissions
-	 *
+	 * 
 	 * @param value The new default to set
 	 */
 	public void setDefault(DefaultPermissionValue value) {

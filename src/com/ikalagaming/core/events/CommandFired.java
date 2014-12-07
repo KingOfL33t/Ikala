@@ -5,9 +5,9 @@ import com.ikalagaming.event.Event;
 
 /**
  * A command was sent.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class CommandFired extends Event {
 
@@ -29,7 +29,7 @@ public class CommandFired extends Event {
 	/**
 	 * Creates a new {@link CommandFired} with the supplied parameters. There is
 	 * no guarantee that only the intended package will receive the message.
-	 *
+	 * 
 	 * @param to the Package type that owns the command
 	 * @param command the command
 	 */
@@ -42,7 +42,7 @@ public class CommandFired extends Event {
 	 * no guarantee that only the intended package will receive the message. If
 	 * the arguments list is null, it will be created from the command, if the
 	 * command has multiple parts.
-	 *
+	 * 
 	 * @param to the Package type that owns the command
 	 * @param command the command
 	 * @param args arguments for the command
@@ -62,7 +62,7 @@ public class CommandFired extends Event {
 
 	/**
 	 * Returns the name of the package that the command was registered to.
-	 *
+	 * 
 	 * @return the name of the package
 	 */
 	public String getTo() {
@@ -71,7 +71,7 @@ public class CommandFired extends Event {
 
 	/**
 	 * Returns the command transmitted.
-	 *
+	 * 
 	 * @return the command
 	 */
 	public String getCommand() {
@@ -80,7 +80,7 @@ public class CommandFired extends Event {
 
 	/**
 	 * Return the list of arguments, {@link #hasArgs() if there are any}.
-	 *
+	 * 
 	 * @return the arguments for the command.
 	 */
 	public String[] getArgs() {
@@ -90,7 +90,7 @@ public class CommandFired extends Event {
 	/**
 	 * Returns true if arguments exist, or false if the arguments list is null
 	 * or empty.
-	 *
+	 * 
 	 * @return true if there are arguments
 	 */
 	public boolean hasArgs() {

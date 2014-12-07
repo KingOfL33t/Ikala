@@ -10,9 +10,9 @@ import com.ikalagaming.event.Listener;
 
 /**
  * A package that is loaded from an external source.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Plugin implements IPlugin {
 

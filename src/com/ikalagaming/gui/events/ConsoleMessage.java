@@ -5,9 +5,9 @@ import com.ikalagaming.event.Event;
 
 /**
  * A message needs to be sent to the console.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class ConsoleMessage extends Event {
 
@@ -18,7 +18,7 @@ public class ConsoleMessage extends Event {
 
 	/**
 	 * Output the given message to the console. This will output to a new line.
-	 *
+	 * 
 	 * @param message the message to print
 	 */
 	public ConsoleMessage(String message) {
@@ -27,7 +27,7 @@ public class ConsoleMessage extends Event {
 
 	/**
 	 * Returns the message transmitted.
-	 *
+	 * 
 	 * @return the message
 	 */
 	public String getMessage() {

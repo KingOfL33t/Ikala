@@ -11,9 +11,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 /**
  * Handles storing and managing commands for controlling the server. Commands
  * are case insensitive.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class CommandRegistry {
 
@@ -27,7 +27,7 @@ public class CommandRegistry {
 
 	/**
 	 * Constructs a new command registry and sets up the internal structures.
-	 *
+	 * 
 	 * @param manager the manager to use
 	 */
 	public CommandRegistry(PackageManager manager) {
@@ -39,7 +39,7 @@ public class CommandRegistry {
 	/**
 	 * Attempts to register the command for the given class. If the command
 	 * already exists, an error is logged and the method returns false.
-	 *
+	 * 
 	 * @param command the command to register
 	 * @param owner what package is registering the command
 	 * @return true if the command registered successfully
@@ -66,7 +66,7 @@ public class CommandRegistry {
 
 	/**
 	 * Unregisters the given command.
-	 *
+	 * 
 	 * @param command the command to remove
 	 * @return true if the command was removed
 	 */
@@ -86,7 +86,7 @@ public class CommandRegistry {
 
 	/**
 	 * Removes all commands that the given package registered.
-	 *
+	 * 
 	 * @param owner the package which is having commands removed
 	 */
 	public void unregisterPackageCommands(Package owner) {
@@ -106,7 +106,7 @@ public class CommandRegistry {
 
 	/**
 	 * Returns true if the array contains the given string.
-	 *
+	 * 
 	 * @param s the string to look for
 	 * @return true if the string exists
 	 */
@@ -123,7 +123,7 @@ public class CommandRegistry {
 	/**
 	 * Returns the package that registered the given string, or null if it
 	 * cannot be found.
-	 *
+	 * 
 	 * @param s the string to look for
 	 * @return the owner of the command
 	 */
@@ -139,17 +139,18 @@ public class CommandRegistry {
 
 	/**
 	 * Returns a clone of the commands list.
+	 * 
 	 * @return a copy of the stored list
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayList<RegisteredCommand> getCommands(){
+	public ArrayList<RegisteredCommand> getCommands() {
 		return (ArrayList<RegisteredCommand>) commands.clone();
 	}
 
 	/**
 	 * Returns the index of the given string if it exists. If it is not in the
 	 * array, returns -1.
-	 *
+	 * 
 	 * @param s the string to look for
 	 * @return the index of the string
 	 */

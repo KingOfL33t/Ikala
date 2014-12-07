@@ -1,3 +1,4 @@
+
 package com.ikalagaming.database;
 
 import java.math.BigDecimal;
@@ -27,7 +28,7 @@ public class DatabaseInterface {
 	Connection connection;
 
 	/**
-	 * Constructs a new DatabaseInterface with the given information. 
+	 * Constructs a new DatabaseInterface with the given information.
 	 * 
 	 * @param url the url to connect to (such as "localhost")
 	 * @param port the port number of the server (such as "3306")
@@ -48,33 +49,27 @@ public class DatabaseInterface {
 	 * Strings that are not permitted inside of a query (as they are operators
 	 * in SQL).
 	 */
-	private static final String[] invalidStrings = { "||", "-", "*", "/", "<>",
-			"<", ">", " ", ",", "=", "<=", ">=", "~=", "!=", "^=", "(", ")" };
+	private static final String[] invalidStrings = {"||", "-", "*", "/", "<>",
+			"<", ">", " ", ",", "=", "<=", ">=", "~=", "!=", "^=", "(", ")"};
 
 	/**
 	 * Performs a safe database query using a {@link PreparedStatement}. The
 	 * query should be a valid SQL query with question marks ("?") where the
 	 * arguments should be inserted. String arguments should be supplied for
 	 * each question mark. Returns a {@link ResultSet} that is returned by the
-	 * query. Results is not guaranteed to be non-null.
-	 * The results set should be closed as soon as possible to minimize the 
-	 * resources loaded.
+	 * query. Results is not guaranteed to be non-null. The results set should
+	 * be closed as soon as possible to minimize the resources loaded.
 	 * 
-	 * @param query
-	 *            the query to send to the database
-	 * @param arguments
-	 *            the arguments for the query
+	 * @param query the query to send to the database
+	 * @param arguments the arguments for the query
 	 * @return the set that is returned
-	 * @throws InvalidQuery
-	 *             if the query was badly formatted
-	 * @throws SQLException
-	 *             if a database access error occurs; this method is called on a
-	 *             closed PreparedStatement or the SQL statement does not return
-	 *             a ResultSet object
-	 * @throws SQLTimeoutException
-	 *             if a database access error occurs; this method is called on a
-	 *             closed PreparedStatement or the SQL statement does not return
-	 *             a ResultSet object
+	 * @throws InvalidQuery if the query was badly formatted
+	 * @throws SQLException if a database access error occurs; this method is
+	 *             called on a closed PreparedStatement or the SQL statement
+	 *             does not return a ResultSet object
+	 * @throws SQLTimeoutException if a database access error occurs; this
+	 *             method is called on a closed PreparedStatement or the SQL
+	 *             statement does not return a ResultSet object
 	 */
 	public ResultSet sendSafeQuery(String query, Object... arguments)
 			throws InvalidQuery, SQLException, SQLTimeoutException {
@@ -99,12 +94,14 @@ public class DatabaseInterface {
 				}
 			}
 			results = statement.executeQuery();
-		} catch (SQLException exception) {
+		}
+		catch (SQLException exception) {
 			if (statement != null) {
 				statement.close();
 			}
 			throw exception;
-		} catch (InvalidQuery e) {
+		}
+		catch (InvalidQuery e) {
 			if (statement != null) {
 				statement.close();
 			}
@@ -132,12 +129,9 @@ public class DatabaseInterface {
 	 * <li>String</li>
 	 * </ul>
 	 * 
-	 * @param statement
-	 *            the statement to change
-	 * @param toSet
-	 *            the object to set
-	 * @param index
-	 *            the index of the parameter to set
+	 * @param statement the statement to change
+	 * @param toSet the object to set
+	 * @param index the index of the parameter to set
 	 * @return false if an exception was thrown setting the parameter
 	 */
 	private boolean setObject(PreparedStatement statement, Object toSet,
@@ -145,28 +139,39 @@ public class DatabaseInterface {
 		try {
 			if (toSet instanceof BigDecimal) {
 				statement.setBigDecimal(index, (BigDecimal) toSet);
-			} else if (toSet instanceof Boolean) {
+			}
+			else if (toSet instanceof Boolean) {
 				statement.setBoolean(index, (boolean) toSet);
-			} else if (toSet instanceof Byte) {
+			}
+			else if (toSet instanceof Byte) {
 				statement.setByte(index, (byte) toSet);
-			} else if (toSet instanceof Byte[]) {
+			}
+			else if (toSet instanceof Byte[]) {
 				statement.setBytes(index, (byte[]) toSet);
-			} else if (toSet instanceof Double) {
+			}
+			else if (toSet instanceof Double) {
 				statement.setDouble(index, (double) toSet);
-			} else if (toSet instanceof Float) {
+			}
+			else if (toSet instanceof Float) {
 				statement.setFloat(index, (float) toSet);
-			} else if (toSet instanceof Integer) {
+			}
+			else if (toSet instanceof Integer) {
 				statement.setInt(index, (int) toSet);
-			} else if (toSet instanceof Long) {
+			}
+			else if (toSet instanceof Long) {
 				statement.setLong(index, (long) toSet);
-			} else if (toSet instanceof Short) {
+			}
+			else if (toSet instanceof Short) {
 				statement.setShort(index, (short) toSet);
-			} else if (toSet instanceof String) {
+			}
+			else if (toSet instanceof String) {
 				statement.setString(index, (String) toSet);
-			} else {
+			}
+			else {
 				statement.setObject(index, toSet);
 			}
-		} catch (SQLException e) {
+		}
+		catch (SQLException e) {
 			return false;
 		}
 		return true;
@@ -182,9 +187,12 @@ public class DatabaseInterface {
 		connectionProps.put("user", this.username);
 		connectionProps.put("password", this.password);
 		try {
-			connection = DriverManager.getConnection("jdbc:" + "mysql" + "://"
-					+ this.url + ":" + this.port + "/", connectionProps);
-		} catch (SQLException e) {
+			connection =
+					DriverManager
+							.getConnection("jdbc:" + "mysql" + "://" + this.url
+									+ ":" + this.port + "/", connectionProps);
+		}
+		catch (SQLException e) {
 			// TODO log error
 			e.printStackTrace();
 			return false;
@@ -199,7 +207,8 @@ public class DatabaseInterface {
 	public void closeConnection() {
 		try {
 			connection.close();
-		} catch (SQLException e) {
+		}
+		catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

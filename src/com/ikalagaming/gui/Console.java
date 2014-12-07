@@ -30,9 +30,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * A simple console.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class Console extends WindowAdapter implements Package {
 	private class ConsoleKeyListener extends KeyAdapter {
@@ -183,7 +183,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Adds a char to the end of the current string and console line
-	 *
+	 * 
 	 * @param c the char to add
 	 */
 	private void addChar(char c) {
@@ -214,7 +214,7 @@ public class Console extends WindowAdapter implements Package {
 	/**
 	 * Adds a String to the bottom of the console. Removes the top lines
 	 * if/while they exceed the maximum line count.
-	 *
+	 * 
 	 * @param message The message to append
 	 */
 	public synchronized void appendMessage(String message) {
@@ -304,7 +304,7 @@ public class Console extends WindowAdapter implements Package {
 	/**
 	 * Returns the window height. This is the height of the frame the console is
 	 * in.
-	 *
+	 * 
 	 * @return the height of the frame
 	 */
 	public int getHeight() {
@@ -313,7 +313,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Returns the maximum number of lines that are stored in the window.
-	 *
+	 * 
 	 * @return the max number of lines
 	 */
 	public int getMaxLineCount() {
@@ -327,7 +327,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Returns the lineStartOffset of the given line and handles errors.
-	 *
+	 * 
 	 * @param line the line to find
 	 * @return the offset of the start of the line
 	 */
@@ -355,7 +355,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Returns window width. This is the width of the frame the console is in.
-	 *
+	 * 
 	 * @return the width of the frame
 	 */
 	public int getWidth() {
@@ -364,7 +364,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Returns the window title.
-	 *
+	 * 
 	 * @return the String that is used as the title
 	 */
 	public String getWindowTitle() {
@@ -691,7 +691,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Sets the frame height. This is the height of the frame the console is in.
-	 *
+	 * 
 	 * @param height The new height
 	 */
 	public void setHeight(int height) {
@@ -701,7 +701,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Sets the maximum number of lines stored in the window.
-	 *
+	 * 
 	 * @param maxLineCount the maximum number of lines to store
 	 */
 	public void setMaxLineCount(int maxLineCount) {
@@ -715,7 +715,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Sets the frame width. This is the width of the frame the console is in.
-	 *
+	 * 
 	 * @param width The new width
 	 */
 	public void setWidth(int width) {
@@ -725,7 +725,7 @@ public class Console extends WindowAdapter implements Package {
 
 	/**
 	 * Sets the title of the window.
-	 *
+	 * 
 	 * @param windowTitle the String to use as the title
 	 */
 	public void setWindowTitle(String windowTitle) {

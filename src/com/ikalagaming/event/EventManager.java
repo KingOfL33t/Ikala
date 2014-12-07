@@ -29,7 +29,7 @@ public class EventManager implements Package {
 
 	/**
 	 * Registers event listeners in the supplied listener.
-	 *
+	 * 
 	 * @param listener The listener to register
 	 */
 	public void registerEventListeners(Listener listener) {
@@ -41,7 +41,7 @@ public class EventManager implements Package {
 
 	/**
 	 * Unregisters event listeners in the supplied listener.
-	 *
+	 * 
 	 * @param listener The listener to unregister
 	 */
 	public void unregisterEventListeners(Listener listener) {
@@ -53,7 +53,7 @@ public class EventManager implements Package {
 	/**
 	 * Returns a {@link HandlerList} for a give event type. Creates one if none
 	 * exist.
-	 *
+	 * 
 	 * @param type the type of event to find handlers for
 	 */
 	private HandlerList getEventListeners(Class<? extends Event> type) {
@@ -65,7 +65,7 @@ public class EventManager implements Package {
 
 	/**
 	 * Sends the {@link Event event} to all of its listeners.
-	 *
+	 * 
 	 * @param event The event to fire
 	 * @throws IllegalStateException if the element cannot be added at this time
 	 *             due to capacity restrictions
@@ -90,7 +90,7 @@ public class EventManager implements Package {
 	/**
 	 * Creates {@link EventListener EventListeners} for a given {@link Listener
 	 * listener}.
-	 *
+	 * 
 	 * @param listener The listener to create EventListenrs for
 	 * @return A map of events to a set of EventListeners belonging to it
 	 */
@@ -162,7 +162,7 @@ public class EventManager implements Package {
 
 	/**
 	 * Returns the handlerlist for the given event.
-	 *
+	 * 
 	 * @param event the class to find handlers for
 	 * @return the handlerlist for that class
 	 */

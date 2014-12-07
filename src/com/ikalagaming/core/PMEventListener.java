@@ -15,9 +15,9 @@ import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * The event listener for the package management system.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class PMEventListener implements Listener {
 
@@ -31,7 +31,7 @@ public class PMEventListener implements Listener {
 
 	/**
 	 * Constructs a listener for the given package manager.
-	 *
+	 * 
 	 * @param parent the manager to handle events for
 	 */
 	public PMEventListener(PackageManager parent) {
@@ -56,7 +56,7 @@ public class PMEventListener implements Listener {
 
 	/**
 	 * Called when a command event is sent.
-	 *
+	 * 
 	 * @param event the command sent
 	 */
 	@EventHandler
@@ -115,7 +115,7 @@ public class PMEventListener implements Listener {
 
 	/**
 	 * Called when a package event is sent out by the event system.
-	 *
+	 * 
 	 * @param event the event that was fired
 	 */
 	@EventHandler

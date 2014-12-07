@@ -11,9 +11,9 @@ import java.util.HashMap;
  * Groups may have a parent group which they inherit permissions from.
  * Permissions set in a group override permissions set in a parent group if
  * there are any conflicts.
- *
+ * 
  * @author Ches Burks
- *
+ * 
  */
 public class PermissionGroup implements PermissionHolder {
 
@@ -50,7 +50,7 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the group
 	 * @param permissions Permissions this group is assigned
 	 */
@@ -80,7 +80,7 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the group
 	 * @param parent The parent of this group
 	 * @param permissions Permissions this group is assigned
@@ -113,7 +113,7 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the group
 	 * @param description The description of the group
 	 * @param permissions Permissions this group is assigned
@@ -151,7 +151,7 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 *
+	 * 
 	 * @param name The name of the group
 	 * @param description The description of the group
 	 * @param parent The parent of this group
@@ -191,7 +191,7 @@ public class PermissionGroup implements PermissionHolder {
 				permissions == null ? new HashMap<Permission, Boolean>()
 						: permissions;
 
-		//TODO calculate permissions
+		// TODO calculate permissions
 		groupsByName.put(name, this);
 
 	}
@@ -199,7 +199,7 @@ public class PermissionGroup implements PermissionHolder {
 	/**
 	 * Returns true if this has a parent. If this groups parent is null, returns
 	 * false.
-	 *
+	 * 
 	 * @return true if this group has a parent group
 	 */
 	public boolean hasParent() {
@@ -208,7 +208,7 @@ public class PermissionGroup implements PermissionHolder {
 
 	/**
 	 * Return the parent, if it exists. May return null.
-	 *
+	 * 
 	 * @return this groups parent group
 	 */
 	public PermissionGroup getParent() {
@@ -282,7 +282,7 @@ public class PermissionGroup implements PermissionHolder {
 
 	/**
 	 * Returns true if a group with the given name has been created.
-	 *
+	 * 
 	 * @param name the name of the group
 	 * @return true if the group exists
 	 */
@@ -293,7 +293,7 @@ public class PermissionGroup implements PermissionHolder {
 	/**
 	 * If the group {@link #groupExists(String) exists}, returns the group. If
 	 * the group has not been created, returns null.
-	 *
+	 * 
 	 * @param name the name of the group to return
 	 * @return the group, or null if no group with that name exists
 	 */
@@ -309,7 +309,7 @@ public class PermissionGroup implements PermissionHolder {
 
 	/**
 	 * Returns the name of this group.
-	 *
+	 * 
 	 * @return the groups name
 	 */
 	public String getGroupName() {
@@ -318,7 +318,7 @@ public class PermissionGroup implements PermissionHolder {
 
 	/**
 	 * Returns the description of this group.
-	 *
+	 * 
 	 * @return the groups description
 	 */
 	public String getDescription() {

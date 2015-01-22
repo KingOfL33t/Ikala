@@ -9,6 +9,8 @@ import java.util.Set;
 
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.core.packages.PackageSettings;
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.PackageLogger;
 import com.ikalagaming.util.SafeResourceLoader;
@@ -19,8 +21,7 @@ import com.ikalagaming.util.SafeResourceLoader;
 public class EventManager implements Package {
 
 	private EventDispatcher dispatcher;
-	// private ResourceBundle resourceBundle;
-	private boolean enabled = false;
+	private PackageState state = PackageState.DISABLED;
 	private final double version = 0.1;
 	private PackageManager packageManager;
 	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
@@ -71,7 +72,7 @@ public class EventManager implements Package {
 	 *             due to capacity restrictions
 	 */
 	public void fireEvent(Event event) throws IllegalStateException {
-		if (!enabled) {
+		if (!isEnabled()) {
 			return;
 		}
 		try {
@@ -185,6 +186,7 @@ public class EventManager implements Package {
 		if (isEnabled()) {
 			return false;
 		}
+		state = PackageState.ENABLING;
 		try {
 			this.onEnable();
 		}
@@ -194,10 +196,9 @@ public class EventManager implements Package {
 					"Package failed to enable"), LoggingLevel.SEVERE,
 					"EventManager.enable()");
 			// better safe than sorry (probably did not initialize correctly)
-			this.enabled = false;
+			state = PackageState.CORRUPTED;
 			return false;
 		}
-		this.enabled = true;
 		return true;
 	}
 
@@ -206,6 +207,7 @@ public class EventManager implements Package {
 		if (!isEnabled()) {
 			return false;
 		}
+		state = PackageState.DISABLING;
 		try {
 			this.onDisable();
 		}
@@ -214,25 +216,32 @@ public class EventManager implements Package {
 					"package_disable_fail", packageManager.getResourceBundle(),
 					"Package failed to disable"), LoggingLevel.SEVERE,
 					"EventManager.disable()");
-			this.enabled = true;
+			state = PackageState.CORRUPTED;
 			return false;
 		}
-		this.enabled = false;
 		return true;
 	}
 
 	@Override
 	public boolean reload() {
-		if (this.enabled) {
-			this.disable();
+		state = PackageState.UNLOADING;
+		if (!PackageSettings.DISABLE_ON_UNLOAD) {
+			disable();
 		}
-		this.enable();
+		if (state == PackageState.ENABLED) {
+			disable();
+		}
+		onLoad();
+		enable();// The event system does not need manual enabling
 		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return enabled;
+		if (state == PackageState.ENABLED) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -240,6 +249,7 @@ public class EventManager implements Package {
 		dispatcher = new EventDispatcher(this);
 		dispatcher.start();
 		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
+		state = PackageState.ENABLED;
 	}
 
 	@Override
@@ -257,20 +267,31 @@ public class EventManager implements Package {
 			logger.logError(SafeResourceLoader.getString("thread_interrupted",
 					packageManager.getResourceBundle(), "Thread interrupted"),
 					LoggingLevel.WARNING, "EventManager.onDisable()");
+			state = PackageState.CORRUPTED;
 		}
-
+		state = PackageState.DISABLED;
 	}
 
 	@Override
 	public void onLoad() {
+		state = PackageState.LOADING;
 		logger = new PackageLogger(this);
+		state = PackageState.DISABLED;
+		if (!PackageSettings.ENABLE_ON_LOAD) {
+			enable();
+		}
 	}
 
 	@Override
 	public void onUnload() {
-		// this.resourceBundle = null;
+		state = PackageState.UNLOADING;
+		if (state == PackageState.ENABLED) {
+			disable();
+			state = PackageState.UNLOADING;
+		}
 		this.packageManager = null;
 		logger = null;
+		state = PackageState.PENDING_REMOVAL;
 	}
 
 	@Override
@@ -286,6 +307,11 @@ public class EventManager implements Package {
 	@Override
 	public Set<Listener> getListeners() {
 		return new HashSet<Listener>();
+	}
+
+	@Override
+	public PackageState getPackageState() {
+		return state;
 	}
 
 }

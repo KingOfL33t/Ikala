@@ -12,6 +12,7 @@ import java.util.Set;
 import com.ikalagaming.core.events.PackageEvent;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageSettings;
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Event;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
@@ -22,7 +23,7 @@ import com.ikalagaming.util.SafeResourceLoader;
 
 /**
  * Handles loading, unloading and storage of Packages. This is considered a
- * package, but is never loaded.
+ * package, but is always enabled and never loaded.
  * 
  * @author Ches Burks
  * 
@@ -37,6 +38,7 @@ public class PackageManager implements Package {
 	private CommandRegistry cmdRegistry;
 	private PackageLogger logger;
 	private PMEventListener listener;
+	private PackageState state = PackageState.ENABLED;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -103,6 +105,7 @@ public class PackageManager implements Package {
 		return resourceBundle;
 	}
 
+	// TODO clean up methods and split into more reasonably sized functions
 	/**
 	 * <p>
 	 * Loads the given package into memory, stores it by type, and enables it if
@@ -671,5 +674,10 @@ public class PackageManager implements Package {
 		HashSet<Listener> listeners = new HashSet<Listener>();
 		listeners.add(listener);
 		return listeners;
+	}
+
+	@Override
+	public PackageState getPackageState() {
+		return state;
 	}
 }

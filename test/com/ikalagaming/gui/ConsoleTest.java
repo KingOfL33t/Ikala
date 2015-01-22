@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.gui.Console;
 
 /**
@@ -24,7 +25,13 @@ public class ConsoleTest {
 	public void testResize() {
 		Console tested = new Console();
 		tested.onLoad();
+		while (tested.getPackageState() == PackageState.LOADING){
+			;
+		}
 		tested.enable();
+		while (tested.getPackageState() == PackageState.ENABLING){
+			;
+		}
 		tested.setHeight(100);
 		tested.setWidth(100);
 		tested.setHeight(400);
@@ -41,7 +48,13 @@ public class ConsoleTest {
 	public void testGetters() {
 		Console tested = new Console();
 		tested.onLoad();
+		while (tested.getPackageState() == PackageState.LOADING){
+			;
+		}
 		tested.enable();
+		while (tested.getPackageState() == PackageState.ENABLING){
+			;
+		}
 		assertNotNull(tested.getHeight());
 		assertNotNull(tested.getWidth());
 		assertNotNull(tested.getMaxLineCount());
@@ -55,7 +68,13 @@ public class ConsoleTest {
 	public void testAppendingMessage() {
 		Console tested = new Console();
 		tested.onLoad();
+		while (tested.getPackageState() == PackageState.LOADING){
+			;
+		}
 		tested.enable();
+		while (tested.getPackageState() == PackageState.ENABLING){
+			;
+		}
 		tested.appendMessage("This is a test");
 	}
 
@@ -67,12 +86,41 @@ public class ConsoleTest {
 	public void testOverflowingMessages() {
 		Console tested = new Console();
 		tested.onLoad();
+		while (tested.getPackageState() == PackageState.LOADING){
+			;
+		}
 		tested.enable();
+		while (tested.getPackageState() == PackageState.ENABLING){
+			;
+		}
 		int i;
 		int overflow = 10;// how many lines to add after the max
 		for (i = 0; i < tested.getMaxLineCount() + overflow; i++) {
 			tested.appendMessage("Test line " + i);
 		}
+	}
+	
+	/**
+	 * Appends a message that is longer than one line
+	 */
+	@Test
+	public void testLongMessage() {
+		Console tested = new Console();
+		tested.onLoad();
+		while (tested.getPackageState() == PackageState.LOADING){
+			;
+		}
+		tested.enable();
+		while (tested.getPackageState() == PackageState.ENABLING){
+			;
+		}
+		int length = 81;
+		int i;
+		String testInput = "";
+		for (i = 0; i < length; ++i){
+			testInput += "a";
+		}
+		tested.appendMessage(testInput);
 	}
 
 }

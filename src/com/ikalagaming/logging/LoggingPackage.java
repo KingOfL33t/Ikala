@@ -10,6 +10,8 @@ import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.core.packages.PackageSettings;
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.util.SafeResourceLoader;
 
@@ -22,7 +24,7 @@ import com.ikalagaming.util.SafeResourceLoader;
 public class LoggingPackage implements Package {
 
 	private ResourceBundle resourceBundle;
-	private boolean enabled = false;
+	private PackageState state = PackageState.DISABLED;
 	private final double version = 0.1;
 	private PackageManager packageManager;
 	private String packageName = "logging";
@@ -47,7 +49,7 @@ public class LoggingPackage implements Package {
 	public void logError(Package origin, String error, LoggingLevel level,
 			String details) {
 		newLog = "";
-		if (!enabled) {
+		if (!isEnabled()) {
 			System.err.println(level.getName() + " " + error + " " + details);
 			return;
 		}
@@ -87,7 +89,7 @@ public class LoggingPackage implements Package {
 	 */
 	public void log(Package origin, LoggingLevel level, String details) {
 		newLog = "";
-		if (!enabled) {
+		if (!isEnabled()) {
 			System.out.println(level.getName() + " " + details);
 			return;
 		}
@@ -126,7 +128,7 @@ public class LoggingPackage implements Package {
 
 	@Override
 	public boolean enable() {
-		this.enabled = true;
+		state = PackageState.ENABLING;
 		try {
 			this.onEnable();
 		}
@@ -134,7 +136,7 @@ public class LoggingPackage implements Package {
 			logError(this, "Package enable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
 			// better safe than sorry (probably did not initialize correctly)
-			this.enabled = false;
+			state = PackageState.CORRUPTED;
 			return false;
 		}
 		return true;
@@ -142,13 +144,14 @@ public class LoggingPackage implements Package {
 
 	@Override
 	public boolean disable() {
-		this.enabled = false;
+		state = PackageState.DISABLING;
 		try {
 			this.onDisable();
 		}
 		catch (Exception e) {
 			logError(this, "package disable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
+			state = PackageState.CORRUPTED;
 			return false;
 		}
 		return true;
@@ -156,26 +159,42 @@ public class LoggingPackage implements Package {
 
 	@Override
 	public boolean reload() {
-		if (this.enabled) {
-			this.disable();
+		state = PackageState.UNLOADING;
+		if (!PackageSettings.DISABLE_ON_UNLOAD) {
+			disable();
 		}
-		this.enable();
+		if (state == PackageState.ENABLED) {
+			disable();
+		}
+		this.resourceBundle = null;
+		this.packageManager = null;
+		state = PackageState.LOADING;
+		onLoad();
+		enable();// it will start up enabled
 		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return enabled;
+		if (state == PackageState.ENABLED) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
-	public void onEnable() {}
+	public void onEnable() {
+		state = PackageState.ENABLED;
+	}
 
 	@Override
-	public void onDisable() {}
+	public void onDisable() {
+		state = PackageState.DISABLED;
+	}
 
 	@Override
 	public void onLoad() {
+		state = PackageState.LOADING;
 		try {
 			resourceBundle =
 					ResourceBundle.getBundle(ResourceLocation.LoggingPackage,
@@ -187,12 +206,15 @@ public class LoggingPackage implements Package {
 		}
 		dispatcher = new LogDispatcher(this);
 		dispatcher.start();
+		state = PackageState.DISABLED;
 	}
 
 	@Override
 	public void onUnload() {
+		state = PackageState.UNLOADING;
 		this.resourceBundle = null;
 		this.packageManager = null;
+		state = PackageState.PENDING_REMOVAL;
 	}
 
 	@Override
@@ -208,6 +230,11 @@ public class LoggingPackage implements Package {
 	@Override
 	public Set<Listener> getListeners() {
 		return new HashSet<Listener>();
+	}
+
+	@Override
+	public PackageState getPackageState() {
+		return state;
 	}
 
 }

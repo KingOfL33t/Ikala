@@ -3,9 +3,17 @@ package com.ikalagaming.gui;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -23,6 +31,7 @@ import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.PackageLogger;
@@ -34,12 +43,11 @@ import com.ikalagaming.util.SafeResourceLoader;
  * @author Ches Burks
  * 
  */
-public class Console extends WindowAdapter implements Package {
+public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	private class ConsoleKeyListener extends KeyAdapter {
 
 		@Override
 		public void keyPressed(KeyEvent event) {
-			// TODO paste
 			int keyCode = event.getKeyCode();
 			switch (keyCode) {
 			case KeyEvent.VK_LEFT:
@@ -68,6 +76,24 @@ public class Console extends WindowAdapter implements Package {
 			case KeyEvent.VK_BACK_SPACE:
 				delChar();
 				break;
+			case KeyEvent.VK_V:
+				if (event.isControlDown()) {
+					setCurrentText(getClipboardContents());
+				}
+				else {
+					addChar(event.getKeyChar());
+				}
+				break;
+			case KeyEvent.VK_C:
+				if (event.isControlDown()) {
+					if (textArea.getSelectedText() != null) {
+						setClipboardContents(textArea.getSelectedText());
+					}
+				}
+				else {
+					addChar(event.getKeyChar());
+				}
+				break;
 			case KeyEvent.VK_0:
 			case KeyEvent.VK_1:
 			case KeyEvent.VK_2:
@@ -80,7 +106,6 @@ public class Console extends WindowAdapter implements Package {
 			case KeyEvent.VK_9:
 			case KeyEvent.VK_A:
 			case KeyEvent.VK_B:
-			case KeyEvent.VK_C:
 			case KeyEvent.VK_D:
 			case KeyEvent.VK_E:
 			case KeyEvent.VK_F:
@@ -99,7 +124,6 @@ public class Console extends WindowAdapter implements Package {
 			case KeyEvent.VK_S:
 			case KeyEvent.VK_T:
 			case KeyEvent.VK_U:
-			case KeyEvent.VK_V:
 			case KeyEvent.VK_W:
 			case KeyEvent.VK_X:
 			case KeyEvent.VK_Y:
@@ -142,6 +166,7 @@ public class Console extends WindowAdapter implements Package {
 			case KeyEvent.VK_SPACE:
 				addChar(event.getKeyChar());
 				break;
+
 			default:
 				break;
 			}
@@ -163,11 +188,7 @@ public class Console extends WindowAdapter implements Package {
 	private JFrame frame;
 
 	private JTextArea textArea;
-	private int cursorX = 0;// delta from left of screen
-	private int cursorY = 0;// delta from last line
 	private int posInString = 0;// where the cursor is in the string
-	private int charWidth = 80;// how many characters per line
-	private int charHeight = 25;// lines per window
 	private char inputIndicator = '>';
 	private String currentLine = "";
 	private int currentIndicatorLine = 0;
@@ -176,7 +197,7 @@ public class Console extends WindowAdapter implements Package {
 	private CommandHistory history;
 	private PackageManager packageManager;
 	private String packageName = "console";
-	private boolean enabled = false;
+	private PackageState state = PackageState.DISABLED;
 	private PackageLogger logger;
 
 	private final double version = 0.1;
@@ -187,14 +208,8 @@ public class Console extends WindowAdapter implements Package {
 	 * @param c the char to add
 	 */
 	private void addChar(char c) {
-		if (cursorY > 0) {
-			textArea.insert(System.lineSeparator(),
-					getSafeLineStartOffset(currentIndicatorLine + cursorY)
-
-					+ ((posInString + 1) % charWidth) + 1);
-		}
 		textArea.insert("" + c, getSafeLineStartOffset(currentIndicatorLine)
-				+ (posInString + 1) % charWidth);
+				+ (posInString) + 1);
 		// how many lines the current line takes up
 		currentLine =
 				currentLine.substring(0, posInString) + c
@@ -207,7 +222,7 @@ public class Console extends WindowAdapter implements Package {
 	 */
 	private void appendIndicatorChar() {
 		textArea.append("" + inputIndicator);
-		++cursorX;
+		++posInString;
 		moveRight();
 	}
 
@@ -218,20 +233,30 @@ public class Console extends WindowAdapter implements Package {
 	 * @param message The message to append
 	 */
 	public synchronized void appendMessage(String message) {
+		if (!isEnabled()) {
+			logger.log(LoggingLevel.SEVERE, SafeResourceLoader.getString(
+					"not_enabled", resourceBundle, "Console is not enabled"));
+			return;
+		}
 		// should this not be synchronized?
 		// it seems like it could be a choke point for speed. -CB
-		String curLine = currentLine;
-		int x = cursorX;
-		int y = cursorY;
+
 		int p = posInString;
 		clearCurrentText();
 		removeIndicatorChar();
-		textArea.append(message + System.lineSeparator());
+		// the double spacing and removal of space is there to have an
+		// extra gap just before the input line and any previous lines for
+		// visibility
+		if (textArea.getText().endsWith(System.lineSeparator())) {
+			textArea.replaceRange("", textArea.getText().length() - 1, textArea
+					.getText().length());// removes the last newline if it
+											// exists
+		}
+		textArea.append(message);
+		textArea.append(System.lineSeparator());// extra space to be removed
+		textArea.append(System.lineSeparator());
 		updateInputLine();
-		textArea.append(curLine);
-		currentLine = curLine;
-		cursorX = x;
-		cursorY = y;
+		textArea.append(currentLine);
 		posInString = p;
 		validatePositions();
 		updateCaretPosition();
@@ -246,6 +271,7 @@ public class Console extends WindowAdapter implements Package {
 	 * will be removed.
 	 */
 	private void clearCurrentText() {
+
 		int start;
 		// fetch the index of the last line of text
 		start = getSafeLineStartOffset(currentIndicatorLine);
@@ -253,8 +279,6 @@ public class Console extends WindowAdapter implements Package {
 		++start;
 		textArea.replaceRange("", start, start + currentLine.length());
 		posInString = 0;
-		cursorY = 0;
-		cursorX = 0;
 		currentLine = "";
 		validatePositions();
 		updateCaretPosition();
@@ -264,15 +288,11 @@ public class Console extends WindowAdapter implements Package {
 	 * Removes a char from the end of the current string and console line
 	 */
 	private void delChar() {
-		if (cursorY == 0) {
-			if (cursorX <= 1) {
-				return;
-			}
+		if (posInString <= 0) {
+			return;
 		}
-		int pos =
-				getSafeLineStartOffset(currentIndicatorLine) + cursorY
-						+ ((posInString + 1) % charWidth);
-		textArea.replaceRange("", pos - 1, pos);
+		int pos = getSafeLineStartOffset(currentIndicatorLine) + posInString;
+		textArea.replaceRange("", pos, pos + 1);
 
 		currentLine =
 				currentLine.substring(0, posInString - 1)
@@ -282,13 +302,18 @@ public class Console extends WindowAdapter implements Package {
 
 	@Override
 	public boolean disable() {
+		synchronized (state) {
+			state = PackageState.DISABLING;
+		}
 		onDisable();
-		enabled = false;
 		return true;
 	}
 
 	@Override
 	public boolean enable() {
+		synchronized (state) {
+			state = PackageState.ENABLING;
+		}
 		Runnable myrunnable = new Runnable() {
 			public void run() {
 				onEnable();
@@ -297,7 +322,6 @@ public class Console extends WindowAdapter implements Package {
 		new Thread(myrunnable).start();// Call it when you need to run the
 		// function
 
-		enabled = true;
 		return true;
 	}
 
@@ -333,6 +357,17 @@ public class Console extends WindowAdapter implements Package {
 	 */
 	private int getSafeLineStartOffset(int line) {
 		try {
+			if (line >= textArea.getLineCount()) {
+				if (textArea.getLineCount() >= 1) {
+					line = textArea.getLineCount() - 1;
+				}
+				else {
+					line = 0;
+				}
+			}
+			if (line <= 0) {
+				return 0;
+			}
 			return textArea.getLineStartOffset(line);
 		}
 		catch (BadLocationException e) {
@@ -340,7 +375,7 @@ public class Console extends WindowAdapter implements Package {
 					resourceBundle, "Bad location"), LoggingLevel.WARNING,
 					"Console.getSafeLineOffset(String)");
 		}
-		return -1;
+		return 0;
 	}
 
 	@Override
@@ -465,39 +500,19 @@ public class Console extends WindowAdapter implements Package {
 
 	@Override
 	public boolean isEnabled() {
-		return enabled;
+		synchronized (state) {
+			if (state == PackageState.ENABLED) {
+				return true;
+			}
+			return false;
+		}
 	}
 
 	private void moveLeft() {
-		if (cursorY == 0) {
-			if (cursorX <= 1) {
-				updateCaretPosition();
-				return;
-			}
-			else {
-				--cursorX;
-				--posInString;
-			}
+		if (posInString <= 0) {
+			return;
 		}
-		else if (cursorY > 0) {
-			// on an additional line
-			if (cursorX > 0) {
-				--cursorX;
-				--posInString;
-			}
-			else if (cursorX <= 0) {
-				cursorX = charWidth - 1;
-				--posInString;
-				--cursorY;
-			}
-		}
-		else {
-			// on the same line as the indicator
-			if (cursorX > 1) {
-				--cursorX;
-				--posInString;
-			}
-		}
+		--posInString;
 		validatePositions();
 		updateCaretPosition();
 
@@ -514,60 +529,60 @@ public class Console extends WindowAdapter implements Package {
 			updateCaretPosition();
 			return;// do not do anything
 		}
-		if (cursorX < 0) {
+		if (posInString < 0) {
 			posInString = 0;
-			cursorX = 0;
 			validatePositions();
 			updateCaretPosition();
-			return;// do not do anything
 		}
-		else if (cursorX >= 0 && cursorX < charWidth) {
-			++cursorX;
+		else if (posInString >= 0) {
 			++posInString;
 			validatePositions();
 			updateCaretPosition();
 		}
-		else if (cursorX >= charWidth) {
-			cursorX = 0;
-			++cursorY;
-			++posInString;
-			validatePositions();
-			updateCaretPosition();
-		}
+		/*
+		 * else if (cursorX >= charWidth) { cursorX = 0; ++cursorY;
+		 * ++posInString; validatePositions(); updateCaretPosition(); }
+		 */
 	}
 
 	/**
 	 * Moves the cursor to the next line, then shows the line indicator char.
 	 */
 	private void newLine() {
-		textArea.append(System.lineSeparator());
 		posInString = 0;
 		currentLine = "";
-		if (textArea.getLineCount() < charHeight) {
-			++cursorY;
-		}
-		cursorX = 0;
-		cursorY = 0;
+		textArea.append(System.lineSeparator());// this extra space is removed
+		textArea.append(System.lineSeparator());
 		updateInputLine();
 		while (textArea.getLineCount() > maxLineCount) {
 			removeTopLine();
 		}
+		updateCaretPosition();
 	}
 
 	@Override
 	public void onDisable() {
 		frame.setVisible(false);
 		frame.dispose();
+		synchronized (state) {
+			state = PackageState.DISABLED;
+		}
 	}
 
 	@Override
 	public void onEnable() {
 		init();
 		appendIndicatorChar();
+		synchronized (state) {
+			state = PackageState.ENABLED;
+		}
 	}
 
 	@Override
 	public void onLoad() {
+		synchronized (state) {
+			state = PackageState.LOADING;
+		}
 		logger = new PackageLogger(this);
 		try {
 			resourceBundle =
@@ -582,11 +597,23 @@ public class Console extends WindowAdapter implements Package {
 		windowTitle =
 				SafeResourceLoader
 						.getString("title", resourceBundle, "Console");
-
+		synchronized (state) {
+			state = PackageState.DISABLED;
+		}
 	}
 
 	@Override
 	public void onUnload() {
+		synchronized (state) {
+			state = PackageState.UNLOADING;
+		}
+		if (getPackageState() == PackageState.ENABLED) {
+			disable();
+			synchronized (state) {
+				state = PackageState.UNLOADING;
+			}
+		}
+
 		if (frame != null) {
 			frame.setVisible(false);
 			frame.dispose();
@@ -596,23 +623,32 @@ public class Console extends WindowAdapter implements Package {
 		history = null;
 		packageManager = null;
 		logger = null;
+		synchronized (state) {
+			state = PackageState.PENDING_REMOVAL;
+		}
 	}
 
 	@Override
 	public boolean reload() {
-		if (!disable()) {
-			// failed to disable
-			return false;
+		synchronized (state) {
+			state = PackageState.UNLOADING;
 		}
-		if (!enable()) {
-			// failed to enable
-			return false;
+		if (frame != null) {
+			frame.setVisible(false);
+			frame.dispose();
+			frame = null;
 		}
+		resourceBundle = null;
+		history = null;
+		packageManager = null;
+		logger = null;
+
+		onLoad();
 		return true;
 	}
 
 	/**
-	 * Appends the input indicator char to the console
+	 * Replaces the input indicator char to the console
 	 */
 	private void removeIndicatorChar() {
 		int offset = getSafeLineStartOffset(currentIndicatorLine);
@@ -682,8 +718,6 @@ public class Console extends WindowAdapter implements Package {
 		}
 		textArea.append(s);
 		posInString = s.length();
-		cursorY = s.length() / charWidth;
-		cursorX = s.length() % charWidth + 1;
 		currentLine = s;
 		validatePositions();
 		updateCaretPosition();
@@ -738,14 +772,19 @@ public class Console extends WindowAdapter implements Package {
 	 */
 	private void updateCaretPosition() {
 		int position =
-				getSafeLineStartOffset(currentIndicatorLine + cursorY)
-						+ cursorX;
+				getSafeLineStartOffset(currentIndicatorLine) + posInString + 1;
 		if (position >= textArea.getText().length()) {
 			position = textArea.getText().length();
 		}
 		textArea.setCaretPosition(position);
+		if (!textArea.getCaret().isVisible()) {
+			textArea.getCaret().setVisible(true);
+		}
 	}
 
+	/**
+	 * Adds a new indicator character to the beginning of the last line.
+	 */
 	private void updateInputLine() {
 		currentIndicatorLine = textArea.getLineCount() - 1;
 		appendIndicatorChar();
@@ -758,15 +797,6 @@ public class Console extends WindowAdapter implements Package {
 	 * they are not.
 	 */
 	private void validatePositions() {
-		if (cursorX < 0) {
-			cursorX = 0;
-		}
-		if (cursorY < 0) {
-			cursorY = 0;
-		}
-		if (cursorX > charWidth) {
-			cursorX = charWidth;
-		}
 		if (posInString < 0) {
 			posInString = 0;
 		}
@@ -780,6 +810,61 @@ public class Console extends WindowAdapter implements Package {
 		HashSet<Listener> listeners = new HashSet<Listener>();
 		listeners.add(listener);
 		return listeners;
+	}
+
+	@Override
+	public synchronized PackageState getPackageState() {
+		return state;
+	}
+
+	/**
+	 * Empty implementation of the ClipboardOwner interface.
+	 */
+	@Override
+	public void lostOwnership(Clipboard aClipboard, Transferable aContents) {
+		// do nothing
+	}
+
+	/**
+	 * Copy a String to the clipboard, and make this class the owner of the
+	 * Clipboard's contents.
+	 * 
+	 * @param contents the new contents of the clipboard
+	 */
+	private void setClipboardContents(String contents) {
+		StringSelection stringSelection = new StringSelection(contents);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(stringSelection, this);
+	}
+
+	/**
+	 * Get the String from the clipboard.
+	 *
+	 * @return any text found on the Clipboard. If one is not found, returns an
+	 *         empty String.
+	 */
+	private String getClipboardContents() {
+		String result = "";
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		Transferable contents = clipboard.getContents(this);
+		boolean hasTransferableText =
+				(contents != null)
+						&& contents
+								.isDataFlavorSupported(DataFlavor.stringFlavor);
+		if (hasTransferableText) {
+			try {
+				result =
+						(String) contents
+								.getTransferData(DataFlavor.stringFlavor);
+			}
+			catch (UnsupportedFlavorException | IOException ex) {
+				logger.logError(SafeResourceLoader.getString(
+						"invalid_clipboard", resourceBundle,
+						"Invalid clipboard contents"), LoggingLevel.WARNING, ex
+						.getLocalizedMessage());
+			}
+		}
+		return result;
 	}
 
 }

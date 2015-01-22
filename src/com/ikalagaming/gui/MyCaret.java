@@ -19,9 +19,7 @@ public class MyCaret extends DefaultCaret {
 
 	private static final long serialVersionUID = -389070432822516041L;
 
-	@Override
 	protected synchronized void damage(Rectangle r) {
-		super.damage(r);
 		if (r == null)
 			return;
 
@@ -40,9 +38,7 @@ public class MyCaret extends DefaultCaret {
 		repaint(); // calls getComponent().repaint(x, y, width, height)
 	}
 
-	@Override
 	public void paint(Graphics g) {
-		super.paint(g);
 		JTextComponent comp = getComponent();
 		if (comp == null)
 			return;
@@ -70,26 +66,25 @@ public class MyCaret extends DefaultCaret {
 			y = r.y;
 			height = r.height;
 		}
-		if (!(g.getColor() == comp.getCaretColor())) {
-			g.setColor(comp.getCaretColor());
-		}
+
+		g.setColor(comp.getCaretColor());
 		g.setXORMode(comp.getBackground()); // do this to draw in XOR mode
 
 		if (dotChar == '\n') {
+			int diam = r.height;
 			if (isVisible())
 				g.fillRect(r.x, r.y, width, r.height);
-			width = r.height / 2 + 2;
+			width = diam / 2 + 2;
 			return;
 		}
 
-		if (dotChar == '\t') {
+		if (dotChar == '\t')
 			try {
 				Rectangle nextr = comp.modelToView(dot + 1);
 				if ((r.y == nextr.y) && (r.x < nextr.x)) {
 					width = nextr.x - r.x;
 					if (isVisible())
 						g.fillRect(r.x, r.y, width, r.height);
-					width = r.height / 2 + 2;
 					return;
 				}
 				else
@@ -98,11 +93,9 @@ public class MyCaret extends DefaultCaret {
 			catch (BadLocationException e) {
 				dotChar = ' ';
 			}
-		}
 
 		width = g.getFontMetrics().charWidth(dotChar);
 		if (isVisible())
 			g.fillRect(r.x, r.y, width, r.height);
-
 	}
 }

@@ -17,19 +17,19 @@ import com.ikalagaming.event.Listener;
 public class Plugin implements IPlugin {
 
 	private String packageName = "null-plugin";
-	private boolean enabled = false;
 	private final double version = 0.1;
 	private PackageManager packageManager;
 	private FileConfiguration config;
 	private PluginDescription description;
+	private PackageState state = PackageState.DISABLED;
 
 	@Override
 	public boolean disable() {
 		if (!isEnabled()) {
 			return false;
 		}
+		state = PackageState.DISABLING;
 		onDisable();
-		enabled = false;
 		return true;
 	}
 
@@ -38,8 +38,8 @@ public class Plugin implements IPlugin {
 		if (isEnabled()) {
 			return false;
 		}
+		state = PackageState.ENABLING;
 		onEnable();
-		enabled = true;
 		return true;
 	}
 
@@ -60,17 +60,27 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public boolean isEnabled() {
-		return enabled;
+		if (state == PackageState.ENABLED) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
-	public void onDisable() {}
+	public void onDisable() {
+		state = PackageState.DISABLED;
+	}
 
 	@Override
-	public void onEnable() {}
+	public void onEnable() {
+		state = PackageState.ENABLED;
+	}
 
 	@Override
 	public void onLoad() {
+		state = PackageState.LOADING;
+		state = PackageState.DISABLED;
+		// plugins will be enabled as soon as they load by default
 		if (!PackageSettings.ENABLE_ON_LOAD) {
 			enable();
 		}
@@ -78,15 +88,25 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public void onUnload() {
-		if (!PackageSettings.DISABLE_ON_UNLOAD) {
+		state = PackageState.UNLOADING;
+		if (state == PackageState.ENABLED) {
 			disable();
+			state = PackageState.UNLOADING;
 		}
+		state = PackageState.PENDING_REMOVAL;
 	}
 
 	@Override
 	public boolean reload() {
-		onUnload();
+		state = PackageState.UNLOADING;
+		if (!PackageSettings.DISABLE_ON_UNLOAD) {
+			disable();
+		}
+		if (state == PackageState.ENABLED) {
+			disable();
+		}
 		onLoad();
+		enable();// it will restart enabled
 		return true;
 	}
 
@@ -123,6 +143,11 @@ public class Plugin implements IPlugin {
 	@Override
 	public Set<Listener> getListeners() {
 		return new HashSet<Listener>();
+	}
+
+	@Override
+	public PackageState getPackageState() {
+		return state;
 	}
 
 }

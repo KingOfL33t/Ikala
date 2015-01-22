@@ -9,8 +9,9 @@ package com.ikalagaming.core.packages;
  */
 public class PackageSettings {
 	/**
-	 * If packages should be enabled when they are loaded. If this is false then
-	 * packages must be enabled manually after they are loaded.
+	 * If packages should be enabled by the package manager when they are
+	 * loaded. If this is false then packages must be enabled manually after
+	 * they are loaded.
 	 */
 	public static boolean ENABLE_ON_LOAD = true;
 	/**

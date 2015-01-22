@@ -11,6 +11,7 @@ import com.ikalagaming.core.IQueue;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.packages.Package;
+import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
@@ -29,7 +30,7 @@ public class InputPackage implements Package, Listener {
 	private PackageManager parent;
 	private final double version = 0.1;
 	private final String packageName = "user-input";
-	private boolean enabled = false;
+	private PackageState state = PackageState.DISABLED;
 	private PackageLogger logger;
 	private IQueue<String> inputBuffer;
 	private BufferedReader br;
@@ -81,7 +82,7 @@ public class InputPackage implements Package, Listener {
 	}
 
 	private void iterateReadAndWrite() {
-		if (!enabled) {
+		if (!isEnabled()) {
 			return;// just in case we need to stop taking input
 		}
 		try {
@@ -99,15 +100,15 @@ public class InputPackage implements Package, Listener {
 
 	@Override
 	public boolean disable() {
+		state = PackageState.DISABLING;
 		onDisable();
-		enabled = false;
 		return true;
 	}
 
 	@Override
 	public boolean enable() {
+		state = PackageState.ENABLING;
 		onEnable();
-		enabled = true;
 		return true;
 	}
 
@@ -128,7 +129,10 @@ public class InputPackage implements Package, Listener {
 
 	@Override
 	public boolean isEnabled() {
-		return enabled;
+		if (state == PackageState.ENABLED) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -136,9 +140,11 @@ public class InputPackage implements Package, Listener {
 
 		try {
 			br.close();
+			state = PackageState.DISABLED;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
+			state = PackageState.CORRUPTED;
 		}
 	}
 
@@ -146,24 +152,30 @@ public class InputPackage implements Package, Listener {
 	public void onEnable() {
 		br = new BufferedReader(new InputStreamReader(System.in));
 		iterateReadAndWrite();
+		state = PackageState.ENABLED;
 	}
 
 	@Override
 	public void onLoad() {
+		state = PackageState.LOADING;
 		logger = new PackageLogger(this);
 		inputBuffer = new IQueue<String>();
+		state = PackageState.DISABLED;
 	}
 
 	@Override
 	public void onUnload() {
-		enabled = false;
+		state = PackageState.UNLOADING;
 		logger = null;
+		state = PackageState.PENDING_REMOVAL;
 	}
 
 	@Override
 	public boolean reload() {
+		state = PackageState.UNLOADING;
+		logger = null;
+		onLoad();
 		enable();
-		disable();
 		return false;
 	}
 
@@ -177,5 +189,10 @@ public class InputPackage implements Package, Listener {
 		HashSet<Listener> listeners = new HashSet<Listener>();
 		listeners.add(this);
 		return listeners;
+	}
+
+	@Override
+	public PackageState getPackageState() {
+		return state;
 	}
 }

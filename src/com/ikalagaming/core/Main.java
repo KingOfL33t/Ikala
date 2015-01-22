@@ -60,6 +60,8 @@ public class Main {
 			}
 		}
 		// Game.getPackageManager().loadPlugin("minecraft");
-
+		TaskManager manager = new TaskManager(g);
+		manager.setVisible(true);
 	}
+	
 }

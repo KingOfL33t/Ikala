@@ -100,7 +100,7 @@ public interface Package {
 	 * {@link PackageState#LOADING} just before loading has started. After it is
 	 * fully loaded, it should be enabled based on the value of
 	 * {@link PackageSettings#ENABLE_ON_LOAD}. If it is not enabled then the
-	 * package state should be set to {@link #DISABLED}.
+	 * package state should be set to {@link PackageState#DISABLED}.
 	 */
 	public void onLoad();
 

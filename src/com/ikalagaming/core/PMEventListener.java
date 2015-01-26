@@ -11,6 +11,7 @@ import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.gui.events.ConsoleMessage;
+import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -26,6 +27,15 @@ public class PMEventListener implements Listener {
 	private final String onUnload;
 	private final String enable;
 	private final String disable;
+
+	private String cmd_help;
+	private String cmd_packages;
+	private String cmd_enable;
+	private String cmd_disable;
+	private String cmd_load;
+	private String cmd_unload;
+	private String cmd_reload;
+	private String cmd_version;
 
 	private PackageManager manager;
 
@@ -52,6 +62,31 @@ public class PMEventListener implements Listener {
 				SafeResourceLoader.getString("ARG_DISABLE",
 						manager.getResourceBundle(), "disable");
 
+		cmd_help =
+				SafeResourceLoader.getString("COMMAND_HELP",
+						manager.getResourceBundle(), "help");
+		cmd_packages =
+				SafeResourceLoader.getString("COMMAND_LIST_PACKAGES",
+						manager.getResourceBundle(), "packages");
+		cmd_enable =
+				SafeResourceLoader.getString("COMMAND_ENABLE",
+						manager.getResourceBundle(), "enable");
+		cmd_disable =
+				SafeResourceLoader.getString("COMMAND_DISABLE",
+						manager.getResourceBundle(), "disable");
+		cmd_load =
+				SafeResourceLoader.getString("COMMAND_LOAD",
+						manager.getResourceBundle(), "load");
+		cmd_unload =
+				SafeResourceLoader.getString("COMMAND_UNLOAD",
+						manager.getResourceBundle(), "unload");
+		cmd_reload =
+				SafeResourceLoader.getString("COMMAND_RELOAD",
+						manager.getResourceBundle(), "reload");
+		cmd_version =
+				SafeResourceLoader.getString("COMMAND_VERSION",
+						manager.getResourceBundle(), "version");
+
 	}
 
 	/**
@@ -61,17 +96,40 @@ public class PMEventListener implements Listener {
 	 */
 	@EventHandler
 	public void onCommand(CommandFired event) {
-		String help =
-				SafeResourceLoader.getString("COMMAND_HELP",
-						manager.getResourceBundle(), "COMMAND_HELP");
-		String packages =
-				SafeResourceLoader.getString("COMMAND_LIST_PACKAGES",
-						manager.getResourceBundle(), "COMMAND_LIST_PACKAGES");
-		if (event.getCommand().equalsIgnoreCase(help)) {
+
+		if (event.getCommand().equalsIgnoreCase(cmd_help)) {
 			printHelp();
 		}
-		else if (event.getCommand().equalsIgnoreCase(packages)) {
+		else if (event.getCommand().equalsIgnoreCase(cmd_packages)) {
 			printPackages();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_enable)) {
+			printWIP();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_disable)) {
+			String name = "";
+			if (event.getArgs().length >= 1) {
+				name = event.getArgs()[0];
+			}
+			disable(name);
+			printWIP();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_load)) {
+			printWIP();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_unload)) {
+			printWIP();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_reload)) {
+			printWIP();
+		}
+		else if (event.getCommand().equalsIgnoreCase(cmd_version)) {
+			String name = "";
+			if (event.getArgs().length >= 1) {
+				name = event.getArgs()[0];
+			}
+			printVersion(name);
+
 		}
 
 	}
@@ -89,6 +147,18 @@ public class PMEventListener implements Listener {
 		}
 	}
 
+	/**
+	 * Alerts the user that the given feature is not yet completed or working
+	 * correctly.
+	 */
+	private void printWIP() {
+		ConsoleMessage message =
+				new ConsoleMessage(SafeResourceLoader.getString("WIP_TEXT",
+						manager.getResourceBundle(),
+						"WIP. This may not function correctly."));
+		manager.fireEvent(message);
+	}
+
 	private void printPackages() {
 		String tmp;
 		ConsoleMessage message;
@@ -100,16 +170,95 @@ public class PMEventListener implements Listener {
 		for (String name : names) {
 			tmp = "";
 			tmp += loadedPackages.get(name).getName();
-			tmp += " " + "v" + loadedPackages.get(name).getVersion() + "";
-			// TODO localized version and enabled status
+			tmp +=
+					" "
+							+ SafeResourceLoader.getString("PACKAGE_VERSION",
+									manager.getResourceBundle(), "v")
+							+ loadedPackages.get(name).getVersion();
 			if (loadedPackages.get(name).isEnabled()) {
-				tmp += " " + "(enabled)";
+				tmp +=
+						" "
+								+ "("
+								+ SafeResourceLoader.getString(
+										"ENABLED_STATUS",
+										manager.getResourceBundle(), "Enabled")
+								+ ")";
 			}
 			else {
-				tmp += " " + "(disabled)";
+				tmp +=
+						" "
+								+ "("
+								+ SafeResourceLoader
+										.getString("DISABLED_STATUS",
+												manager.getResourceBundle(),
+												"Disabled") + ")";
 			}
 			message = new ConsoleMessage(tmp);
 			manager.fireEvent(message);
+		}
+	}
+
+	/**
+	 * Prints the version of the package specified, if it exists. If no package
+	 * exists, alerts the user to this fact.
+	 * 
+	 * @param packageName The package to find a version for
+	 */
+	private void printVersion(String packageName) {
+		String tmp = "";
+		ConsoleMessage message;
+
+		Package pack = manager.getPackage(packageName);
+
+		if (pack != null) {
+			tmp =
+					SafeResourceLoader.getString("PACKAGE_VERSION",
+							manager.getResourceBundle(), "v")
+							+ pack.getVersion();
+		}
+		else {
+			tmp =
+					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
+							manager.getResourceBundle(), "Package not found");
+		}
+		message = new ConsoleMessage(tmp);
+		manager.fireEvent(message);
+	}
+
+	/**
+	 * Disables the specified package. If no package exists, alerts the user to
+	 * this fact.
+	 * 
+	 * @param packageName The package to find a version for
+	 */
+	private void disable(String packageName) {
+		String tmp = "";
+		ConsoleMessage message;
+
+		Package pack = manager.getPackage(packageName);
+
+		if (pack == null) {
+			tmp =
+					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
+							manager.getResourceBundle(), "Package not found");
+			message = new ConsoleMessage(tmp);
+			manager.fireEvent(message);
+			// stop right here. It does not exist
+			return;
+		}
+		if (!pack.isEnabled()) {
+			tmp =
+					SafeResourceLoader.getString("package_disable_fail",
+							manager.getResourceBundle(),
+							"Package failed to disable");
+			message = new ConsoleMessage(tmp);
+			manager.fireEvent(message);
+			return;
+		}
+		else {
+			// unload the package
+			manager.fireEvent(new PackageEvent("package-manager", packageName,
+					callMethod + " " + disable));
 		}
 	}
 
@@ -122,8 +271,11 @@ public class PMEventListener implements Listener {
 	public void onPackageEvent(PackageEvent event) {
 
 		if (!manager.isLoaded(event.getTo())) {
-			// TODO log this
-			System.out.println(event.getTo() + " not loaded");
+			manager.getLogger().logError(
+					manager,
+					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
+							manager.getResourceBundle(), "Package not found"),
+					LoggingLevel.INFO, event.getTo());
 			return;
 		}
 		Package pack = manager.getPackage(event.getTo());
@@ -142,6 +294,15 @@ public class PMEventListener implements Listener {
 			}
 			else if (trimmed.startsWith(disable)) {
 				pack.disable();
+				String details =
+						SafeResourceLoader.getString("ALERT_DISABLED",
+								manager.getResourceBundle(),
+								"Package $PACKAGE ($VERSION) disabled!");
+				details = details.replaceFirst("\\$PACKAGE", pack.getName());
+				details =
+						details.replaceFirst("\\$VERSION",
+								"" + pack.getVersion());
+				manager.getLogger().log(pack, LoggingLevel.FINE, details);
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 
 package com.ikalagaming.logging;
 
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-import com.ikalagaming.core.IQueue;
 import com.ikalagaming.gui.Console;
 
 /**
@@ -14,7 +14,7 @@ import com.ikalagaming.gui.Console;
  */
 public class LogDispatcher extends Thread {
 
-	private IQueue<String> queue;
+	private LinkedList<String> queue;
 	private String currentStr;
 	private boolean running;
 	private boolean hasLogs;
@@ -27,7 +27,7 @@ public class LogDispatcher extends Thread {
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
 	public LogDispatcher(LoggingPackage manager) {
-		queue = new IQueue<String>();
+		queue = new LinkedList<String>();
 		this.hasLogs = false;
 		this.running = true;
 		this.manager = manager;

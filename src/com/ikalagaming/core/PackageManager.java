@@ -105,7 +105,6 @@ public class PackageManager implements Package {
 		return resourceBundle;
 	}
 
-	// TODO clean up methods and split into more reasonably sized functions
 	/**
 	 * <p>
 	 * Loads the given package into memory, stores it by type, and enables it if
@@ -124,21 +123,41 @@ public class PackageManager implements Package {
 	 * @return true if the package was loaded properly, false otherwise
 	 */
 	public boolean loadPackage(Package toLoad) {
-		logger.log(LoggingLevel.FINE, "Loading package " + toLoad.getName()
-				+ " (V" + toLoad.getVersion() + ")" + "...");
+		String loading =
+				SafeResourceLoader.getString("ALERT_PACKAGE_LOADING",
+						resourceBundle,
+						"Loading package $PACKAGE (v$VERSION)...");
+		loading = loading.replaceFirst("\\$PACKAGE", toLoad.getName());
+		loading = loading.replaceFirst("\\$VERSION", "" + toLoad.getVersion());
+		logger.log(LoggingLevel.FINE, loading);
 		// if the package exists and is older than toLoad, unload
 		if (isLoaded(toLoad)) {
-			logger.log(LoggingLevel.FINE, "Package " + toLoad.getName()
-					+ " is already loaded. (V" + toLoad.getVersion() + ")");
+			String alreadyLoaded =
+					SafeResourceLoader.getString(
+							"ALERT_PACKAGE_ALREADY_LOADED", resourceBundle,
+							"Package $PACKAGE is already loaded. (v$VERSION)");
+			alreadyLoaded =
+					alreadyLoaded.replaceFirst("\\$PACKAGE", toLoad.getName());
+			alreadyLoaded =
+					alreadyLoaded.replaceFirst("\\$VERSION",
+							"" + toLoad.getVersion());
+			logger.log(LoggingLevel.FINE, alreadyLoaded);
 			if (loadedPackages.get(toLoad.getName()).getVersion() < toLoad
 					.getVersion()) {
 				unloadPackage(loadedPackages.get(toLoad.getName()));
 				// unload the old package and continue loading the new one
 			}
 			else {
-				logger.log(LoggingLevel.FINE, "Package " + toLoad.getName()
-						+ " (V" + toLoad.getVersion() + ")" + " was outdated. "
-						+ "Aborting.");
+				String outdated =
+						SafeResourceLoader.getString("ALERT_PACKAGE_OUTDATED",
+								resourceBundle, "Package $PACKAGE (v$VERSION) "
+										+ "was outdated. Aborting.");
+				outdated =
+						outdated.replaceFirst("\\$PACKAGE", toLoad.getName());
+				outdated =
+						outdated.replaceFirst("\\$VERSION",
+								"" + toLoad.getVersion());
+				logger.log(LoggingLevel.FINE, outdated);
 				return false;
 			}
 		}
@@ -157,8 +176,12 @@ public class PackageManager implements Package {
 					}
 					logger.log(
 							LoggingLevel.FINER,
-							"Registered event listeners for "
-									+ toLoad.getName());
+							SafeResourceLoader.getString(
+									"ALERT_REG_EVENT_LISTENERS",
+									resourceBundle,
+									"Registered event listeners for $PACKAGE")
+									.replaceFirst("\\$PACKAGE",
+											toLoad.getName()));
 				}
 			}
 		}
@@ -166,100 +189,161 @@ public class PackageManager implements Package {
 		// load it
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS
 				&& PackageSettings.USE_EVENTS_FOR_ON_LOAD) {
-			String toSend = "";
-
-			toSend =
-					SafeResourceLoader.getString("CMD_CALL", resourceBundle,
-							"call")
-							+ " "
-							+ SafeResourceLoader.getString("ARG_ON_LOAD",
-									resourceBundle, "onLoad");
-
-			if (isLoaded("event-manager")
-					&& getPackage("event-manager").isEnabled()) {
-				logger.log(LoggingLevel.FINER,
-						"Calling onLoad of " + toLoad.getName()
-								+ " using event system.");
-				/*
-				 * Tries to send the event. If the return value is false, it
-				 * failed and therefore we must load manually
-				 */
-				if (!firePackageEvent(toLoad.getName(), toSend)) {
-					logger.log(LoggingLevel.FINER, "Event failed, "
-							+ "calling method directly.");
-					toLoad.onLoad();
-				}
-			}
-			else {
-				logger.log(LoggingLevel.FINER,
-						"Calling onLoad of " + toLoad.getName());
-				// errors creating message so the event would not work
-				toLoad.onLoad();
-			}
+			changeState(toLoad, "load", true);
 		}
 		else {
-			logger.log(LoggingLevel.FINER,
-					"Calling onLoad of " + toLoad.getName());
-			// not using events for onload, or not using events at all
-			toLoad.onLoad();
+			changeState(toLoad, "load", false);
 		}
 
 		// enable the package
 		if (PackageSettings.ENABLE_ON_LOAD) {
 			if (PackageSettings.USE_EVENTS_FOR_ACCESS
 					&& PackageSettings.USE_EVENTS_FOR_ENABLE) {
-				String toSend = "";
-				toSend =
-						SafeResourceLoader.getString("CMD_CALL",
-								resourceBundle, "call")
-								+ " "
-								+ SafeResourceLoader.getString("ARG_ENABLE",
-										resourceBundle, "enable");
-
-				if (isLoaded("event-manager")
-						&& getPackage("event-manager").isEnabled()) {
-					logger.log(LoggingLevel.FINER, "Calling enable of "
-							+ toLoad.getName() + " using event system.");
-					/*
-					 * Tries to send the event. If the return value is false, it
-					 * failed and therefore we must load manually
-					 */
-					if (!firePackageEvent(toLoad.getName(), toSend)) {
-						logger.log(LoggingLevel.FINER, "Event failed, "
-								+ "calling method directly.");
-						toLoad.enable();
-					}
-				}
-				else {
-					logger.log(LoggingLevel.FINER, "Calling enable of "
-							+ toLoad.getName());
-					// errors creating message so the event would not work
-					toLoad.enable();
-				}
+				changeState(toLoad, "enable", true);
 			}
 			else {
-				logger.log(LoggingLevel.FINER,
-						"Calling enable of " + toLoad.getName());
-				// not using events for enable, or not using events at all
-				toLoad.enable();
+				changeState(toLoad, "enable", false);
 			}
 		}
-		logger.log(LoggingLevel.FINE, "Package " + toLoad.getName() + " (V"
-				+ toLoad.getVersion() + ")" + " loaded!");
+
+		String loaded =
+				SafeResourceLoader.getString("ALERT_PACKAGE_LOADED",
+						resourceBundle, "Package $PACKAGE (v$VERSION) loaded!");
+		loaded = loaded.replaceFirst("\\$PACKAGE", toLoad.getName());
+		loaded = loaded.replaceFirst("\\$VERSION", "" + toLoad.getVersion());
+		logger.log(LoggingLevel.FINE, loaded);
 
 		if (toLoad.getName() == "event-manager") {
-			logger.log(LoggingLevel.FINER, "Registering package manager "
-					+ "listeners with event manager.");
 			EventManager manager = (EventManager) getPackage("event-manager");
 			if (manager.isEnabled()) {
 				for (Listener l : getListeners()) {
 					manager.registerEventListeners(l);
 				}
-				logger.log(LoggingLevel.FINER,
-						"Registered event listeners for " + getName());
+				logger.log(
+						LoggingLevel.FINER,
+						SafeResourceLoader.getString(
+								"ALERT_REG_EVENT_LISTENERS", resourceBundle,
+								"Registered event listeners for $PACKAGE")
+								.replaceFirst("\\$PACKAGE", getName()));
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Logs a call to the given method of the given package. Uses the
+	 * ALERT_CALL_METHOD_EVENT or ALERT_CALL_METHOD_DIRECT depending on whether
+	 * usingEvents is true or false.
+	 * 
+	 * @param method the method being called
+	 * @param pack the package the method belongs to
+	 * @param usingEvents true if it is using the event system, false if direct
+	 */
+	private void logMethodCall(String method, String pack, boolean usingEvents) {
+		String call;
+		if (usingEvents) {
+			call =
+					SafeResourceLoader.getString("ALERT_CALL_METHOD_EVENT",
+							resourceBundle,
+							"Calling $METHOD of $PACKAGE using event system");
+		}
+		else {
+			call =
+					SafeResourceLoader.getString("ALERT_CALL_METHOD_DIRECT",
+							resourceBundle,
+							"Calling $METHOD of $PACKAGE directly");
+		}
+		call = call.replaceFirst("\\$METHOD", method);
+		call = call.replaceFirst("\\$PACKAGE", pack);
+
+		logger.log(LoggingLevel.FINER, call);
+	}
+
+	/**
+	 * Change the state of a given package. The operations allowed are
+	 * <ul>
+	 * <li>load</li>
+	 * <li>enable</li>
+	 * <li>disable</li>
+	 * <li>unload</li>
+	 * </ul>
+	 * If events fail and should be used, reverts to direct calling of methods.
+	 * 
+	 * @param toChange the package to change
+	 * @param operation what you want to do to the package
+	 * @param usingEvents true if you want to use events, otherwise false
+	 */
+	private void changeState(Package toChange, String operation,
+			boolean usingEvents) {
+		String toSend = "";
+		String localMethodName = "";
+		String backupMethodName = "";
+		boolean callDirectly = usingEvents;
+		if (operation == "load") {
+			localMethodName = "ARG_ON_LOAD";
+			backupMethodName = "onLoad";
+		}
+		else if (operation == "enable") {
+			localMethodName = "ARG_ENABLE";
+			backupMethodName = "enable";
+		}
+		else if (operation == "disable") {
+			localMethodName = "ARG_DISABLE";
+			backupMethodName = "disable";
+		}
+		else if (operation == "onUnload") {
+			localMethodName = "ARG_ON_UNLOAD";
+			backupMethodName = "onUnload";
+		}
+
+		else {
+			localMethodName = "";
+			backupMethodName = "";
+		}
+
+		if (!callDirectly) {
+			toSend =
+					SafeResourceLoader.getString("CMD_CALL", resourceBundle,
+							"call")
+							+ " "
+							+ SafeResourceLoader.getString(localMethodName,
+									resourceBundle, backupMethodName);
+
+			if (isLoaded("event-manager")
+					&& getPackage("event-manager").isEnabled()) {
+				logMethodCall(backupMethodName, toChange.getName(), true);
+				/*
+				 * Tries to send the event. If the return value is false, it
+				 * failed and therefore we must load manually
+				 */
+				if (!firePackageEvent(toChange.getName(), toSend)) {
+					logger.log(LoggingLevel.FINER, SafeResourceLoader
+							.getString("ALERT_CALL_EVENT_FAILED",
+									resourceBundle,
+									"Event failed. Calling method directly"));
+					callDirectly = true;
+				}
+			}
+			else {
+				callDirectly = true;
+			}
+		}
+		// not an else, in case callDirectly was set earlier
+		if (callDirectly) {
+			logMethodCall(backupMethodName, toChange.getName(), false);
+			if (operation == "load") {
+				toChange.onLoad();
+			}
+			else if (operation == "enable") {
+				toChange.enable();
+			}
+			else if (operation == "disable") {
+				toChange.disable();
+			}
+			else if (operation == "unload") {
+				toChange.onUnload();
+			}
+		}
 	}
 
 	/**
@@ -457,10 +541,14 @@ public class PackageManager implements Package {
 	 * @return true if the package was unloaded properly
 	 */
 	public boolean unloadPackage(String toUnload) {
-		logger.log(LoggingLevel.FINE, "Unloading package " + toUnload + "...");
+		String unloading =
+				SafeResourceLoader.getString("ALERT_PACKAGE_UNLOADING",
+						resourceBundle, "Unloading package $PACKAGE...");
+		unloading = unloading.replaceFirst("\\$PACKAGE", toUnload);
+		logger.log(LoggingLevel.FINE, unloading);
 		if (!isLoaded(toUnload)) {
-			logger.log(LoggingLevel.FINE, "Package " + toUnload
-					+ " is not loaded. Aborting.");
+			logger.log(LoggingLevel.FINE, SafeResourceLoader.getString(
+					"package_not_loaded", resourceBundle, "Package not loaded"));
 			return false;
 		}
 
@@ -468,81 +556,20 @@ public class PackageManager implements Package {
 			if (loadedPackages.get(toUnload).isEnabled()) {
 				if (PackageSettings.USE_EVENTS_FOR_ACCESS
 						&& PackageSettings.USE_EVENTS_FOR_DISABLE) {
-					String toSend = "";
-
-					toSend =
-							SafeResourceLoader.getString("CMD_CALL",
-									resourceBundle, "call")
-									+ " "
-									+ SafeResourceLoader.getString(
-											"ARG_ON_DISABLE", resourceBundle,
-											"onDisable");
-
-					if (isLoaded("event-manager")
-							&& getPackage("event-manager").isEnabled()) {
-						logger.log(LoggingLevel.FINER, "Calling disable "
-								+ "method of " + toUnload + " using events.");
-						/*
-						 * Tries to send the event. If the return value is
-						 * false, it failed and therefore we must load manually
-						 */
-						if (!firePackageEvent(toUnload, toSend)) {
-							logger.log(LoggingLevel.FINER, "Events failed, "
-									+ "calling method instead.");
-							loadedPackages.get(toUnload).disable();
-						}
-					}
-					else {
-						logger.log(LoggingLevel.FINER, "Calling disable "
-								+ "method of " + toUnload);
-						// errors creating message so the event would not work
-						loadedPackages.get(toUnload).disable();
-					}
+					changeState(loadedPackages.get(toUnload), "disable", true);
 				}
 				else {
-					logger.log(LoggingLevel.FINER, "Calling disable "
-							+ "method of " + toUnload);
-					loadedPackages.get(toUnload).disable();
+					changeState(loadedPackages.get(toUnload), "disable", false);
 				}
 			}
 		}
 
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS
 				&& PackageSettings.USE_EVENTS_FOR_ON_UNLOAD) {
-			String toSend = "";
-
-			toSend =
-					SafeResourceLoader.getString("CMD_CALL", resourceBundle,
-							"call")
-							+ " "
-							+ SafeResourceLoader.getString("ARG_UNLOAD",
-									resourceBundle, "unload");
-
-			if (isLoaded("event-manager")
-					&& getPackage("event-manager").isEnabled()) {
-				logger.log(LoggingLevel.FINER, "Calling onUnload "
-						+ "method of " + toUnload + " using events.");
-				/*
-				 * Tries to send the event. If the return value is false, it
-				 * failed and therefore we must load manually
-				 */
-				if (!firePackageEvent(toUnload, toSend)) {
-					logger.log(LoggingLevel.FINER, "Events failed, "
-							+ "calling method instead.");
-					loadedPackages.get(toUnload).onUnload();
-				}
-			}
-			else {
-				logger.log(LoggingLevel.FINER, "Calling onUnload "
-						+ "method of " + toUnload);
-				// errors creating message so the event would not work
-				loadedPackages.get(toUnload).onUnload();
-			}
+			changeState(loadedPackages.get(toUnload), "unload", true);
 		}
 		else {
-			logger.log(LoggingLevel.FINER, "Calling onUnload " + "method of "
-					+ toUnload);
-			loadedPackages.get(toUnload).onUnload();
+			changeState(loadedPackages.get(toUnload), "unload", false);
 		}
 
 		if (isLoaded("event-manager")) {
@@ -551,14 +578,22 @@ public class PackageManager implements Package {
 				for (Listener l : loadedPackages.get(toUnload).getListeners()) {
 					manager.unregisterEventListeners(l);
 				}
-				logger.log(LoggingLevel.FINER,
-						"Unregistered event listeners for " + toUnload);
+				logger.log(
+						LoggingLevel.FINER,
+						SafeResourceLoader.getString(
+								"ALERT_UNREG_EVENT_LISTENERS", resourceBundle,
+								"Unregistered event listeners for $PACKAGE")
+								.replaceFirst("\\$PACKAGE", getName()));
 			}
 		}
-
 		loadedPackages.remove(toUnload);
 
-		logger.log(LoggingLevel.FINE, "Package " + toUnload + " unloaded!");
+		String unloaded =
+				SafeResourceLoader.getString("ALERT_PACKAGE_UNLOADED",
+						resourceBundle, "Package $PACKAGE unloaded!");
+		unloaded = unloaded.replaceFirst("\\$PACKAGE", toUnload);
+		logger.log(LoggingLevel.FINE, unloaded);
+
 		return true;
 	}
 
@@ -577,8 +612,8 @@ public class PackageManager implements Package {
 		 */
 		String type = toUnload.getName();
 		if (!isLoaded(type)) {
-			logger.log(LoggingLevel.FINE, "Package " + toUnload.getName()
-					+ " is not loaded. Aborting.");
+			logger.log(LoggingLevel.FINE, SafeResourceLoader.getString(
+					"package_not_loaded", resourceBundle, "Package not loaded"));
 			return;
 		}
 		unloadPackage(type);

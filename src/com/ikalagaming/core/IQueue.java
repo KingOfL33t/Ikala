@@ -12,7 +12,7 @@ import java.util.Queue;
  * 
  * @author Ches Burks
  * @param <E> The type of object the queue contains
- * 
+ * @deprecated Use a LinkedList instead.
  */
 public class IQueue<E extends Object> implements Queue<E> {
 
@@ -108,7 +108,7 @@ public class IQueue<E extends Object> implements Queue<E> {
 		try {
 			Object[] obje = e.toArray();
 			for (int i = 0; i < obje.length; ++i) {
-				obje[i + tail] = (E) obje[i];
+				array[i + tail] = (E) obje[i];
 			}
 			// update tail
 			tail += e.size();
@@ -574,14 +574,14 @@ public class IQueue<E extends Object> implements Queue<E> {
 	 * collection will contain no elements in common with the specified
 	 * collection.
 	 * 
-	 * @param events collection containing elements to be removed from this
+	 * @param objects collection containing elements to be removed from this
 	 *            collection
 	 * @return true if this collection changed as a result of the call
 	 */
 	@Override
-	public synchronized boolean removeAll(Collection<?> events) {
+	public synchronized boolean removeAll(Collection<?> objects) {
 		boolean changed = false;
-		for (Object object : events) {
+		for (Object object : objects) {
 			changed = changed || remove(object);
 			// if remove ever returns true, changed will be true
 		}
@@ -593,15 +593,15 @@ public class IQueue<E extends Object> implements Queue<E> {
 	 * specified collection (optional operation). In other words, removes
 	 * everything in the queue that is not in the supplied collection.
 	 * 
-	 * @param events collection containing elements to be retained in this
+	 * @param objects collection containing elements to be retained in this
 	 *            collection
 	 * @return true if this collection changed as a result of the call
 	 */
 	@Override
-	public synchronized boolean retainAll(Collection<?> events) {
+	public synchronized boolean retainAll(Collection<?> objects) {
 		boolean changed = false;
 		for (int i = head; i < tail; ++i) {
-			if (!events.contains(array[head])) {
+			if (!objects.contains(array[head])) {
 				changed = changed || remove(array[head]);
 				--i;
 			}

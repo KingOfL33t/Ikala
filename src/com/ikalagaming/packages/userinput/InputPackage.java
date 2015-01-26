@@ -5,9 +5,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
-import com.ikalagaming.core.IQueue;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.packages.Package;
@@ -32,7 +32,7 @@ public class InputPackage implements Package, Listener {
 	private final String packageName = "user-input";
 	private PackageState state = PackageState.DISABLED;
 	private PackageLogger logger;
-	private IQueue<String> inputBuffer;
+	private LinkedList<String> inputBuffer;
 	private BufferedReader br;
 	private String buffer;
 
@@ -43,7 +43,6 @@ public class InputPackage implements Package, Listener {
 	 */
 	public void addToInputBuffer(String str) {
 		inputBuffer.add(str);
-		System.out.println(str);
 	}
 
 	/**
@@ -151,15 +150,23 @@ public class InputPackage implements Package, Listener {
 	@Override
 	public void onEnable() {
 		br = new BufferedReader(new InputStreamReader(System.in));
-		iterateReadAndWrite();
+		
 		state = PackageState.ENABLED;
+		
+		(new Thread(loop)).start();
 	}
 
+	Runnable loop = new Runnable() {
+		public void run() {
+			iterateReadAndWrite();
+		}
+	};
+	
 	@Override
 	public void onLoad() {
 		state = PackageState.LOADING;
 		logger = new PackageLogger(this);
-		inputBuffer = new IQueue<String>();
+		inputBuffer = new LinkedList<String>();
 		state = PackageState.DISABLED;
 	}
 

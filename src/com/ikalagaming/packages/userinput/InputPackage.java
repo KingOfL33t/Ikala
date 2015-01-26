@@ -150,9 +150,9 @@ public class InputPackage implements Package, Listener {
 	@Override
 	public void onEnable() {
 		br = new BufferedReader(new InputStreamReader(System.in));
-		
+
 		state = PackageState.ENABLED;
-		
+
 		(new Thread(loop)).start();
 	}
 
@@ -161,7 +161,7 @@ public class InputPackage implements Package, Listener {
 			iterateReadAndWrite();
 		}
 	};
-	
+
 	@Override
 	public void onLoad() {
 		state = PackageState.LOADING;

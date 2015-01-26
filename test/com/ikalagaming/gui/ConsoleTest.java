@@ -25,11 +25,11 @@ public class ConsoleTest {
 	public void testResize() {
 		Console tested = new Console();
 		tested.onLoad();
-		while (tested.getPackageState() == PackageState.LOADING){
+		while (tested.getPackageState() == PackageState.LOADING) {
 			;
 		}
 		tested.enable();
-		while (tested.getPackageState() == PackageState.ENABLING){
+		while (tested.getPackageState() == PackageState.ENABLING) {
 			;
 		}
 		tested.setHeight(100);
@@ -48,11 +48,11 @@ public class ConsoleTest {
 	public void testGetters() {
 		Console tested = new Console();
 		tested.onLoad();
-		while (tested.getPackageState() == PackageState.LOADING){
+		while (tested.getPackageState() == PackageState.LOADING) {
 			;
 		}
 		tested.enable();
-		while (tested.getPackageState() == PackageState.ENABLING){
+		while (tested.getPackageState() == PackageState.ENABLING) {
 			;
 		}
 		assertNotNull(tested.getHeight());
@@ -68,11 +68,11 @@ public class ConsoleTest {
 	public void testAppendingMessage() {
 		Console tested = new Console();
 		tested.onLoad();
-		while (tested.getPackageState() == PackageState.LOADING){
+		while (tested.getPackageState() == PackageState.LOADING) {
 			;
 		}
 		tested.enable();
-		while (tested.getPackageState() == PackageState.ENABLING){
+		while (tested.getPackageState() == PackageState.ENABLING) {
 			;
 		}
 		tested.appendMessage("This is a test");
@@ -86,11 +86,11 @@ public class ConsoleTest {
 	public void testOverflowingMessages() {
 		Console tested = new Console();
 		tested.onLoad();
-		while (tested.getPackageState() == PackageState.LOADING){
+		while (tested.getPackageState() == PackageState.LOADING) {
 			;
 		}
 		tested.enable();
-		while (tested.getPackageState() == PackageState.ENABLING){
+		while (tested.getPackageState() == PackageState.ENABLING) {
 			;
 		}
 		int i;
@@ -99,7 +99,7 @@ public class ConsoleTest {
 			tested.appendMessage("Test line " + i);
 		}
 	}
-	
+
 	/**
 	 * Appends a message that is longer than one line
 	 */
@@ -107,17 +107,17 @@ public class ConsoleTest {
 	public void testLongMessage() {
 		Console tested = new Console();
 		tested.onLoad();
-		while (tested.getPackageState() == PackageState.LOADING){
+		while (tested.getPackageState() == PackageState.LOADING) {
 			;
 		}
 		tested.enable();
-		while (tested.getPackageState() == PackageState.ENABLING){
+		while (tested.getPackageState() == PackageState.ENABLING) {
 			;
 		}
 		int length = 81;
 		int i;
 		String testInput = "";
-		for (i = 0; i < length; ++i){
+		for (i = 0; i < length; ++i) {
 			testInput += "a";
 		}
 		tested.appendMessage(testInput);

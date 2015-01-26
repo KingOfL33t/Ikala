@@ -25,6 +25,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import com.ikalagaming.core.packages.PackageState;
+import java.awt.Component;
+import java.awt.GridLayout;
+import javax.swing.JLabel;
 
 /**
  * Displays various information about the program.
@@ -44,7 +47,10 @@ public class TaskManager extends JFrame {
 			new HashMap<String, PackageState>();
 	private final int maxTick = 10;
 	private int tickCount = 0;// counts down to refreshing package list
-	JPopupMenu popupMenu;
+	private JLabel threads;
+	private JLabel memUsage;
+	private long memUsed = 0;
+	private long percentUsed = 0;
 
 	/**
 	 * Updates and displays information about the program
@@ -66,6 +72,15 @@ public class TaskManager extends JFrame {
 				model.setValueAt(currentState, i, 1);
 			}
 		}
+		threads.setText(java.lang.Thread.activeCount() + "");
+
+		memUsed =
+				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime()
+						.freeMemory()) / 1024;
+		percentUsed = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime()
+				.freeMemory())*100 / Runtime.getRuntime().totalMemory();
+		
+		memUsage.setText(memUsed + " kb (" +percentUsed + "%)");
 	}
 
 	private void updatePackageNames() {
@@ -109,6 +124,27 @@ public class TaskManager extends JFrame {
 	 */
 	public long getDelay() {
 		return delay;
+	}
+
+	public void changeState(String change) {
+		int row = table.getSelectedRow();
+		if (row == -1) {
+			return;
+		}
+		// TODO determine which package to unload
+		if (change == "Enable") {
+
+		}
+		else if (change == "Disable") {
+
+		}
+		else if (change == "Load") {
+
+		}
+		else if (change == "Unload") {
+
+		}
+
 	}
 
 	/**
@@ -192,44 +228,97 @@ public class TaskManager extends JFrame {
 				"Package Name", "Status"}));
 		table.getColumnModel().getColumn(0).setPreferredWidth(102);
 
-		popupMenu = new JPopupMenu();
+		JPopupMenu popupMenu_1 = new JPopupMenu();
 
 		JMenuItem mntmEnable = new JMenuItem("Enable");
-		popupMenu.add(mntmEnable);
-
-		JMenuItem mntmDisable = new JMenuItem("Disable");
-		popupMenu.add(mntmDisable);
-
-		JMenuItem mntmUnload = new JMenuItem("Unload");
-		popupMenu.add(mntmUnload);
-
-		JMenuItem mntmReload = new JMenuItem("Reload");
-		popupMenu.add(mntmReload);
-
-		table.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {}
-
-			public void mouseReleased(MouseEvent e) {
-				if (e.isPopupTrigger()) {
-					JTable source = (JTable) e.getSource();
-					int row = source.rowAtPoint(e.getPoint());
-					int column = source.columnAtPoint(e.getPoint());
-
-					if (!source.isRowSelected(row))
-						source.changeSelection(row, column, false, false);
-
-					popupMenu.show(e.getComponent(), e.getX(), e.getY());
-				}
+		mntmEnable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				changeState("Enable");
 			}
 		});
+		popupMenu_1.add(mntmEnable);
+
+		JMenuItem mntmDisable = new JMenuItem("Disable");
+		mntmDisable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				changeState("Disable");
+			}
+		});
+		popupMenu_1.add(mntmDisable);
+
+		JMenuItem mntmUnload = new JMenuItem("Unload");
+		mntmUnload.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				changeState("Unload");
+			}
+		});
+		popupMenu_1.add(mntmUnload);
+
+		JMenuItem mntmReload = new JMenuItem("Reload");
+		mntmReload.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				changeState("Reload");
+			}
+		});
+		popupMenu_1.add(mntmReload);
+
+		addPopup(table, popupMenu_1);
 
 		scrollPane.setViewportView(table);
+
+		JPanel panel_1 = new JPanel();
+		contentPane.add(panel_1, BorderLayout.SOUTH);
+		panel_1.setLayout(new GridLayout(1, 0, 0, 0));
+
+		JLabel lblMemoryUsage = new JLabel("Memory Usage:");
+		panel_1.add(lblMemoryUsage);
+
+		memUsage = new JLabel("0");
+		panel_1.add(memUsage);
+
+		JLabel lblThreads = new JLabel("Threads:");
+		panel_1.add(lblThreads);
+
+		threads = new JLabel("0");
+		panel_1.add(threads);
 		model = (DefaultTableModel) table.getModel();
 
 		Updater update = new Updater(this);
 		update.start();
 	}
 
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+
+				if (e.getSource() instanceof JTable) {
+					JTable source = (JTable) e.getSource();
+					int row = source.rowAtPoint(e.getPoint());
+					int column = source.columnAtPoint(e.getPoint());
+
+					if (!source.isRowSelected(row))
+						source.changeSelection(row, column, false, false);
+				}
+			}
+		});
+	}
 }
 
 class Updater extends Thread {

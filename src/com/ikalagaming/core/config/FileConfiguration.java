@@ -10,6 +10,7 @@ package com.ikalagaming.core.config;
 public class FileConfiguration {
 	/**
 	 * Does nothing.
+	 * 
 	 * @deprecated this is filler
 	 */
 	public void nop() {}// TODO setup file configuration systems

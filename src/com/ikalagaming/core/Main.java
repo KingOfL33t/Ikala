@@ -63,5 +63,5 @@ public class Main {
 		TaskManager manager = new TaskManager(g);
 		manager.setVisible(true);
 	}
-	
+
 }

@@ -57,7 +57,7 @@ public class CommandFired extends Event {
 				System.arraycopy(parts, 1, args, 0, parts.length - 1);
 			}
 			else {
-				//so it is not null
+				// so it is not null
 				args = new String[0];
 			}
 		}

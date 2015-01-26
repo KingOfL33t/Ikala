@@ -34,7 +34,8 @@ public class InputPackage implements Package, Listener {
 	private PackageLogger logger;
 	private LinkedList<String> inputBuffer;
 	private BufferedReader br;
-	private String buffer;
+	private String buffer = "";
+	private Thread thread;
 
 	/**
 	 * Adds the given string to the buffer pending processing.
@@ -80,23 +81,6 @@ public class InputPackage implements Package, Listener {
 
 	}
 
-	private void iterateReadAndWrite() {
-		if (!isEnabled()) {
-			return;// just in case we need to stop taking input
-		}
-		try {
-			buffer = br.readLine();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		addToInputBuffer(buffer);
-		if (!inputBuffer.isEmpty()) {
-			processInput();
-		}
-		iterateReadAndWrite();// read until disabled
-	}
-
 	@Override
 	public boolean disable() {
 		state = PackageState.DISABLING;
@@ -136,7 +120,6 @@ public class InputPackage implements Package, Listener {
 
 	@Override
 	public void onDisable() {
-
 		try {
 			br.close();
 			state = PackageState.DISABLED;
@@ -153,12 +136,35 @@ public class InputPackage implements Package, Listener {
 
 		state = PackageState.ENABLED;
 
-		(new Thread(loop)).start();
+		thread = new Thread(loop);
+		thread.start();
 	}
 
 	Runnable loop = new Runnable() {
 		public void run() {
-			iterateReadAndWrite();
+			while (isEnabled()){
+				try {
+					if (br.ready()){
+						buffer += br.read();
+					}
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				if (buffer.endsWith(System.lineSeparator())){
+					addToInputBuffer(buffer);
+				}
+				
+				if (!inputBuffer.isEmpty()) {
+					processInput();
+				}
+				try {
+					Thread.sleep(10L);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	};
 

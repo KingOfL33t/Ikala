@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import com.ikalagaming.core.Game;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.packages.Package;
@@ -27,7 +28,6 @@ import com.ikalagaming.util.SafeResourceLoader;
  */
 public class InputPackage implements Package, Listener {
 
-	private PackageManager parent;
 	private final double version = 0.1;
 	private final String packageName = "user-input";
 	private PackageState state = PackageState.DISABLED;
@@ -56,27 +56,28 @@ public class InputPackage implements Package, Listener {
 		}
 		line = inputBuffer.remove();
 		String firstWord = line.trim().split(" ")[0];
-		if (parent.getCommandRegistry().contains(firstWord)) {
-			if (parent.isLoaded("event-manager")) {
+		if (Game.getPackageManager().getCommandRegistry().contains(firstWord)) {
+			if (Game.getPackageManager().isLoaded("event-manager")) {
 				EventManager mgr =
-						(EventManager) parent.getPackage("event-manager");
+						(EventManager) Game.getPackageManager().getPackage(
+								"event-manager");
 				CommandFired event =
-						new CommandFired(parent.getCommandRegistry()
-								.getParent(firstWord).getName(), line);
+						new CommandFired(Game.getPackageManager()
+								.getCommandRegistry().getParent(firstWord)
+								.getName(), line);
 				mgr.fireEvent(event);
 			}
 			else {
 				logger.logError(SafeResourceLoader.getString(
-						"package_not_loaded", parent.getResourceBundle(),
-						"Package not loaded"), LoggingLevel.WARNING,
-						"event-manager");
+						"package_not_loaded", Game.getPackageManager()
+								.getResourceBundle(), "Package not loaded"),
+						LoggingLevel.WARNING, "event-manager");
 			}
 		}
 		else {
-			logger.logError(
-					SafeResourceLoader.getString("command_unknown",
-							parent.getResourceBundle(), "Unknown command"),
-					LoggingLevel.INFO, firstWord);
+			logger.logError(SafeResourceLoader.getString("command_unknown",
+					Game.getPackageManager().getResourceBundle(),
+					"Unknown command"), LoggingLevel.INFO, firstWord);
 		}
 
 	}
@@ -93,11 +94,6 @@ public class InputPackage implements Package, Listener {
 		state = PackageState.ENABLING;
 		onEnable();
 		return true;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return parent;
 	}
 
 	@Override
@@ -142,19 +138,19 @@ public class InputPackage implements Package, Listener {
 
 	Runnable loop = new Runnable() {
 		public void run() {
-			while (isEnabled()){
+			while (isEnabled()) {
 				try {
-					if (br.ready()){
+					if (br.ready()) {
 						buffer += br.read();
 					}
 				}
 				catch (IOException e) {
 					e.printStackTrace();
 				}
-				if (buffer.endsWith(System.lineSeparator())){
+				if (buffer.endsWith(System.lineSeparator())) {
 					addToInputBuffer(buffer);
 				}
-				
+
 				if (!inputBuffer.isEmpty()) {
 					processInput();
 				}
@@ -190,11 +186,6 @@ public class InputPackage implements Package, Listener {
 		onLoad();
 		enable();
 		return false;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		this.parent = parent;
 	}
 
 	@Override

@@ -59,13 +59,12 @@ public class EventDispatcher extends Thread {
 			;// do nothing since its a null event
 		}
 		catch (Exception e) {
-			if (manager.getPackageManager() != null) {
-				logger.logError("error firing event", LoggingLevel.WARNING,
-						e.toString());
-			}
-			else {
-				System.err.println(e.toString());
-			}
+
+			logger.logError("error firing event", LoggingLevel.WARNING,
+					e.toString());
+
+			System.err.println(e.toString());
+
 		}
 	}
 
@@ -120,15 +119,14 @@ public class EventDispatcher extends Thread {
 			return;
 		}
 		catch (Exception e) {
-			if (manager.getPackageManager() != null) {
-				logger.logError("error running event dispatcher",
-						LoggingLevel.WARNING, e.toString()
-								+ " at EventDispatcher.run()");
-				e.printStackTrace();
-			}
-			else {
-				System.err.println(e.toString());
-			}
+
+			logger.logError("error running event dispatcher",
+					LoggingLevel.WARNING, e.toString()
+							+ " at EventDispatcher.run()");
+			e.printStackTrace();
+
+			System.err.println(e.toString());
+
 		}
 	}
 

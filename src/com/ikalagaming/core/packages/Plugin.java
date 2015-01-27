@@ -4,7 +4,6 @@ package com.ikalagaming.core.packages;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.config.FileConfiguration;
 import com.ikalagaming.event.Listener;
 
@@ -18,7 +17,6 @@ public class Plugin implements IPlugin {
 
 	private String packageName = "null-plugin";
 	private final double version = 0.1;
-	private PackageManager packageManager;
 	private FileConfiguration config;
 	private PluginDescription description;
 	private PackageState state = PackageState.DISABLED;
@@ -41,11 +39,6 @@ public class Plugin implements IPlugin {
 		state = PackageState.ENABLING;
 		onEnable();
 		return true;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return packageManager;
 	}
 
 	@Override
@@ -108,11 +101,6 @@ public class Plugin implements IPlugin {
 		onLoad();
 		enable();// it will restart enabled
 		return true;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		packageManager = parent;
 	}
 
 	@Override

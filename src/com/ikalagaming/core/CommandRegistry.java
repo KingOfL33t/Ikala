@@ -5,7 +5,8 @@ import java.util.ArrayList;
 
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -23,7 +24,6 @@ public class CommandRegistry {
 	private ArrayList<RegisteredCommand> commands;
 
 	private PackageManager manager;
-	private PackageLogger logger;
 
 	/**
 	 * Constructs a new command registry and sets up the internal structures.
@@ -33,7 +33,6 @@ public class CommandRegistry {
 	public CommandRegistry(PackageManager manager) {
 		commands = new ArrayList<RegisteredCommand>();
 		this.manager = manager;
-		logger = new PackageLogger(manager);
 	}
 
 	/**
@@ -47,18 +46,31 @@ public class CommandRegistry {
 	public boolean registerCommand(String command, Package owner) {
 		if (contains(command)) {
 			int index = getIndexOf(command);
-			logger.logError(SafeResourceLoader.getString(
-					"command_already_registered", manager.getResourceBundle(),
-					"command already registered"), LoggingLevel.WARNING,
-					command + " is already registered to "
-							+ commands.get(index).getOwner().getName());
+			String msg =
+					SafeResourceLoader
+							.getString("COMMAND_ALREADY_REGISTERED",
+									manager.getResourceBundle(),
+									"Command $COMMAND is already registered to $PACKAGE");
+			msg = msg.replaceFirst("\\$COMMAND", command);
+			msg =
+					msg.replaceFirst("\\$PACKAGE", commands.get(index)
+							.getOwner().getName());
+			LogError err =
+					new LogError(msg, LoggingLevel.WARNING, manager.getName());
+			Game.getEventManager().fireEvent(err);
 			return false;
 		}
 		else {
 			RegisteredCommand cmd = new RegisteredCommand(command, owner);
 			commands.add(cmd);
-			logger.log(LoggingLevel.FINEST, "Registered command " + command
-					+ " to " + owner.getName());
+			String msg =
+					SafeResourceLoader.getString("REGISTERED_COMMAND",
+							manager.getResourceBundle(),
+							"Registered command $COMMAND to $PACKAGE");
+			msg = msg.replaceFirst("\\$COMMAND", command);
+			msg = msg.replaceFirst("\\$PACKAGE", owner.getName());
+			Log log = new Log(msg, LoggingLevel.FINEST, manager.getName());
+			Game.getEventManager().fireEvent(log);
 			java.util.Collections.sort(commands);
 			return true;
 		}
@@ -76,7 +88,13 @@ public class CommandRegistry {
 				int index = getIndexOf(command);
 				commands.remove(index);
 			}
-			logger.log(LoggingLevel.FINEST, "Unregistered command " + command);
+			String msg =
+					SafeResourceLoader.getString("UNREGISTERED_COMMAND",
+							manager.getResourceBundle(),
+							"Unregistered command $COMMAND");
+			msg = msg.replaceFirst("\\$COMMAND", command);
+			Log log = new Log(msg, LoggingLevel.FINEST, manager.getName());
+			Game.getEventManager().fireEvent(log);
 			return true;
 		}
 		else {

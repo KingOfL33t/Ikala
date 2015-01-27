@@ -14,6 +14,7 @@ import com.ikalagaming.packages.rng.RngPackageMain;
  */
 public class Game {
 	private static PackageManager packageMgr;
+	private static EventManager eventMgr;
 	private static final String rootFolderName = "KnightsOfIkala";
 	// subfolder where plugins are located
 	private static final String pluginFolder = "plugins";
@@ -47,6 +48,15 @@ public class Game {
 	 */
 	public static PackageManager getPackageManager() {
 		return packageMgr;
+	}
+
+	/**
+	 * Returns the game's event manager.
+	 * 
+	 * @return The package manager
+	 */
+	public static EventManager getEventManager() {
+		return eventMgr;
 	}
 
 	/**
@@ -109,6 +119,11 @@ public class Game {
 		if (packageMgr == null) {
 			packageMgr = new PackageManager();
 		}
+		if (eventMgr == null) {
+			eventMgr = new EventManager();
+		}
+		packageMgr.enable();// finishes loading
+		packageMgr.loadPackage(eventMgr);
 		loadCorePackages();
 		setupDirectories();
 	}
@@ -117,7 +132,6 @@ public class Game {
 	 * Loads the main packages used by the game like the event system.
 	 */
 	private void loadCorePackages() {
-		packageMgr.loadPackage(new EventManager());
 		packageMgr.loadPackage(new RngPackageMain());
 	}
 

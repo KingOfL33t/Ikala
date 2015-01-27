@@ -4,11 +4,13 @@ package com.ikalagaming.logging;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import com.ikalagaming.core.Game;
 import com.ikalagaming.gui.Console;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
  * 
+ * @deprecated use events instead
  * @author Ches Burks
  * 
  */
@@ -24,6 +26,7 @@ public class LogDispatcher extends Thread {
 	 * Creates and starts the thread. It will begin attempting to dispatch
 	 * events immediately if there are any available.
 	 * 
+	 * @deprecated use events instead
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
 	public LogDispatcher(LoggingPackage manager) {
@@ -35,7 +38,7 @@ public class LogDispatcher extends Thread {
 
 	/**
 	 * Adds the String to the queue pending logging.
-	 * 
+	 * @deprecated use events instead
 	 * @param log The log message to record
 	 * @throws IllegalStateException if the element cannot be added at this time
 	 *             due to capacity restrictions
@@ -59,6 +62,7 @@ public class LogDispatcher extends Thread {
 	/**
 	 * Checks for Strings in the queue, and logs them if possible. Does not do
 	 * anything if {@link #terminate()} has been called.
+	 * @deprecated use events instead
 	 */
 	public void run() {
 		if (!running) {
@@ -87,10 +91,10 @@ public class LogDispatcher extends Thread {
 				// log it to the system output stream
 				System.out.println(currentStr);
 
-				if (manager != null && manager.getPackageManager() != null
-						&& manager.getPackageManager().isLoaded("console")) {
+				if (manager != null && Game.getPackageManager() != null
+						&& Game.getPackageManager().isLoaded("console")) {
 					Console c =
-							(Console) manager.getPackageManager().getPackage(
+							(Console) Game.getPackageManager().getPackage(
 									"console");
 					if (c.isEnabled()) {
 						c.appendMessage(currentStr);

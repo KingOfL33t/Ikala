@@ -26,6 +26,7 @@ import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
+import com.ikalagaming.core.Game;
 import com.ikalagaming.core.Localization;
 import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
@@ -195,7 +196,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	private final int maxHistory = 30;
 
 	private CommandHistory history;
-	private PackageManager packageManager;
 	private String packageName = "console";
 	private PackageState state = PackageState.DISABLED;
 	private PackageLogger logger;
@@ -342,11 +342,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	 */
 	public int getMaxLineCount() {
 		return maxLineCount;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return this.packageManager;
 	}
 
 	/**
@@ -621,7 +616,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		resourceBundle = null;
 		history = null;
-		packageManager = null;
 		logger = null;
 		synchronized (state) {
 			state = PackageState.PENDING_REMOVAL;
@@ -640,7 +634,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		resourceBundle = null;
 		history = null;
-		packageManager = null;
 		logger = null;
 
 		onLoad();
@@ -688,7 +681,7 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 
 		String firstWord = line.trim().split("\\s+")[0];
 
-		if (!packageManager.getCommandRegistry().contains(firstWord)) {
+		if (!Game.getPackageManager().getCommandRegistry().contains(firstWord)) {
 			appendMessage(SafeResourceLoader.getString("unknown_command",
 					resourceBundle, "Unknown command")
 					+ " '"
@@ -697,13 +690,17 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 					+ SafeResourceLoader.getString("try_cmd", resourceBundle,
 							"For a list of available commands, type")
 					+ " '"
-					+ SafeResourceLoader.getString("COMMAND_HELP",
-							packageManager.getResourceBundle(), "help") + "'");
+					+ SafeResourceLoader.getString("COMMAND_HELP", Game
+							.getPackageManager().getResourceBundle(), "help")
+					+ "'");
 		}
 
-		Package pack = packageManager.getCommandRegistry().getParent(firstWord);
+		Package pack =
+				Game.getPackageManager().getCommandRegistry()
+						.getParent(firstWord);
 		if (pack != null) {
-			packageManager.fireEvent(new CommandFired(pack.getName(), line));
+			Game.getPackageManager().fireEvent(
+					new CommandFired(pack.getName(), line));
 		}
 
 	}
@@ -740,11 +737,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	 */
 	public void setMaxLineCount(int maxLineCount) {
 		this.maxLineCount = maxLineCount;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		this.packageManager = parent;
 	}
 
 	/**

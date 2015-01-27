@@ -3,7 +3,6 @@ package com.ikalagaming.core.packages;
 
 import java.util.Set;
 
-import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.event.Listener;
 
 /**
@@ -44,13 +43,6 @@ public interface Package {
 	 * @return true if the package was successfully enabled
 	 */
 	public boolean enable();
-
-	/**
-	 * Returns the current package manager reference, if it exists.
-	 * 
-	 * @return the parent package manager
-	 */
-	public PackageManager getPackageManager();
 
 	/**
 	 * Returns the type of package this is. This is a string that describes the
@@ -150,13 +142,6 @@ public interface Package {
 	 * @return true if the package reloaded successfully
 	 */
 	public boolean reload();
-
-	/**
-	 * Stores a reference to the PackageManager that is handling this package.
-	 * 
-	 * @param parent the parent package manager
-	 */
-	public void setPackageManager(PackageManager parent);
 
 	/**
 	 * Returns a list of listeners for this package. These listeners will be

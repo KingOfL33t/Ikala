@@ -53,10 +53,7 @@ public class PackageManager implements Package {
 		catch (MissingResourceException e) {
 			e.printStackTrace(System.err);
 		}
-		cmdRegistry = new CommandRegistry(this);
-		registerCommands();
-		logger = new PackageLogger(this);
-		listener = new PMEventListener(this);
+
 	}
 
 	/**
@@ -164,7 +161,6 @@ public class PackageManager implements Package {
 
 		// store the new package
 		loadedPackages.put(toLoad.getName(), toLoad);
-		toLoad.setPackageManager(this);
 
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS) {
 			if (isLoaded("event-manager")) {
@@ -623,6 +619,7 @@ public class PackageManager implements Package {
 	 * Returns the logger for the system. If one does not exist, it will be
 	 * created.
 	 * 
+	 * @deprecated Use events to log
 	 * @return a logger for the engine
 	 */
 	public LoggingPackage getLogger() {
@@ -661,12 +658,11 @@ public class PackageManager implements Package {
 
 	@Override
 	public boolean enable() {
-		return false;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return this;
+		cmdRegistry = new CommandRegistry(this);
+		logger = new PackageLogger(this);
+		listener = new PMEventListener(this);
+		registerCommands();
+		return true;
 	}
 
 	@Override
@@ -700,9 +696,6 @@ public class PackageManager implements Package {
 	public boolean reload() {
 		return false;
 	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {}
 
 	@Override
 	public Set<Listener> getListeners() {

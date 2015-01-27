@@ -6,7 +6,6 @@ import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Listener;
@@ -20,7 +19,6 @@ import com.ikalagaming.event.Listener;
 public class RngPackageMain implements Package, Listener {
 
 	private Generator gen;
-	private PackageManager parent;
 	private final double version = 0.1;
 	private final String packageName = "rng";
 	private PackageState state = PackageState.DISABLED;
@@ -114,11 +112,6 @@ public class RngPackageMain implements Package, Listener {
 	}
 
 	@Override
-	public PackageManager getPackageManager() {
-		return parent;
-	}
-
-	@Override
 	public String getName() {
 		return packageName;
 	}
@@ -177,11 +170,6 @@ public class RngPackageMain implements Package, Listener {
 		}
 		onLoad();
 		return false;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		this.parent = parent;
 	}
 
 	@Override

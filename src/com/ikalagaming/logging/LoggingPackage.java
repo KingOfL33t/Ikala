@@ -7,7 +7,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.ikalagaming.core.Localization;
-import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageSettings;
@@ -26,7 +25,6 @@ public class LoggingPackage implements Package {
 	private ResourceBundle resourceBundle;
 	private PackageState state = PackageState.DISABLED;
 	private final double version = 0.1;
-	private PackageManager packageManager;
 	private String packageName = "logging";
 	private LogDispatcher dispatcher;
 	private String newLog = "";
@@ -40,6 +38,8 @@ public class LoggingPackage implements Package {
 	 * code and logging level. This only logs errors that are above or equal to
 	 * the threshold. The package name is listed before the info. <br>
 	 * If the package is not enabled, simply logs straight to System.err
+	 * 
+	 * @deprecated use events instead
 	 * 
 	 * @param origin The package that is logging the error
 	 * @param error The error that occurred
@@ -82,6 +82,8 @@ public class LoggingPackage implements Package {
 	 * level. This only logs information that is above or equal to the logging
 	 * threshold. <br>
 	 * If the package is not enabled, simply logs straight to System.out
+	 * 
+	 * @deprecated use events instead
 	 * 
 	 * @param origin The package that is logging the info
 	 * @param level what level is the requested log
@@ -167,7 +169,6 @@ public class LoggingPackage implements Package {
 			disable();
 		}
 		this.resourceBundle = null;
-		this.packageManager = null;
 		state = PackageState.LOADING;
 		onLoad();
 		enable();// it will start up enabled
@@ -213,18 +214,7 @@ public class LoggingPackage implements Package {
 	public void onUnload() {
 		state = PackageState.UNLOADING;
 		this.resourceBundle = null;
-		this.packageManager = null;
 		state = PackageState.PENDING_REMOVAL;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		this.packageManager = parent;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return this.packageManager;
 	}
 
 	@Override

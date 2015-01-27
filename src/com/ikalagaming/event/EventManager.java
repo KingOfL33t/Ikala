@@ -7,12 +7,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ikalagaming.core.PackageManager;
+import com.ikalagaming.core.Game;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageSettings;
 import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -23,10 +24,8 @@ public class EventManager implements Package {
 	private EventDispatcher dispatcher;
 	private PackageState state = PackageState.DISABLED;
 	private final double version = 0.1;
-	private PackageManager packageManager;
 	private HashMap<Class<? extends Event>, HandlerList> handlerMap;
 	private String packageName = "event-manager";
-	private PackageLogger logger;
 
 	/**
 	 * Registers event listeners in the supplied listener.
@@ -82,9 +81,20 @@ public class EventManager implements Package {
 			throw illegalState;
 		}
 		catch (Exception e) {
-			logger.logError(SafeResourceLoader.getString("event_queue_full",
-					packageManager.getResourceBundle(), "Event queue full"),
-					LoggingLevel.WARNING, "EventManager.fireEvent(Event)");
+			if (event instanceof Log || event instanceof LogError) {
+				e.printStackTrace(System.err);
+			}
+			else {
+				LogError err =
+						new LogError(SafeResourceLoader.getString(
+								"EVT_QUEUE_FULL",
+								Game.getPackageManager().getResourceBundle(),
+								"Event queue full"),
+								"EventManager.fireEvent(Event)",
+								LoggingLevel.WARNING, this);
+				dispatcher.dispatchEvent(err);
+			}
+
 		}
 	}
 
@@ -191,10 +201,14 @@ public class EventManager implements Package {
 			this.onEnable();
 		}
 		catch (Exception e) {
-			logger.logError(SafeResourceLoader.getString("package_enable_fail",
-					packageManager.getResourceBundle(),
-					"Package failed to enable"), LoggingLevel.SEVERE,
-					"EventManager.enable()");
+			LogError err =
+					new LogError(SafeResourceLoader.getString(
+							"package_enable_fail",
+							Game.getPackageManager().getResourceBundle(),
+							"Package failed to enable"),
+							"EventManager.enable()", LoggingLevel.SEVERE, this);
+			dispatcher.dispatchEvent(err);
+			e.printStackTrace(System.err);
 			// better safe than sorry (probably did not initialize correctly)
 			state = PackageState.CORRUPTED;
 			return false;
@@ -212,10 +226,13 @@ public class EventManager implements Package {
 			this.onDisable();
 		}
 		catch (Exception e) {
-			logger.logError(SafeResourceLoader.getString(
-					"package_disable_fail", packageManager.getResourceBundle(),
-					"Package failed to disable"), LoggingLevel.SEVERE,
-					"EventManager.disable()");
+			LogError err =
+					new LogError(SafeResourceLoader.getString(
+							"package_disable_fail",
+							Game.getPackageManager().getResourceBundle(),
+							"Package failed to disable"),
+							"EventManager.disable()", LoggingLevel.SEVERE, this);
+			dispatcher.dispatchEvent(err);
 			state = PackageState.CORRUPTED;
 			return false;
 		}
@@ -264,9 +281,14 @@ public class EventManager implements Package {
 			dispatcher.join();
 		}
 		catch (InterruptedException e) {
-			logger.logError(SafeResourceLoader.getString("thread_interrupted",
-					packageManager.getResourceBundle(), "Thread interrupted"),
-					LoggingLevel.WARNING, "EventManager.onDisable()");
+			LogError err =
+					new LogError(SafeResourceLoader.getString(
+							"thread_interrupted",
+							Game.getPackageManager().getResourceBundle(),
+							"Thread interrupted"), "EventManager.onDisable()",
+							LoggingLevel.SEVERE, this);
+			dispatcher.dispatchEvent(err);
+			e.printStackTrace(System.err);
 			state = PackageState.CORRUPTED;
 		}
 		state = PackageState.DISABLED;
@@ -275,7 +297,6 @@ public class EventManager implements Package {
 	@Override
 	public void onLoad() {
 		state = PackageState.LOADING;
-		logger = new PackageLogger(this);
 		state = PackageState.DISABLED;
 		if (!PackageSettings.ENABLE_ON_LOAD) {
 			enable();
@@ -289,19 +310,7 @@ public class EventManager implements Package {
 			disable();
 			state = PackageState.UNLOADING;
 		}
-		this.packageManager = null;
-		logger = null;
 		state = PackageState.PENDING_REMOVAL;
-	}
-
-	@Override
-	public void setPackageManager(PackageManager parent) {
-		this.packageManager = parent;
-	}
-
-	@Override
-	public PackageManager getPackageManager() {
-		return this.packageManager;
 	}
 
 	@Override

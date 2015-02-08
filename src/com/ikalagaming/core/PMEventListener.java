@@ -12,6 +12,8 @@ import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.gui.events.ConsoleMessage;
 import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -218,8 +220,10 @@ public class PMEventListener implements Listener {
 		}
 		else {
 			tmp =
-					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
-							manager.getResourceBundle(), "Package not found");
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							manager.getResourceBundle(),
+							"Package $PACKAGE not loaded").replaceFirst(
+							"\\$PACKAGE", packageName);
 		}
 		message = new ConsoleMessage(tmp);
 		manager.fireEvent(message);
@@ -239,8 +243,10 @@ public class PMEventListener implements Listener {
 
 		if (pack == null) {
 			tmp =
-					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
-							manager.getResourceBundle(), "Package not found");
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							manager.getResourceBundle(),
+							"Package $PACKAGE not loaded").replaceFirst(
+							"\\$PACKAGE", packageName);
 			message = new ConsoleMessage(tmp);
 			manager.fireEvent(message);
 			// stop right here. It does not exist
@@ -271,11 +277,13 @@ public class PMEventListener implements Listener {
 	public void onPackageEvent(PackageEvent event) {
 
 		if (!manager.isLoaded(event.getTo())) {
-			manager.getLogger().logError(
-					manager,
-					SafeResourceLoader.getString("NO_SUCH_PACKAGE",
-							manager.getResourceBundle(), "Package not found"),
-					LoggingLevel.INFO, event.getTo());
+			String err =
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							manager.getResourceBundle(),
+							"Package $PACKAGE not loaded").replaceFirst(
+							"\\$PACKAGE", event.getTo());
+			Game.getEventManager().fireEvent(
+					new LogError(err, LoggingLevel.INFO, "package-manager"));
 			return;
 		}
 		Package pack = manager.getPackage(event.getTo());
@@ -302,7 +310,8 @@ public class PMEventListener implements Listener {
 				details =
 						details.replaceFirst("\\$VERSION",
 								"" + pack.getVersion());
-				manager.getLogger().log(pack, LoggingLevel.FINE, details);
+				Game.getEventManager().fireEvent(
+						new Log(details, LoggingLevel.FINE, "package-manager"));
 			}
 		}
 	}

@@ -4,8 +4,10 @@ package com.ikalagaming.event;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import com.ikalagaming.core.Game;
 import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 
 /**
  * Holds an EventQueue and dispatches the events in order when possible.
@@ -21,7 +23,6 @@ public class EventDispatcher extends Thread {
 	private HandlerList handlers;
 	private EventListener[] listeners;
 	private EventManager manager;
-	private PackageLogger logger;
 
 	private boolean running;
 	private boolean hasEvents;
@@ -37,7 +38,6 @@ public class EventDispatcher extends Thread {
 		this.manager = manager;
 		this.hasEvents = false;
 		this.running = true;
-		logger = new PackageLogger(manager);
 	}
 
 	/**
@@ -59,11 +59,30 @@ public class EventDispatcher extends Thread {
 			;// do nothing since its a null event
 		}
 		catch (Exception e) {
+			if (event instanceof Log) {
+				System.err.println(e.toString());
+			}
+			else if (event instanceof LogError) {
+				System.err.println(e.toString());
+			}
+			else {
+				/*
+				 * It was not a problem with the logging, so try to log the
+				 * error. If that fails, logging is broken so print to
+				 * System.err for the devs.
+				 */
+				// TODO This code is in need of major cleanup.
+				try {
+					// TODO Localize this error message
+					Game.getEventManager().fireEvent(
+							new LogError("Error occurred firing event",
+									LoggingLevel.WARNING, "event-manager"));
+				}
+				catch (Exception messyErrorHandling) {
+					System.err.println(messyErrorHandling.toString());
+				}
 
-			logger.logError("error firing event", LoggingLevel.WARNING,
-					e.toString());
-
-			System.err.println(e.toString());
+			}
 
 		}
 	}
@@ -119,10 +138,10 @@ public class EventDispatcher extends Thread {
 			return;
 		}
 		catch (Exception e) {
-
-			logger.logError("error running event dispatcher",
-					LoggingLevel.WARNING, e.toString()
-							+ " at EventDispatcher.run()");
+			// TODO Localize this error message
+			String error = "Error running event dispatcher";
+			Game.getEventManager().fireEvent(
+					new LogError(error, LoggingLevel.WARNING, "event-manager"));
 			e.printStackTrace();
 
 			System.err.println(e.toString());
@@ -141,7 +160,6 @@ public class EventDispatcher extends Thread {
 	public void terminate() {
 		hasEvents = false;
 		running = false;
-		manager = null;// stop memory freeing from being stopped
-		logger = null;
+		manager = null;
 	}
 }

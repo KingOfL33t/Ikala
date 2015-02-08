@@ -11,7 +11,10 @@ import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageSettings;
 import com.ikalagaming.core.packages.PackageState;
+import com.ikalagaming.event.EventHandler;
 import com.ikalagaming.event.Listener;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -20,7 +23,7 @@ import com.ikalagaming.util.SafeResourceLoader;
  * @author Ches Burks
  * 
  */
-public class LoggingPackage implements Package {
+public class LoggingPackage implements Package, Listener {
 
 	private ResourceBundle resourceBundle;
 	private PackageState state = PackageState.DISABLED;
@@ -39,14 +42,12 @@ public class LoggingPackage implements Package {
 	 * the threshold. The package name is listed before the info. <br>
 	 * If the package is not enabled, simply logs straight to System.err
 	 * 
-	 * @deprecated use events instead
-	 * 
 	 * @param origin The package that is logging the error
 	 * @param error The error that occurred
 	 * @param level what level is the requested log
 	 * @param details additional information about the error
 	 */
-	public void logError(Package origin, String error, LoggingLevel level,
+	private void logError(String origin, String error, LoggingLevel level,
 			String details) {
 		newLog = "";
 		if (!isEnabled()) {
@@ -66,7 +67,7 @@ public class LoggingPackage implements Package {
 						+ " "
 						+ SafeResourceLoader.getString("level_prefix",
 								resourceBundle, "[")
-						+ origin.getName()
+						+ origin
 						+ SafeResourceLoader.getString("level_postfix",
 								resourceBundle, "]")
 						+ " "
@@ -78,18 +79,16 @@ public class LoggingPackage implements Package {
 	}
 
 	/**
-	 * Logs the provided error. Attempts to use localized names for the logging
-	 * level. This only logs information that is above or equal to the logging
-	 * threshold. <br>
+	 * Logs the provided information. Attempts to use localized names for the
+	 * logging level. This only logs information that is above or equal to the
+	 * logging threshold. <br>
 	 * If the package is not enabled, simply logs straight to System.out
-	 * 
-	 * @deprecated use events instead
 	 * 
 	 * @param origin The package that is logging the info
 	 * @param level what level is the requested log
 	 * @param details what to log
 	 */
-	public void log(Package origin, LoggingLevel level, String details) {
+	private void log(String origin, LoggingLevel level, String details) {
 		newLog = "";
 		if (!isEnabled()) {
 			System.out.println(level.getName() + " " + details);
@@ -106,7 +105,7 @@ public class LoggingPackage implements Package {
 							+ " "
 							+ SafeResourceLoader.getString("level_prefix",
 									resourceBundle, "[")
-							+ origin.getName()
+							+ origin
 							+ SafeResourceLoader.getString("level_postfix",
 									resourceBundle, "]") + " " + details;
 		}
@@ -135,7 +134,8 @@ public class LoggingPackage implements Package {
 			this.onEnable();
 		}
 		catch (Exception e) {
-			logError(this, "Package enable fail", LoggingLevel.SEVERE,
+			// TODO localize this
+			logError(packageName, "Package enable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
 			// better safe than sorry (probably did not initialize correctly)
 			state = PackageState.CORRUPTED;
@@ -151,7 +151,8 @@ public class LoggingPackage implements Package {
 			this.onDisable();
 		}
 		catch (Exception e) {
-			logError(this, "package disable fail", LoggingLevel.SEVERE,
+			// TODO localize this
+			logError(packageName, "package disable fail", LoggingLevel.SEVERE,
 					"LoggingPackage.enable()");
 			state = PackageState.CORRUPTED;
 			return false;
@@ -202,7 +203,8 @@ public class LoggingPackage implements Package {
 							Localization.getLocale());
 		}
 		catch (MissingResourceException missingResource) {
-			logError(this, "locale not found", LoggingLevel.SEVERE,
+			// TODO Attempt to localize this somehow
+			logError(packageName, "locale not found", LoggingLevel.SEVERE,
 					"LoggingPackage.onLoad()");
 		}
 		dispatcher = new LogDispatcher(this);
@@ -225,6 +227,33 @@ public class LoggingPackage implements Package {
 	@Override
 	public PackageState getPackageState() {
 		return state;
+	}
+
+	/**
+	 * Logs the provided information. Attempts to use localized names for the
+	 * logging level. This only logs information that is above or equal to the
+	 * logging threshold. <br>
+	 * If the package is not enabled, simply logs straight to System.out
+	 * 
+	 * @param event the Event to record
+	 */
+	@EventHandler
+	public void onLogEvent(Log event) {
+		log(event.getSender(), event.getLevel(), event.getDetails());
+	}
+
+	/**
+	 * Logs the provided error. Attempts to use localized names for the error
+	 * code and logging level. This only logs errors that are above or equal to
+	 * the threshold. The package name is listed before the info. <br>
+	 * If the package is not enabled, simply logs straight to System.err
+	 * 
+	 * @param event the Event to record
+	 */
+	@EventHandler
+	public void onLogErrorEvent(LogError event) {
+		logError(event.getSender(), event.getError(), event.getLevel(),
+				event.getDetails());
 	}
 
 }

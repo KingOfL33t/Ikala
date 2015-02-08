@@ -116,14 +116,14 @@ public class Game {
 	 * Initializes main subsystems.
 	 */
 	public void init() {
-		if (packageMgr == null) {
-			packageMgr = new PackageManager();
-		}
 		if (eventMgr == null) {
 			eventMgr = new EventManager();
 		}
-		packageMgr.enable();// finishes loading
-		packageMgr.loadPackage(eventMgr);
+		if (packageMgr == null) {
+			packageMgr = new PackageManager();
+		}
+		packageMgr.enable();// finishes loading, also enables the event manager
+
 		loadCorePackages();
 		setupDirectories();
 	}

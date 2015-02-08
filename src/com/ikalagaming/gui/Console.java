@@ -28,14 +28,14 @@ import javax.swing.text.DefaultCaret;
 
 import com.ikalagaming.core.Game;
 import com.ikalagaming.core.Localization;
-import com.ikalagaming.core.PackageManager;
 import com.ikalagaming.core.ResourceLocation;
 import com.ikalagaming.core.events.CommandFired;
 import com.ikalagaming.core.packages.Package;
 import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.events.LogError;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -198,8 +198,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	private CommandHistory history;
 	private String packageName = "console";
 	private PackageState state = PackageState.DISABLED;
-	private PackageLogger logger;
-
 	private final double version = 0.1;
 
 	/**
@@ -234,8 +232,10 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	 */
 	public synchronized void appendMessage(String message) {
 		if (!isEnabled()) {
-			logger.log(LoggingLevel.SEVERE, SafeResourceLoader.getString(
-					"not_enabled", resourceBundle, "Console is not enabled"));
+			Game.getEventManager().fireEvent(
+					new Log(SafeResourceLoader.getString("not_enabled",
+							resourceBundle, "Console is not enabled"),
+							LoggingLevel.SEVERE, this));
 			return;
 		}
 		// should this not be synchronized?
@@ -366,9 +366,10 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 			return textArea.getLineStartOffset(line);
 		}
 		catch (BadLocationException e) {
-			logger.logError(SafeResourceLoader.getString("error_bad_location",
-					resourceBundle, "Bad location"), LoggingLevel.WARNING,
-					"Console.getSafeLineOffset(String)");
+			Game.getEventManager().fireEvent(
+					new Log(SafeResourceLoader.getString("error_bad_location",
+							resourceBundle, "Bad location"),
+							LoggingLevel.WARNING, this));
 		}
 		return 0;
 	}
@@ -578,7 +579,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		synchronized (state) {
 			state = PackageState.LOADING;
 		}
-		logger = new PackageLogger(this);
 		try {
 			resourceBundle =
 					ResourceBundle.getBundle(ResourceLocation.Console,
@@ -586,8 +586,10 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		catch (MissingResourceException missingResource) {
 			// don't localize this since it would fail anyways
-			logger.logError("Locale not found", LoggingLevel.WARNING,
-					"Console.onLoad()");
+			// TODO handle this better
+			Game.getEventManager().fireEvent(
+					new LogError("Locale not found for Console",
+							LoggingLevel.WARNING, this));
 		}
 		windowTitle =
 				SafeResourceLoader
@@ -616,7 +618,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		resourceBundle = null;
 		history = null;
-		logger = null;
 		synchronized (state) {
 			state = PackageState.PENDING_REMOVAL;
 		}
@@ -634,7 +635,6 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		resourceBundle = null;
 		history = null;
-		logger = null;
 
 		onLoad();
 		return true;
@@ -658,9 +658,11 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 			textArea.replaceRange("", 0, end);
 		}
 		catch (BadLocationException e) {
-			logger.logError(SafeResourceLoader.getString("error_bad_location",
-					resourceBundle, "Bad location"), LoggingLevel.WARNING,
-					"Console.removeTopLine(String)");
+			Game.getEventManager().fireEvent(
+					new Log(SafeResourceLoader.getString("error_bad_location",
+							resourceBundle, "Bad location"),
+							LoggingLevel.WARNING, this));
+
 		}
 	}
 
@@ -850,10 +852,12 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 								.getTransferData(DataFlavor.stringFlavor);
 			}
 			catch (UnsupportedFlavorException | IOException ex) {
-				logger.logError(SafeResourceLoader.getString(
-						"invalid_clipboard", resourceBundle,
-						"Invalid clipboard contents"), LoggingLevel.WARNING, ex
-						.getLocalizedMessage());
+				Game.getEventManager().fireEvent(
+						new LogError(SafeResourceLoader.getString(
+								"invalid_clipboard", resourceBundle,
+								"Invalid clipboard contents").concat(
+								ex.getLocalizedMessage()),
+								LoggingLevel.WARNING, this));
 			}
 		}
 		return result;

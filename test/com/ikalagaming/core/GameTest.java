@@ -24,8 +24,7 @@ public class GameTest {
 		g.init();
 		assertNotNull("Game is null", g);
 		assertNotNull("Package manager is null", Game.getPackageManager());
-		assertNotNull("Event manager is null", Game.getPackageManager()
-				.getPackage("event-manager"));
+		assertNotNull("Event manager is null", Game.getEventManager());
 		assertNotNull("Logging is null",
 				Game.getPackageManager().getPackage("logging"));
 	}

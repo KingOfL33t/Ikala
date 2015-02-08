@@ -263,9 +263,7 @@ public class EventManager implements Package {
 
 	@Override
 	public void onEnable() {
-		dispatcher = new EventDispatcher(this);
 		dispatcher.start();
-		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
 		state = PackageState.ENABLED;
 	}
 
@@ -298,9 +296,8 @@ public class EventManager implements Package {
 	public void onLoad() {
 		state = PackageState.LOADING;
 		state = PackageState.DISABLED;
-		if (!PackageSettings.ENABLE_ON_LOAD) {
-			enable();
-		}
+		dispatcher = new EventDispatcher(this);
+		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
 	}
 
 	@Override

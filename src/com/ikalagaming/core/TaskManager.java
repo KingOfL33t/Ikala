@@ -126,6 +126,17 @@ public class TaskManager extends JFrame {
 		return delay;
 	}
 
+	/**
+	 * Attempts to change the status of the currently selected package. 
+	 * This may be any of the following:
+	 * <ul>
+	 * <li>Enable</li>
+	 * <li>Disable</li>
+	 * <li>Load</li>
+	 * <li>Unload</li>
+	 * </ul>
+	 * @param change the change to make
+	 */
 	public void changeState(String change) {
 		int row = table.getSelectedRow();
 		if (row == -1) {

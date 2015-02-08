@@ -18,7 +18,7 @@ import com.ikalagaming.event.EventManager;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.LoggingPackage;
-import com.ikalagaming.logging.PackageLogger;
+import com.ikalagaming.logging.events.Log;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -36,9 +36,9 @@ public class PackageManager implements Package {
 	private HashMap<String, Package> loadedPackages;
 	private String packageName = "package-manager";
 	private CommandRegistry cmdRegistry;
-	private PackageLogger logger;
 	private PMEventListener listener;
 	private PackageState state = PackageState.ENABLED;
+	private HashSet<Listener> listeners;
 
 	/**
 	 * Constructs a new {@link PackageManager} and initializes variables.
@@ -53,7 +53,14 @@ public class PackageManager implements Package {
 		catch (MissingResourceException e) {
 			e.printStackTrace(System.err);
 		}
-
+		listeners = new HashSet<Listener>();
+		cmdRegistry = new CommandRegistry(this);
+		
+		listener = new PMEventListener(this);
+		listeners.add(listener);
+		
+		loadCorePackages();
+		registerCommands();
 	}
 
 	/**
@@ -103,6 +110,88 @@ public class PackageManager implements Package {
 	}
 
 	/**
+	 * Loads the event manager and logging packages. This is done on
+	 * initialization.
+	 */
+	private void loadCorePackages() {
+		LoggingPackage loggingPack = new LoggingPackage();
+		EventManager eventMgrPack = Game.getEventManager();
+
+		loadedPackages.put(loggingPack.getName(), loggingPack);
+		loadedPackages.put(eventMgrPack.getName(), eventMgrPack);
+
+		eventMgrPack.onLoad();
+		loggingPack.onLoad();
+		
+		/*
+		 * ensures the event manager can have its listeners registered after
+		 * being loaded.
+		 */
+		for (Listener l : getListeners()) {
+			Game.getEventManager().registerEventListeners(l);
+		}
+		for (Listener l : loggingPack.getListeners()) {
+			Game.getEventManager().registerEventListeners(l);
+		}
+		
+		eventMgrPack.enable();
+		loggingPack.enable();
+		
+		String regListenersP =
+				SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",
+						resourceBundle,
+						"Registered event listeners for $PACKAGE")
+						.replaceFirst("\\$PACKAGE", getName());
+		String regListenersL =
+				SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",
+						resourceBundle,
+						"Registered event listeners for $PACKAGE")
+						.replaceFirst("\\$PACKAGE", loggingPack.getName());
+		String loadingL =
+				SafeResourceLoader
+						.getString("ALERT_PACKAGE_LOADING", resourceBundle,
+								"Loading package $PACKAGE (v$VERSION)...")
+						.replaceFirst("\\$PACKAGE", loggingPack.getName())
+						.replaceFirst("\\$VERSION",
+								"" + loggingPack.getVersion());
+		String loadingE =
+				SafeResourceLoader
+						.getString("ALERT_PACKAGE_LOADING", resourceBundle,
+								"Loading package $PACKAGE (v$VERSION)...")
+						.replaceFirst("\\$PACKAGE", eventMgrPack.getName())
+						.replaceFirst("\\$VERSION",
+								"" + eventMgrPack.getVersion());
+		String loadedE =
+				SafeResourceLoader
+						.getString("ALERT_PACKAGE_LOADED", resourceBundle,
+								"Package $PACKAGE (v$VERSION) loaded!")
+						.replaceFirst("\\$PACKAGE", eventMgrPack.getName())
+						.replaceFirst("\\$VERSION",
+								"" + eventMgrPack.getVersion());
+		String loadedL =
+				SafeResourceLoader
+						.getString("ALERT_PACKAGE_LOADED", resourceBundle,
+								"Package $PACKAGE (v$VERSION) loaded!")
+						.replaceFirst("\\$PACKAGE", loggingPack.getName())
+						.replaceFirst("\\$VERSION",
+								"" + loggingPack.getVersion());
+
+		Game.getEventManager().fireEvent(
+				new Log(loadingE, LoggingLevel.FINE, this));
+		Game.getEventManager().fireEvent(
+				new Log(loadingL, LoggingLevel.FINE, this));
+		Game.getEventManager().fireEvent(
+				new Log(regListenersP, LoggingLevel.FINER, this));
+		Game.getEventManager().fireEvent(
+				new Log(regListenersL, LoggingLevel.FINER, this));
+		Game.getEventManager().fireEvent(
+				new Log(loadedE, LoggingLevel.FINER, this));
+		Game.getEventManager().fireEvent(
+				new Log(loadedL, LoggingLevel.FINER, this));
+
+	}
+
+	/**
 	 * <p>
 	 * Loads the given package into memory, stores it by type, and enables it if
 	 * packages are
@@ -126,7 +215,8 @@ public class PackageManager implements Package {
 						"Loading package $PACKAGE (v$VERSION)...");
 		loading = loading.replaceFirst("\\$PACKAGE", toLoad.getName());
 		loading = loading.replaceFirst("\\$VERSION", "" + toLoad.getVersion());
-		logger.log(LoggingLevel.FINE, loading);
+		Game.getEventManager().fireEvent(
+				new Log(loading, LoggingLevel.FINE, this));
 		// if the package exists and is older than toLoad, unload
 		if (isLoaded(toLoad)) {
 			String alreadyLoaded =
@@ -138,7 +228,8 @@ public class PackageManager implements Package {
 			alreadyLoaded =
 					alreadyLoaded.replaceFirst("\\$VERSION",
 							"" + toLoad.getVersion());
-			logger.log(LoggingLevel.FINE, alreadyLoaded);
+			Game.getEventManager().fireEvent(
+					new Log(alreadyLoaded, LoggingLevel.FINE, this));
 			if (loadedPackages.get(toLoad.getName()).getVersion() < toLoad
 					.getVersion()) {
 				unloadPackage(loadedPackages.get(toLoad.getName()));
@@ -154,7 +245,8 @@ public class PackageManager implements Package {
 				outdated =
 						outdated.replaceFirst("\\$VERSION",
 								"" + toLoad.getVersion());
-				logger.log(LoggingLevel.FINE, outdated);
+				Game.getEventManager().fireEvent(
+						new Log(outdated, LoggingLevel.FINE, this));
 				return false;
 			}
 		}
@@ -163,23 +255,16 @@ public class PackageManager implements Package {
 		loadedPackages.put(toLoad.getName(), toLoad);
 
 		if (PackageSettings.USE_EVENTS_FOR_ACCESS) {
-			if (isLoaded("event-manager")) {
-				EventManager manager =
-						(EventManager) getPackage("event-manager");
-				if (manager.isEnabled()) {
-					for (Listener l : toLoad.getListeners()) {
-						manager.registerEventListeners(l);
-					}
-					logger.log(
-							LoggingLevel.FINER,
-							SafeResourceLoader.getString(
-									"ALERT_REG_EVENT_LISTENERS",
-									resourceBundle,
-									"Registered event listeners for $PACKAGE")
-									.replaceFirst("\\$PACKAGE",
-											toLoad.getName()));
-				}
+			for (Listener l : toLoad.getListeners()) {
+				Game.getEventManager().registerEventListeners(l);
 			}
+			String msg =
+					SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",
+							resourceBundle,
+							"Registered event listeners for $PACKAGE")
+							.replaceFirst("\\$PACKAGE", toLoad.getName());
+			Game.getEventManager().fireEvent(
+					new Log(msg, LoggingLevel.FINER, this));
 		}
 
 		// load it
@@ -207,21 +292,24 @@ public class PackageManager implements Package {
 						resourceBundle, "Package $PACKAGE (v$VERSION) loaded!");
 		loaded = loaded.replaceFirst("\\$PACKAGE", toLoad.getName());
 		loaded = loaded.replaceFirst("\\$VERSION", "" + toLoad.getVersion());
-		logger.log(LoggingLevel.FINE, loaded);
+		Game.getEventManager().fireEvent(
+				new Log(loaded, LoggingLevel.FINE, this));
 
 		if (toLoad.getName() == "event-manager") {
-			EventManager manager = (EventManager) getPackage("event-manager");
-			if (manager.isEnabled()) {
-				for (Listener l : getListeners()) {
-					manager.registerEventListeners(l);
-				}
-				logger.log(
-						LoggingLevel.FINER,
-						SafeResourceLoader.getString(
-								"ALERT_REG_EVENT_LISTENERS", resourceBundle,
-								"Registered event listeners for $PACKAGE")
-								.replaceFirst("\\$PACKAGE", getName()));
+			/*
+			 * ensures the event manager can have its listeners registered after
+			 * being loaded.
+			 */
+			for (Listener l : getListeners()) {
+				Game.getEventManager().registerEventListeners(l);
 			}
+			String msg =
+					SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",
+							resourceBundle,
+							"Registered event listeners for $PACKAGE")
+							.replaceFirst("\\$PACKAGE", getName());
+			Game.getEventManager().fireEvent(
+					new Log(msg, LoggingLevel.FINER, this));
 		}
 		return true;
 	}
@@ -252,7 +340,8 @@ public class PackageManager implements Package {
 		call = call.replaceFirst("\\$METHOD", method);
 		call = call.replaceFirst("\\$PACKAGE", pack);
 
-		logger.log(LoggingLevel.FINER, call);
+		Game.getEventManager().fireEvent(
+				new Log(call, LoggingLevel.FINER, this));
 	}
 
 	/**
@@ -305,23 +394,20 @@ public class PackageManager implements Package {
 							+ SafeResourceLoader.getString(localMethodName,
 									resourceBundle, backupMethodName);
 
-			if (isLoaded("event-manager")
-					&& getPackage("event-manager").isEnabled()) {
-				logMethodCall(backupMethodName, toChange.getName(), true);
-				/*
-				 * Tries to send the event. If the return value is false, it
-				 * failed and therefore we must load manually
-				 */
-				if (!firePackageEvent(toChange.getName(), toSend)) {
-					logger.log(LoggingLevel.FINER, SafeResourceLoader
-							.getString("ALERT_CALL_EVENT_FAILED",
-									resourceBundle,
-									"Event failed. Calling method directly"));
-					callDirectly = true;
-				}
-			}
-			else {
+			logMethodCall(backupMethodName, toChange.getName(), true);
+			/*
+			 * Tries to send the event. If the return value is false, it failed
+			 * and therefore we must load manually
+			 */
+			if (!firePackageEvent(toChange.getName(), toSend)) {
+				String failMsg =
+						SafeResourceLoader.getString("ALERT_CALL_EVENT_FAILED",
+								resourceBundle,
+								"Event failed. Calling method directly");
+				Game.getEventManager().fireEvent(
+						new Log(failMsg, LoggingLevel.FINER, this));
 				callDirectly = true;
+
 			}
 		}
 		// not an else, in case callDirectly was set earlier
@@ -428,18 +514,21 @@ public class PackageManager implements Package {
 	 * @return true if the event was fired correctly
 	 */
 	private boolean firePackageEvent(String to, String content) {
-
 		if (!isLoaded("event-manager")) {
-			logger.logError(SafeResourceLoader.getString("package_not_loaded",
-					resourceBundle, "Package not loaded"),
-					LoggingLevel.WARNING, to);
+			String err =
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							resourceBundle, "Package $PACKAGE not loaded")
+							.replaceFirst("\\$PACKAGE", "event-manager");
+			System.err.println(err);
 			return false;
 		}
 
-		if (!getPackage("event-manager").isEnabled()) {
-			logger.logError(SafeResourceLoader.getString("package_not_enabled",
-					resourceBundle, "Package not enabled"),
-					LoggingLevel.WARNING, to);
+		if (!Game.getEventManager().isEnabled()) {
+			String err =
+					SafeResourceLoader.getString("PACKAGE_NOT_ENABLED",
+							resourceBundle, "Package $PACKAGE not enabled")
+							.replaceFirst("\\$PACKAGE", "event-manager");
+			System.err.println(err);
 			return false;
 		}
 
@@ -448,8 +537,7 @@ public class PackageManager implements Package {
 		tmpEvent = new PackageEvent(packageName, to, content);
 
 		if (tmpEvent != null) {// just in case the assignment failed
-			((EventManager) getPackage("event-manager")).fireEvent(tmpEvent);
-
+			Game.getEventManager().fireEvent(tmpEvent);
 		}
 
 		return true;
@@ -466,21 +554,25 @@ public class PackageManager implements Package {
 	 */
 	public boolean fireEvent(Event event) {
 		if (!isLoaded("event-manager")) {
-			logger.logError(SafeResourceLoader.getString("package_not_loaded",
-					resourceBundle, "Package not loaded"),
-					LoggingLevel.WARNING, "event-manager");
+			String err =
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							resourceBundle, "Package $PACKAGE not loaded")
+							.replaceFirst("\\$PACKAGE", "event-manager");
+			System.err.println(err);
 			return false;
 		}
 
-		if (!getPackage("event-manager").isEnabled()) {
-			logger.logError(SafeResourceLoader.getString("package_not_enabled",
-					resourceBundle, "Package not enabled"),
-					LoggingLevel.WARNING, "event-manager");
+		if (!Game.getEventManager().isEnabled()) {
+			String err =
+					SafeResourceLoader.getString("PACKAGE_NOT_ENABLED",
+							resourceBundle, "Package $PACKAGE not enabled")
+							.replaceFirst("\\$PACKAGE", "event-manager");
+			System.err.println(err);
 			return false;
 		}
 
 		if (event != null) {// just in case the assignment failed
-			((EventManager) getPackage("event-manager")).fireEvent(event);
+			Game.getEventManager().fireEvent(event);
 
 		}
 
@@ -541,10 +633,16 @@ public class PackageManager implements Package {
 				SafeResourceLoader.getString("ALERT_PACKAGE_UNLOADING",
 						resourceBundle, "Unloading package $PACKAGE...");
 		unloading = unloading.replaceFirst("\\$PACKAGE", toUnload);
-		logger.log(LoggingLevel.FINE, unloading);
+		Game.getEventManager().fireEvent(
+				new Log(unloading, LoggingLevel.FINE, this));
 		if (!isLoaded(toUnload)) {
-			logger.log(LoggingLevel.FINE, SafeResourceLoader.getString(
-					"package_not_loaded", resourceBundle, "Package not loaded"));
+			String notLoaded =
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							resourceBundle, "Package $PACKAGE not loaded")
+							.replaceFirst("\\$PACKAGE", toUnload);
+			Game.getEventManager().fireEvent(
+					new Log(notLoaded, LoggingLevel.FINE, this));
+
 			return false;
 		}
 
@@ -568,27 +666,26 @@ public class PackageManager implements Package {
 			changeState(loadedPackages.get(toUnload), "unload", false);
 		}
 
-		if (isLoaded("event-manager")) {
-			EventManager manager = (EventManager) getPackage("event-manager");
-			if (manager.isEnabled()) {
-				for (Listener l : loadedPackages.get(toUnload).getListeners()) {
-					manager.unregisterEventListeners(l);
-				}
-				logger.log(
-						LoggingLevel.FINER,
-						SafeResourceLoader.getString(
-								"ALERT_UNREG_EVENT_LISTENERS", resourceBundle,
-								"Unregistered event listeners for $PACKAGE")
-								.replaceFirst("\\$PACKAGE", getName()));
-			}
+		for (Listener l : loadedPackages.get(toUnload).getListeners()) {
+			Game.getEventManager().unregisterEventListeners(l);
 		}
+		String unreg =
+				SafeResourceLoader.getString("ALERT_UNREG_EVENT_LISTENERS",
+						resourceBundle,
+						"Unregistered event listeners for $PACKAGE")
+						.replaceFirst("\\$PACKAGE", getName());
+		Game.getEventManager().fireEvent(
+				new Log(unreg, LoggingLevel.FINER, this));
+
 		loadedPackages.remove(toUnload);
 
 		String unloaded =
 				SafeResourceLoader.getString("ALERT_PACKAGE_UNLOADED",
 						resourceBundle, "Package $PACKAGE unloaded!");
 		unloaded = unloaded.replaceFirst("\\$PACKAGE", toUnload);
-		logger.log(LoggingLevel.FINE, unloaded);
+
+		Game.getEventManager().fireEvent(
+				new Log(unloaded, LoggingLevel.FINE, this));
 
 		return true;
 	}
@@ -608,8 +705,12 @@ public class PackageManager implements Package {
 		 */
 		String type = toUnload.getName();
 		if (!isLoaded(type)) {
-			logger.log(LoggingLevel.FINE, SafeResourceLoader.getString(
-					"package_not_loaded", resourceBundle, "Package not loaded"));
+			String notLoaded =
+					SafeResourceLoader.getString("PACKAGE_NOT_LOADED",
+							resourceBundle, "Package $PACKAGE not loaded")
+							.replaceFirst("\\$PACKAGE", type);
+			Game.getEventManager().fireEvent(
+					new Log(notLoaded, LoggingLevel.FINE, this));
 			return;
 		}
 		unloadPackage(type);
@@ -658,10 +759,6 @@ public class PackageManager implements Package {
 
 	@Override
 	public boolean enable() {
-		cmdRegistry = new CommandRegistry(this);
-		logger = new PackageLogger(this);
-		listener = new PMEventListener(this);
-		registerCommands();
 		return true;
 	}
 
@@ -699,8 +796,6 @@ public class PackageManager implements Package {
 
 	@Override
 	public Set<Listener> getListeners() {
-		HashSet<Listener> listeners = new HashSet<Listener>();
-		listeners.add(listener);
 		return listeners;
 	}
 

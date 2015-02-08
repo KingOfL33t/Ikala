@@ -8,7 +8,6 @@ com.ikalagaming.gui
 com.ikalagaming.gui.events
 com.ikalagaming.logging
 com.ikalagaming.logging.events
-com.ikalagaming.packages.crypto
 com.ikalagaming.packages.rng
 com.ikalagaming.packages.userinput
 com.ikalagaming.permissions

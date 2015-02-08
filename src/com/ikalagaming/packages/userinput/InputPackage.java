@@ -122,6 +122,7 @@ public class InputPackage implements Package, Listener {
 		state = PackageState.ENABLED;
 
 		thread = new Thread(loop);
+		thread.setName("InputReader");
 		thread.start();
 	}
 

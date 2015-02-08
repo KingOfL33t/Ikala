@@ -122,6 +122,8 @@ public class PackageManager implements Package {
 
 		eventMgrPack.onLoad();
 		loggingPack.onLoad();
+		loggingPack.enable();
+		eventMgrPack.enable();
 		
 		/*
 		 * ensures the event manager can have its listeners registered after
@@ -133,9 +135,6 @@ public class PackageManager implements Package {
 		for (Listener l : loggingPack.getListeners()) {
 			Game.getEventManager().registerEventListeners(l);
 		}
-		
-		eventMgrPack.enable();
-		loggingPack.enable();
 		
 		String regListenersP =
 				SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",

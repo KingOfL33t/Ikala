@@ -34,6 +34,7 @@ public class EventDispatcher extends Thread {
 	 * @param manager the event manager that this dispatcher belongs to
 	 */
 	public EventDispatcher(EventManager manager) {
+		setName("EventDispatcher");
 		queue = new LinkedList<Event>();
 		this.manager = manager;
 		this.hasEvents = false;
@@ -135,6 +136,7 @@ public class EventDispatcher extends Thread {
 		catch (NoSuchElementException noElement) {
 			// the queue is empty
 			// hasEvents = false;
+			System.err.println(noElement.toString());
 			return;
 		}
 		catch (Exception e) {

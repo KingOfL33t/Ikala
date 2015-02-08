@@ -336,6 +336,7 @@ class Updater extends Thread {
 	TaskManager manager;
 
 	public Updater(TaskManager manager) {
+		setName("TaskMgrUpdateThread");
 		this.manager = manager;
 	}
 

@@ -31,6 +31,7 @@ public class LoggingPackage implements Package, Listener {
 	private String packageName = "logging";
 	private LogDispatcher dispatcher;
 	private String newLog = "";
+	private Set<Listener> listeners;
 	/**
 	 * Only logs events that are of this level or higher
 	 */
@@ -221,7 +222,11 @@ public class LoggingPackage implements Package, Listener {
 
 	@Override
 	public Set<Listener> getListeners() {
-		return new HashSet<Listener>();
+		if (listeners == null){
+			listeners = new HashSet<Listener>();
+			listeners.add(this);
+		}
+		return listeners;
 	}
 
 	@Override

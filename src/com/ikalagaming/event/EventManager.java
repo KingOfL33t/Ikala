@@ -87,8 +87,8 @@ public class EventManager implements Package {
 			else {
 				LogError err =
 						new LogError(SafeResourceLoader.getString(
-								"EVT_QUEUE_FULL",
-								Game.getPackageManager().getResourceBundle(),
+								"EVT_QUEUE_FULL", Game.getPackageManager()
+										.getResourceBundle(),
 								"Event queue full"),
 								"EventManager.fireEvent(Event)",
 								LoggingLevel.WARNING, this);
@@ -196,21 +196,25 @@ public class EventManager implements Package {
 		if (isEnabled()) {
 			return false;
 		}
-		state = PackageState.ENABLING;
+		synchronized (state) {
+			state = PackageState.ENABLING;
+		}
 		try {
 			this.onEnable();
 		}
 		catch (Exception e) {
 			LogError err =
 					new LogError(SafeResourceLoader.getString(
-							"package_enable_fail",
-							Game.getPackageManager().getResourceBundle(),
+							"package_enable_fail", Game.getPackageManager()
+									.getResourceBundle(),
 							"Package failed to enable"),
 							"EventManager.enable()", LoggingLevel.SEVERE, this);
 			dispatcher.dispatchEvent(err);
 			e.printStackTrace(System.err);
 			// better safe than sorry (probably did not initialize correctly)
-			state = PackageState.CORRUPTED;
+			synchronized (state) {
+				state = PackageState.CORRUPTED;
+			}
 			return false;
 		}
 		return true;
@@ -221,19 +225,23 @@ public class EventManager implements Package {
 		if (!isEnabled()) {
 			return false;
 		}
-		state = PackageState.DISABLING;
+		synchronized (state) {
+			state = PackageState.DISABLING;
+		}
 		try {
 			this.onDisable();
 		}
 		catch (Exception e) {
 			LogError err =
 					new LogError(SafeResourceLoader.getString(
-							"package_disable_fail",
-							Game.getPackageManager().getResourceBundle(),
+							"package_disable_fail", Game.getPackageManager()
+									.getResourceBundle(),
 							"Package failed to disable"),
 							"EventManager.disable()", LoggingLevel.SEVERE, this);
 			dispatcher.dispatchEvent(err);
-			state = PackageState.CORRUPTED;
+			synchronized (state) {
+				state = PackageState.CORRUPTED;
+			}
 			return false;
 		}
 		return true;
@@ -241,11 +249,13 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean reload() {
-		state = PackageState.UNLOADING;
+		synchronized (state) {
+			state = PackageState.UNLOADING;
+		}
 		if (!PackageSettings.DISABLE_ON_UNLOAD) {
 			disable();
 		}
-		if (state == PackageState.ENABLED) {
+		if (isEnabled()) {
 			disable();
 		}
 		onLoad();
@@ -255,16 +265,19 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean isEnabled() {
-		if (state == PackageState.ENABLED) {
-			return true;
+		synchronized (state) {
+			if (state == PackageState.ENABLED) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	@Override
 	public void onEnable() {
-		dispatcher.start();
-		state = PackageState.ENABLED;
+		synchronized (state) {
+			state = PackageState.ENABLED;
+		}
 	}
 
 	@Override
@@ -280,34 +293,51 @@ public class EventManager implements Package {
 		}
 		catch (InterruptedException e) {
 			LogError err =
-					new LogError(SafeResourceLoader.getString(
-							"thread_interrupted",
-							Game.getPackageManager().getResourceBundle(),
-							"Thread interrupted"), "EventManager.onDisable()",
-							LoggingLevel.SEVERE, this);
+					new LogError(
+							SafeResourceLoader.getString("thread_interrupted",
+									Game.getPackageManager()
+											.getResourceBundle(),
+									"Thread interrupted"),
+							"EventManager.onDisable()", LoggingLevel.SEVERE,
+							this);
 			dispatcher.dispatchEvent(err);
 			e.printStackTrace(System.err);
-			state = PackageState.CORRUPTED;
+			synchronized (state) {
+				state = PackageState.CORRUPTED;
+			}
 		}
-		state = PackageState.DISABLED;
+		synchronized (state) {
+			state = PackageState.DISABLED;
+		}
 	}
 
 	@Override
 	public void onLoad() {
-		state = PackageState.LOADING;
-		state = PackageState.DISABLED;
+		synchronized (state) {
+			state = PackageState.LOADING;
+		}
 		dispatcher = new EventDispatcher(this);
 		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
+		dispatcher.start();
+		synchronized (state) {
+			state = PackageState.DISABLED;
+		}
 	}
 
 	@Override
 	public void onUnload() {
-		state = PackageState.UNLOADING;
-		if (state == PackageState.ENABLED) {
-			disable();
+		synchronized (state) {
 			state = PackageState.UNLOADING;
 		}
-		state = PackageState.PENDING_REMOVAL;
+		if (isEnabled()) {
+			disable();
+			synchronized (state) {
+				state = PackageState.UNLOADING;
+			}
+		}
+		synchronized (state) {
+			state = PackageState.PENDING_REMOVAL;
+		}
 	}
 
 	@Override
@@ -317,7 +347,9 @@ public class EventManager implements Package {
 
 	@Override
 	public PackageState getPackageState() {
-		return state;
+		synchronized (state) {
+			return state;
+		}
 	}
 
 }

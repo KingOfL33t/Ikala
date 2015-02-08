@@ -28,6 +28,7 @@ public class LogDispatcher extends Thread {
 	 * @param manager the logging package that this dispatcher belongs to
 	 */
 	public LogDispatcher(LoggingPackage manager) {
+		setName("LogDispatcher");
 		queue = new LinkedList<String>();
 		this.hasLogs = false;
 		this.running = true;

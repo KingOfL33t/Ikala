@@ -55,10 +55,10 @@ public class PackageManager implements Package {
 		}
 		listeners = new HashSet<Listener>();
 		cmdRegistry = new CommandRegistry(this);
-		
+
 		listener = new PMEventListener(this);
 		listeners.add(listener);
-		
+
 		loadCorePackages();
 		registerCommands();
 	}
@@ -124,7 +124,7 @@ public class PackageManager implements Package {
 		loggingPack.onLoad();
 		loggingPack.enable();
 		eventMgrPack.enable();
-		
+
 		/*
 		 * ensures the event manager can have its listeners registered after
 		 * being loaded.
@@ -135,7 +135,7 @@ public class PackageManager implements Package {
 		for (Listener l : loggingPack.getListeners()) {
 			Game.getEventManager().registerEventListeners(l);
 		}
-		
+
 		String regListenersP =
 				SafeResourceLoader.getString("ALERT_REG_EVENT_LISTENERS",
 						resourceBundle,
@@ -645,15 +645,14 @@ public class PackageManager implements Package {
 			return false;
 		}
 
-		if (PackageSettings.DISABLE_ON_UNLOAD) {
-			if (loadedPackages.get(toUnload).isEnabled()) {
-				if (PackageSettings.USE_EVENTS_FOR_ACCESS
-						&& PackageSettings.USE_EVENTS_FOR_DISABLE) {
-					changeState(loadedPackages.get(toUnload), "disable", true);
-				}
-				else {
-					changeState(loadedPackages.get(toUnload), "disable", false);
-				}
+		// It has to be disabled before unloading.
+		if (loadedPackages.get(toUnload).isEnabled()) {
+			if (PackageSettings.USE_EVENTS_FOR_ACCESS
+					&& PackageSettings.USE_EVENTS_FOR_DISABLE) {
+				changeState(loadedPackages.get(toUnload), "disable", true);
+			}
+			else {
+				changeState(loadedPackages.get(toUnload), "disable", false);
 			}
 		}
 
@@ -800,6 +799,15 @@ public class PackageManager implements Package {
 
 	@Override
 	public PackageState getPackageState() {
-		return state;
+		synchronized (state) {
+			return state;
+		}
+	}
+
+	@Override
+	public void setPackageState(PackageState newState) {
+		synchronized (state) {
+			state = newState;
+		}
 	}
 }

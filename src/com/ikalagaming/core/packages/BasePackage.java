@@ -4,28 +4,24 @@ package com.ikalagaming.core.packages;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ikalagaming.core.config.FileConfiguration;
 import com.ikalagaming.event.Listener;
 
 /**
- * A package that is loaded from an external source.
+ * A basic implementation of the {@link Package} interface. This allows you to
+ * only implement some of the methods yourself.
  * 
- * @author Ches Burks
- * 
+ * @author Ches
+ *
  */
-public class Plugin implements IPlugin {
+public class BasePackage implements Package{
 
-	private String packageName = "null-plugin";
+	private String packageName = "package-manager";
 	private final double version = 0.1;
-	private FileConfiguration config;
-	private PluginDescription description;
 	private PackageState state = PackageState.DISABLED;
-
+	private Set<Listener> listeners;
+	
 	@Override
 	public boolean disable() {
-		if (!isEnabled()) {
-			return false;
-		}
 		setPackageState(PackageState.DISABLING);
 		onDisable();
 		return true;
@@ -33,9 +29,6 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public boolean enable() {
-		if (isEnabled()) {
-			return false;
-		}
 		setPackageState(PackageState.ENABLING);
 		onEnable();
 		return true;
@@ -73,10 +66,6 @@ public class Plugin implements IPlugin {
 	public void onLoad() {
 		setPackageState(PackageState.LOADING);
 		setPackageState(PackageState.DISABLED);
-		// plugins will be enabled as soon as they load by default
-		if (!PackageSettings.ENABLE_ON_LOAD) {
-			enable();
-		}
 	}
 
 	@Override
@@ -92,42 +81,20 @@ public class Plugin implements IPlugin {
 	@Override
 	public boolean reload() {
 		setPackageState(PackageState.UNLOADING);
-		if (isEnabled()) {
+		if (getPackageState() == PackageState.ENABLED) {
 			disable();
 			setPackageState(PackageState.UNLOADING);
 		}
 		onLoad();
-		return true;
-	}
-
-	@Override
-	public PluginDescription getDescription() {
-		return description;
-	}
-
-	@Override
-	public FileConfiguration getConfig() {
-		return config;
-	}
-
-	@Override
-	public void saveConfig() {
-		config.nop();
-	}
-
-	@Override
-	public void saveDefaultConfig() {
-		config.nop();
-	}
-
-	@Override
-	public void reloadConfig() {
-		config.nop();
+		return false;
 	}
 
 	@Override
 	public Set<Listener> getListeners() {
-		return new HashSet<Listener>();
+		if (listeners == null){
+			listeners = new HashSet<Listener>();
+		}
+		return listeners;
 	}
 
 	@Override
@@ -139,7 +106,7 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public void setPackageState(PackageState newState) {
-		synchronized (state) {
+		synchronized (state){
 			state = newState;
 		}
 	}

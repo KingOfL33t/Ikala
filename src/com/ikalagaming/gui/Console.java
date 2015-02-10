@@ -302,18 +302,17 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 
 	@Override
 	public boolean disable() {
-		synchronized (state) {
-			state = PackageState.DISABLING;
-		}
+		setPackageState(PackageState.DISABLING);
+
 		onDisable();
 		return true;
 	}
 
 	@Override
 	public boolean enable() {
-		synchronized (state) {
-			state = PackageState.ENABLING;
-		}
+
+		setPackageState(PackageState.ENABLING);
+
 		Runnable myrunnable = new Runnable() {
 			public void run() {
 				onEnable();
@@ -496,12 +495,12 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 
 	@Override
 	public boolean isEnabled() {
-		synchronized (state) {
-			if (state == PackageState.ENABLED) {
-				return true;
-			}
-			return false;
+
+		if (getPackageState() == PackageState.ENABLED) {
+			return true;
 		}
+		return false;
+
 	}
 
 	private void moveLeft() {
@@ -560,25 +559,25 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	public void onDisable() {
 		frame.setVisible(false);
 		frame.dispose();
-		synchronized (state) {
-			state = PackageState.DISABLED;
-		}
+
+		setPackageState(PackageState.DISABLED);
+
 	}
 
 	@Override
 	public void onEnable() {
 		init();
 		appendIndicatorChar();
-		synchronized (state) {
-			state = PackageState.ENABLED;
-		}
+
+		setPackageState(PackageState.ENABLED);
+
 	}
 
 	@Override
 	public void onLoad() {
-		synchronized (state) {
-			state = PackageState.LOADING;
-		}
+
+		setPackageState(PackageState.LOADING);
+
 		try {
 			resourceBundle =
 					ResourceBundle.getBundle(ResourceLocation.Console,
@@ -594,21 +593,21 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		windowTitle =
 				SafeResourceLoader
 						.getString("title", resourceBundle, "Console");
-		synchronized (state) {
-			state = PackageState.DISABLED;
-		}
+
+		setPackageState(PackageState.DISABLED);
+
 	}
 
 	@Override
 	public void onUnload() {
-		synchronized (state) {
-			state = PackageState.UNLOADING;
-		}
+
+		setPackageState(PackageState.UNLOADING);
+
 		if (getPackageState() == PackageState.ENABLED) {
 			disable();
-			synchronized (state) {
-				state = PackageState.UNLOADING;
-			}
+
+			setPackageState(PackageState.UNLOADING);
+
 		}
 
 		if (frame != null) {
@@ -618,16 +617,16 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 		}
 		resourceBundle = null;
 		history = null;
-		synchronized (state) {
-			state = PackageState.PENDING_REMOVAL;
-		}
+
+		setPackageState(PackageState.PENDING_REMOVAL);
+
 	}
 
 	@Override
 	public boolean reload() {
-		synchronized (state) {
-			state = PackageState.UNLOADING;
-		}
+		// TODO does this even work?
+		setPackageState(PackageState.UNLOADING);
+
 		if (frame != null) {
 			frame.setVisible(false);
 			frame.dispose();
@@ -807,8 +806,17 @@ public class Console extends WindowAdapter implements Package, ClipboardOwner {
 	}
 
 	@Override
-	public synchronized PackageState getPackageState() {
-		return state;
+	public PackageState getPackageState() {
+		synchronized (state) {
+			return state;
+		}
+	}
+
+	@Override
+	public void setPackageState(PackageState newState) {
+		synchronized (state) {
+			state = newState;
+		}
 	}
 
 	/**

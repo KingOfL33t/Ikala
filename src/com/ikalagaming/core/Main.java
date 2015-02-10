@@ -3,7 +3,6 @@ package com.ikalagaming.core;
 
 import com.ikalagaming.core.packages.PackageSettings;
 import com.ikalagaming.gui.Console;
-import com.ikalagaming.packages.userinput.InputPackage;
 
 /**
  * The entrypoint of the program.
@@ -53,13 +52,6 @@ public class Main {
 				}
 			}
 		}
-		Game.getPackageManager().loadPackage(new InputPackage());
-		if (!PackageSettings.ENABLE_ON_LOAD) {
-			if (!Game.getPackageManager().getPackage("user-input").isEnabled()) {
-				Game.getPackageManager().getPackage("user-input").enable();
-			}
-		}
-		// Game.getPackageManager().loadPlugin("minecraft");
 		TaskManager manager = new TaskManager(g);
 		manager.setVisible(true);
 	}

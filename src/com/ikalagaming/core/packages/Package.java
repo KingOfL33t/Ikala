@@ -119,6 +119,16 @@ public interface Package {
 	 * @return a PackageState representing the status of this package
 	 */
 	public PackageState getPackageState();
+	
+	/**
+	 * Sets the {@link PackageState current state} of the package. This
+	 * should be used to update the package state as it is interacted with,
+	 * This exists to assist with thread safety.
+	 * @param newState The state the package should now be
+	 * 
+	 * @return a PackageState representing the status of this package
+	 */
+	public void setPackageState(PackageState newState);
 
 	/**
 	 * This is essentially restarting the package. The general flow is as

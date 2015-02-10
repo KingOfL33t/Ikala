@@ -25,14 +25,14 @@ public class RngPackageMain implements Package, Listener {
 
 	@Override
 	public boolean disable() {
-		state = PackageState.DISABLING;
+		setPackageState(PackageState.DISABLING);
 		onDisable();
 		return true;
 	}
 
 	@Override
 	public boolean enable() {
-		state = PackageState.ENABLING;
+		setPackageState(PackageState.ENABLING);
 		onEnable();
 		return true;
 	}
@@ -123,7 +123,7 @@ public class RngPackageMain implements Package, Listener {
 
 	@Override
 	public boolean isEnabled() {
-		if (state == PackageState.ENABLED) {
+		if (getPackageState() == PackageState.ENABLED) {
 			return true;
 		}
 		return false;
@@ -132,7 +132,7 @@ public class RngPackageMain implements Package, Listener {
 	@Override
 	public void onDisable() {
 		gen = null;
-		state = PackageState.DISABLED;
+		setPackageState(PackageState.DISABLED);
 	}
 
 	@Override
@@ -142,31 +142,31 @@ public class RngPackageMain implements Package, Listener {
 		ByteBuffer bb = ByteBuffer.wrap(sbuf);
 		long seed = bb.getLong();
 		gen = new Generator((int) seed);
-		state = PackageState.ENABLED;
+		setPackageState(PackageState.ENABLED);
 	}
 
 	@Override
 	public void onLoad() {
-		state = PackageState.LOADING;
-		state = PackageState.DISABLED;
+		setPackageState(PackageState.LOADING);
+		setPackageState(PackageState.DISABLED);
 	}
 
 	@Override
 	public void onUnload() {
-		state = PackageState.UNLOADING;
-		if (state == PackageState.ENABLED) {
+		setPackageState(PackageState.UNLOADING);
+		if (isEnabled()) {
 			disable();
-			state = PackageState.UNLOADING;
+			setPackageState(PackageState.UNLOADING);
 		}
-		state = PackageState.PENDING_REMOVAL;
+		setPackageState(PackageState.PENDING_REMOVAL);
 	}
 
 	@Override
 	public boolean reload() {
-		state = PackageState.UNLOADING;
-		if (state == PackageState.ENABLED) {
+		setPackageState(PackageState.UNLOADING);
+		if (isEnabled()) {
 			disable();
-			state = PackageState.UNLOADING;
+			setPackageState(PackageState.UNLOADING);
 		}
 		onLoad();
 		return false;
@@ -179,7 +179,16 @@ public class RngPackageMain implements Package, Listener {
 
 	@Override
 	public PackageState getPackageState() {
-		return state;
+		synchronized (state) {
+			return state;
+		}
+	}
+
+	@Override
+	public void setPackageState(PackageState newState) {
+		synchronized (state) {
+			state = newState;
+		}
 	}
 
 }

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.ikalagaming.core.Game;
 import com.ikalagaming.core.packages.Package;
-import com.ikalagaming.core.packages.PackageSettings;
 import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.events.Log;
@@ -196,9 +195,8 @@ public class EventManager implements Package {
 		if (isEnabled()) {
 			return false;
 		}
-		synchronized (state) {
-			state = PackageState.ENABLING;
-		}
+		setPackageState(PackageState.ENABLING);
+
 		try {
 			this.onEnable();
 		}
@@ -212,9 +210,9 @@ public class EventManager implements Package {
 			dispatcher.dispatchEvent(err);
 			e.printStackTrace(System.err);
 			// better safe than sorry (probably did not initialize correctly)
-			synchronized (state) {
-				state = PackageState.CORRUPTED;
-			}
+
+			setPackageState(PackageState.CORRUPTED);
+
 			return false;
 		}
 		return true;
@@ -225,9 +223,7 @@ public class EventManager implements Package {
 		if (!isEnabled()) {
 			return false;
 		}
-		synchronized (state) {
-			state = PackageState.DISABLING;
-		}
+		setPackageState(PackageState.DISABLING);
 		try {
 			this.onDisable();
 		}
@@ -239,9 +235,7 @@ public class EventManager implements Package {
 							"Package failed to disable"),
 							"EventManager.disable()", LoggingLevel.SEVERE, this);
 			dispatcher.dispatchEvent(err);
-			synchronized (state) {
-				state = PackageState.CORRUPTED;
-			}
+			setPackageState(PackageState.CORRUPTED);
 			return false;
 		}
 		return true;
@@ -249,12 +243,8 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean reload() {
-		synchronized (state) {
-			state = PackageState.UNLOADING;
-		}
-		if (!PackageSettings.DISABLE_ON_UNLOAD) {
-			disable();
-		}
+		setPackageState(PackageState.UNLOADING);
+
 		if (isEnabled()) {
 			disable();
 		}
@@ -265,19 +255,15 @@ public class EventManager implements Package {
 
 	@Override
 	public boolean isEnabled() {
-		synchronized (state) {
-			if (state == PackageState.ENABLED) {
-				return true;
-			}
+		if (getPackageState() == PackageState.ENABLED) {
+			return true;
 		}
 		return false;
 	}
 
 	@Override
 	public void onEnable() {
-		synchronized (state) {
-			state = PackageState.ENABLED;
-		}
+		setPackageState(PackageState.ENABLED);
 	}
 
 	@Override
@@ -302,42 +288,34 @@ public class EventManager implements Package {
 							this);
 			dispatcher.dispatchEvent(err);
 			e.printStackTrace(System.err);
-			synchronized (state) {
-				state = PackageState.CORRUPTED;
-			}
+
+			setPackageState(PackageState.CORRUPTED);
+
 		}
-		synchronized (state) {
-			state = PackageState.DISABLED;
-		}
+		setPackageState(PackageState.DISABLED);
 	}
 
 	@Override
 	public void onLoad() {
-		synchronized (state) {
-			state = PackageState.LOADING;
-		}
+
+		setPackageState(PackageState.LOADING);
+
 		dispatcher = new EventDispatcher(this);
 		handlerMap = new HashMap<Class<? extends Event>, HandlerList>();
 		dispatcher.start();
-		synchronized (state) {
-			state = PackageState.DISABLED;
-		}
+		setPackageState(PackageState.DISABLED);
 	}
 
 	@Override
 	public void onUnload() {
-		synchronized (state) {
-			state = PackageState.UNLOADING;
-		}
+
+		setPackageState(PackageState.UNLOADING);
+
 		if (isEnabled()) {
 			disable();
-			synchronized (state) {
-				state = PackageState.UNLOADING;
-			}
+			setPackageState(PackageState.UNLOADING);
 		}
-		synchronized (state) {
-			state = PackageState.PENDING_REMOVAL;
-		}
+		setPackageState(PackageState.PENDING_REMOVAL);
 	}
 
 	@Override
@@ -349,6 +327,13 @@ public class EventManager implements Package {
 	public PackageState getPackageState() {
 		synchronized (state) {
 			return state;
+		}
+	}
+
+	@Override
+	public void setPackageState(PackageState newState) {
+		synchronized (state) {
+			state = newState;
 		}
 	}
 

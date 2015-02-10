@@ -14,12 +14,6 @@ public class PackageSettings {
 	 * they are loaded.
 	 */
 	public static boolean ENABLE_ON_LOAD = true;
-	/**
-	 * If packages should be disabled when they are unloaded. If this is false
-	 * then packages would have to disable themselves in the unload methods or
-	 * not need to disable before unloading.
-	 */
-	public static boolean DISABLE_ON_UNLOAD = true;
 
 	/**
 	 * If the package manager should use events for altering packages. False if

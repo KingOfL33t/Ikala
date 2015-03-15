@@ -8,11 +8,6 @@ package com.ikalagaming.core;
  * 
  */
 public class ResourceLocation {
-	/**
-	 * The classpath of the EventManager resources
-	 */
-	public static String EventManager =
-			"com.ikalagaming.event.resources.EventManager";
 
 	/**
 	 * The classpath for the Console resources

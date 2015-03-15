@@ -112,17 +112,17 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public void saveConfig() {
-		config.nop();
+		//TODO implement this
 	}
 
 	@Override
 	public void saveDefaultConfig() {
-		config.nop();
+		//TODO implement this
 	}
 
 	@Override
 	public void reloadConfig() {
-		config.nop();
+		//TODO implement this
 	}
 
 	@Override

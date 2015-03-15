@@ -1,7 +1,6 @@
 
 package com.ikalagaming.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -440,7 +439,7 @@ public class PackageManager implements Package {
 		 * Check for being a jar file check for package info file load and check
 		 * for valid info load the file if necessary
 		 */
-		File pluginFolder = Game.getPluginFolder();
+		/*File pluginFolder = Game.getPluginFolder();
 		if (!pluginFolder.exists()) {
 			// TODO log error
 			return false;
@@ -478,30 +477,13 @@ public class PackageManager implements Package {
 		if (files.size() == 0) {
 			// TODO log error
 			return false;
-		}
-
+		}*/
 		/*
 		 * ListIterator<File> iterator = files.listIterator(); File tmp; while
 		 * (iterator.hasNext()) { tmp = iterator.next(); }
 		 */
 		return false;
 	}
-
-	/*
-	 * private void getPluginDescription(File jarfile) { JarFile jar = null;
-	 * InputStream stream = null;
-	 * 
-	 * try { jar = new JarFile(jarfile); JarEntry entry =
-	 * jar.getJarEntry("plugin.yml"); if (entry == null) { //TODO log error no
-	 * plugin.yml jar.close(); } stream = jar.getInputStream(entry); return new
-	 * PluginDescriptionFile(stream); } catch (IOException ex) { throw new
-	 * InvalidDescriptionException(ex); } catch (YAMLException ex) { throw new
-	 * InvalidDescriptionException(ex); } finally { if (jar != null) { try {
-	 * jar.close(); } catch (IOException e) { } } if (stream != null) { try {
-	 * stream.close(); } catch (IOException e) { } } }
-	 * 
-	 * }
-	 */
 
 	/**
 	 * Fires an event with a message to a package type from the package manager.

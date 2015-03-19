@@ -1,5 +1,5 @@
 
-package com.ikalagaming.packages.crypto;
+package com.ikalagaming.crypto;
 
 import org.junit.Test;
 

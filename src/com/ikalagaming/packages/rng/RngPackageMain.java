@@ -6,9 +6,9 @@ import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ikalagaming.core.packages.Package;
-import com.ikalagaming.core.packages.PackageState;
 import com.ikalagaming.event.Listener;
+import com.ikalagaming.packages.Package;
+import com.ikalagaming.packages.PackageState;
 
 /**
  * The main interface for the rng package.

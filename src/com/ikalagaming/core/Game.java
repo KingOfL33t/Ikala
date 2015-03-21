@@ -2,6 +2,7 @@
 package com.ikalagaming.core;
 
 import com.ikalagaming.event.EventManager;
+import com.ikalagaming.packages.PackageManager;
 import com.ikalagaming.packages.rng.RngPackageMain;
 
 /**
@@ -125,7 +126,7 @@ public class Game {
 			eventMgr = new EventManager();
 		}
 		if (packageMgr == null) {
-			packageMgr = new PackageManager();
+			packageMgr = new PackageManager(eventMgr);
 		}
 		packageMgr.enable();// finishes loading, also enables the event manager
 

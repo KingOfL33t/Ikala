@@ -1,5 +1,5 @@
 
-package com.ikalagaming.core.packages;
+package com.ikalagaming.core;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -10,6 +10,7 @@ import java.util.Map;
 import org.magicwerk.brownies.collections.GapList;
 import org.yaml.snakeyaml.Yaml;
 
+import com.ikalagaming.core.InvalidDescriptionException;
 import com.ikalagaming.permissions.DefaultPermissionValue;
 import com.ikalagaming.permissions.Permission;
 

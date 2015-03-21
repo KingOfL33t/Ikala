@@ -24,7 +24,7 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.ikalagaming.core.packages.PackageState;
+import com.ikalagaming.packages.PackageState;
 import java.awt.Component;
 import java.awt.GridLayout;
 import javax.swing.JLabel;

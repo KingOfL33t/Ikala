@@ -1,8 +1,8 @@
 
 package com.ikalagaming.core;
 
-import com.ikalagaming.core.packages.PackageSettings;
-import com.ikalagaming.gui.Console;
+import com.ikalagaming.gui.console.Console;
+import com.ikalagaming.packages.PackageSettings;
 
 /**
  * The entrypoint of the program.
@@ -43,7 +43,7 @@ public class Main {
 		g.init();
 
 		if (displayConsole) {
-			Console c = new Console();
+			Console c = new Console(Game.getEventManager());
 			Game.getPackageManager().loadPackage(c);
 			if (!PackageSettings.ENABLE_ON_LOAD) {
 				if (!Game.getPackageManager().getPackage("console").isEnabled()) {

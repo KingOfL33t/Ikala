@@ -1,5 +1,5 @@
 
-package com.ikalagaming.core.packages;
+package com.ikalagaming.core;
 
 /**
  * A description could not be created correctly.

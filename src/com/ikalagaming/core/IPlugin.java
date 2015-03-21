@@ -1,7 +1,8 @@
 
-package com.ikalagaming.core.packages;
+package com.ikalagaming.core;
 
-import com.ikalagaming.core.config.FileConfiguration;
+import com.ikalagaming.packages.FileConfiguration;
+import com.ikalagaming.packages.Package;
 
 /**
  * An interface that extends the package interface. Contains methods for

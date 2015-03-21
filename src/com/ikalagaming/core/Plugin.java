@@ -1,10 +1,12 @@
 
-package com.ikalagaming.core.packages;
+package com.ikalagaming.core;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ikalagaming.core.config.FileConfiguration;
+import com.ikalagaming.packages.FileConfiguration;
+import com.ikalagaming.packages.PackageSettings;
+import com.ikalagaming.packages.PackageState;
 import com.ikalagaming.event.Listener;
 
 /**
@@ -112,17 +114,17 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public void saveConfig() {
-		//TODO implement this
+		// TODO implement this
 	}
 
 	@Override
 	public void saveDefaultConfig() {
-		//TODO implement this
+		// TODO implement this
 	}
 
 	@Override
 	public void reloadConfig() {
-		//TODO implement this
+		// TODO implement this
 	}
 
 	@Override

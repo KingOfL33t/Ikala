@@ -7,6 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ikalagaming.core.Game;
+import com.ikalagaming.logging.LoggingLevel;
+import com.ikalagaming.logging.events.LogError;
+import com.ikalagaming.util.SafeResourceLoader;
+
 /**
  * Represents a unique permission.
  * 
@@ -25,6 +30,9 @@ public class Permission {
 	private final String name;
 
 	private final String description;
+
+	private static final String resourceLocation =
+			"com.ikalagaming.permissions.resources.Permissions";
 
 	/**
 	 * A mapping of child permissions that this permissions includes. Each child
@@ -75,7 +83,7 @@ public class Permission {
 						output.add(perm);
 					}
 				}
-				catch (Throwable ex) {
+				catch (Throwable ex) {// TODO localize this and use logging
 					throw new IllegalArgumentException("Permission node '"
 							+ entry.getKey().toString() + "' in child of "
 							+ name + " is invalid", ex);
@@ -147,7 +155,7 @@ public class Permission {
 	public static Permission loadPermission(String name, Map<?, ?> data,
 			boolean def, List<Permission> output) throws NullPointerException,
 			IllegalArgumentException {
-		if (name == null) {
+		if (name == null) {// TODO localize and use logging
 			throw new NullPointerException("Name cannot be null");
 		}
 		if (data == null) {
@@ -160,7 +168,7 @@ public class Permission {
 			if (!DefaultPermissionValue.isValid(theDefault.toString())) {
 				throw new IllegalArgumentException(
 						"'default' key contained unknown value");
-			}
+			}// TODO localize and use logging
 
 			def = DefaultPermissionValue.getByName(theDefault.toString());
 
@@ -180,7 +188,7 @@ public class Permission {
 						extractChildren((Map<?, ?>) childrenNode, name, def,
 								output);
 			}
-			else {
+			else {// TODO localize and use logging
 				throw new IllegalArgumentException(
 						"'children' key is of wrong type");
 			}
@@ -244,7 +252,12 @@ public class Permission {
 						(Map<?, ?>) entry.getValue(), defaultPerm, result));
 			}
 			catch (Throwable ex) {
-				// TODO log error
+				LogError log =
+						new LogError(SafeResourceLoader.getString(
+								"INVALID_PERMISSIONS", resourceLocation,
+								"Invalid permissions"), LoggingLevel.WARNING,
+								"Permissions");
+				Game.getEventManager().fireEvent(log);
 				ex.printStackTrace();
 			}
 		}

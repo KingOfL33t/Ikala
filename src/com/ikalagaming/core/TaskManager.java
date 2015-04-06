@@ -77,10 +77,13 @@ public class TaskManager extends JFrame {
 		memUsed =
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime()
 						.freeMemory()) / 1024;
-		percentUsed = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime()
-				.freeMemory())*100 / Runtime.getRuntime().totalMemory();
-		
-		memUsage.setText(memUsed + " kb (" +percentUsed + "%)");
+		percentUsed =
+				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime()
+						.freeMemory())
+						* 100
+						/ Runtime.getRuntime().totalMemory();
+
+		memUsage.setText(memUsed + " kb (" + percentUsed + "%)");
 	}
 
 	private void updatePackageNames() {
@@ -127,33 +130,49 @@ public class TaskManager extends JFrame {
 	}
 
 	/**
-	 * Attempts to change the status of the currently selected package. 
-	 * This may be any of the following:
+	 * Attempts to change the status of the currently selected package. This may
+	 * be any of the following:
 	 * <ul>
 	 * <li>Enable</li>
 	 * <li>Disable</li>
 	 * <li>Load</li>
 	 * <li>Unload</li>
 	 * </ul>
+	 * 
 	 * @param change the change to make
 	 */
 	public void changeState(String change) {
 		int row = table.getSelectedRow();
-		if (row == -1) {
+		int column = -1;
+		for (int i = 0; i < table.getColumnCount(); ++i) {
+			if (table.getColumnName(i).equals("Package Name")) {
+				column = i;
+			}
+		}
+		if (row == -1 || column == -1) {
 			return;
 		}
-		// TODO determine which package to unload
+		com.ikalagaming.packages.Package pack =
+				Game.getPackageManager().getPackage(
+						table.getValueAt(row, column).toString());
+		if (pack == null) {
+			return;
+		}
 		if (change == "Enable") {
-
+			if (!pack.isEnabled()) {
+				pack.enable();
+			}
 		}
 		else if (change == "Disable") {
-
-		}
-		else if (change == "Load") {
-
+			if (pack.isEnabled()) {
+				pack.disable();
+			}
 		}
 		else if (change == "Unload") {
-
+			pack.onUnload();
+		}
+		else if (change == "Reload") {
+			pack.reload();
 		}
 
 	}

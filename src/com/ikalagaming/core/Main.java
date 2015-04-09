@@ -1,4 +1,3 @@
-
 package com.ikalagaming.core;
 
 import com.ikalagaming.gui.console.Console;
@@ -54,7 +53,7 @@ public class Main {
 		}
 		TaskManager manager = new TaskManager(g);
 		manager.setVisible(true);
-		
+
 		JME3MainWindow window = new JME3MainWindow();
 		window.start();
 	}

@@ -1,4 +1,3 @@
-
 package com.ikalagaming.packages.rng;
 
 import java.nio.ByteBuffer;

@@ -1,4 +1,3 @@
-
 package com.ikalagaming.permissions;
 
 import java.util.Collections;

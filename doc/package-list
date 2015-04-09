@@ -4,3 +4,7 @@ com.ikalagaming.entity
 com.ikalagaming.item
 com.ikalagaming.packages.rng
 com.ikalagaming.permissions
+core
+crypto
+entity
+packages.rng

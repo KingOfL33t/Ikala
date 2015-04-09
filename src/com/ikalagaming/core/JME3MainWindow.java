@@ -1,4 +1,3 @@
-
 package com.ikalagaming.core;
 
 import com.jme3.app.SimpleApplication;

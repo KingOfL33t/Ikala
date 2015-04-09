@@ -1,4 +1,3 @@
-
 package com.ikalagaming.crypto;
 
 import java.math.BigInteger;

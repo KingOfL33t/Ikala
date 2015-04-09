@@ -1,4 +1,3 @@
-
 package packages.rng;
 
 import static org.junit.Assert.assertEquals;

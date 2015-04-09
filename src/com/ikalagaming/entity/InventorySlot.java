@@ -1,4 +1,3 @@
-
 package com.ikalagaming.entity;
 
 import com.ikalagaming.item.ItemStack;

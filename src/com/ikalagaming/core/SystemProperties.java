@@ -1,4 +1,3 @@
-
 package com.ikalagaming.core;
 
 import java.io.File;

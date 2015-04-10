@@ -94,7 +94,6 @@ public class Entity {
 	 * Creates an entity with the given name, followed by a dash and its id.
 	 * 
 	 * @param nameHint the base name
-	 * @param app the application this entity was created by
 	 */
 	public Entity(String nameHint) {
 		name = getValidName(nameHint);

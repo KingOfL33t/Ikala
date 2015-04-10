@@ -47,7 +47,6 @@ public class Main {
 			if (!PackageSettings.ENABLE_ON_LOAD) {
 				if (!Game.getPackageManager().getPackage("console").isEnabled()) {
 					Game.getPackageManager().getPackage("console").enable();
-
 				}
 			}
 		}

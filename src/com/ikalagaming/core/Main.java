@@ -52,9 +52,6 @@ public class Main {
 				new TaskManager(Game.getPackageManager(),
 						Game.getEventManager());
 		manager.setVisible(true);
-
-		JME3MainWindow window = new JME3MainWindow();
-		window.start();
 	}
 
 	private static final String noConsoleArg = "nogui";

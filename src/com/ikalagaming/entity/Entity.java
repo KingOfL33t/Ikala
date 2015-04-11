@@ -17,11 +17,6 @@ import com.jme3.scene.shape.Box;
 
 /**
  * An entity that can be represented in the game world which has a unique name.
- * When the entity is dereferenced/garbage collected, it automatically removes
- * itself from the scene and unregisters its name for re-use on other entities.
- * This means that if you do not keep a reference somewhere to the object, it
- * will remove itself from the game after a short while (whenever GC decides to
- * run on the object).
  *
  * @author Ches Burks
  *
@@ -76,9 +71,11 @@ public class Entity {
 		this.root = new Node(this.name + "-" + "rootNode");
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-
+	/**
+	 * Clears out itself and its children from the scene and unregisters the
+	 * name of this object
+	 */
+	public void destroy() {
 		// Detach the object from the scene
 		this.root.detachAllChildren();
 		if (this.root.getParent() != null) {
@@ -104,8 +101,6 @@ public class Entity {
 		freedName = freedName.replaceFirst("\\$NAME", this.name);
 		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
 		Game.getEventManager().fireEvent(logName);
-
-		super.finalize();
 	}
 
 	/**

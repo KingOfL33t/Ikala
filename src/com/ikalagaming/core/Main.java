@@ -1,5 +1,6 @@
 package com.ikalagaming.core;
 
+import com.ikalagaming.gui.TaskManager;
 import com.ikalagaming.gui.console.Console;
 import com.ikalagaming.packages.PackageSettings;
 
@@ -47,7 +48,9 @@ public class Main {
 				}
 			}
 		}
-		TaskManager manager = new TaskManager(g);
+		TaskManager manager =
+				new TaskManager(Game.getPackageManager(),
+						Game.getEventManager());
 		manager.setVisible(true);
 
 		JME3MainWindow window = new JME3MainWindow();

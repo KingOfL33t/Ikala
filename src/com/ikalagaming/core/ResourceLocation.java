@@ -2,9 +2,9 @@ package com.ikalagaming.core;
 
 /**
  * Contains the locations of the resources for various classes.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class ResourceLocation {
 

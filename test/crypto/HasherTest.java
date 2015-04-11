@@ -6,9 +6,9 @@ import com.ikalagaming.crypto.Hasher;
 
 /**
  * Contains tests for the hashing algorithm.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class HasherTest {
 	/**
@@ -18,8 +18,9 @@ public class HasherTest {
 	public void testPasswordHashing() {
 		try {
 			// Print out 10 hashes
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++) {
 				System.out.println(Hasher.createHash("p\r\nassw0Rd!"));
+			}
 
 			// Test password validation
 			boolean failure = false;
@@ -42,10 +43,12 @@ public class HasherTest {
 					failure = true;
 				}
 			}
-			if (failure)
+			if (failure) {
 				System.out.println("TESTS FAILED!");
-			else
+			}
+			else {
 				System.out.println("TESTS PASSED!");
+			}
 		}
 		catch (Exception ex) {
 			System.out.println("ERROR: " + ex);

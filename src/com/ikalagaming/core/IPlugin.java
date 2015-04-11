@@ -6,24 +6,29 @@ import com.ikalagaming.packages.Package;
 /**
  * An interface that extends the package interface. Contains methods for
  * handling descriptions and configuration of plugins.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public interface IPlugin extends Package {
 	/**
+	 * Returns the FileConfiguration for the plugin.
+	 *
+	 * @return the FileConfiguration for the plugin
+	 */
+	public FileConfiguration getConfig();
+
+	/**
 	 * Returns a PluginDescription for the plugin.
-	 * 
+	 *
 	 * @return the description for the plugin
 	 */
 	public PluginDescription getDescription();
 
 	/**
-	 * Returns the FileConfiguration for the plugin.
-	 * 
-	 * @return the FileConfiguration for the plugin
+	 * Clears out the configuration in memory and reloads it from the disk.
 	 */
-	public FileConfiguration getConfig();
+	public void reloadConfig();
 
 	/**
 	 * Saves the configuration to disk. Any changes made in memory will
@@ -37,9 +42,4 @@ public interface IPlugin extends Package {
 	 * in the plugin, an empty configuration file is saved.
 	 */
 	public void saveDefaultConfig();
-
-	/**
-	 * Clears out the configuration in memory and reloads it from the disk.
-	 */
-	public void reloadConfig();
 }

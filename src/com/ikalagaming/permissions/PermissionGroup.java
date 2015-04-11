@@ -10,16 +10,41 @@ import java.util.HashMap;
  * Groups may have a parent group which they inherit permissions from.
  * Permissions set in a group override permissions set in a parent group if
  * there are any conflicts.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class PermissionGroup implements PermissionHolder {
+
+	/**
+	 * If the group {@link #groupExists(String) exists}, returns the group. If
+	 * the group has not been created, returns null.
+	 *
+	 * @param name the name of the group to return
+	 * @return the group, or null if no group with that name exists
+	 */
+	public static PermissionGroup getGroupByName(String name) {
+		if (PermissionGroup.groupExists(name)) {
+			return PermissionGroup.groupsByName.get(name);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns true if a group with the given name has been created.
+	 *
+	 * @param name the name of the group
+	 * @return true if the group exists
+	 */
+	public static boolean groupExists(String name) {
+		return PermissionGroup.groupsByName.containsKey(name);
+	}
 
 	private static final PermissionGroup ROOT = new PermissionGroup("root",
 			null);
 	private final String groupName;
 	private final PermissionGroup parent;
+
 	/**
 	 * Permissions that are set for this group. Inherits permissions from the
 	 * parent, but children override parents for permission values if they both
@@ -28,10 +53,11 @@ public class PermissionGroup implements PermissionHolder {
 	 * revoked from the group.
 	 */
 	private HashMap<Permission, Boolean> permissions;
+
 	private final String description;
 
 	private static HashMap<String, PermissionGroup> groupsByName =
-			new HashMap<String, PermissionGroup>();
+			new HashMap<>();
 
 	/**
 	 * Constructs a new {@link PermissionGroup} with the supplied information.
@@ -49,12 +75,13 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 * 
+	 *
 	 * @param name The name of the group
-	 * @param permissions Permissions this group is assigned
+	 * @param newPermissions Permissions this group is assigned
 	 */
-	public PermissionGroup(String name, HashMap<Permission, Boolean> permissions) {
-		this(name, null, null, permissions);
+	public PermissionGroup(String name,
+			HashMap<Permission, Boolean> newPermissions) {
+		this(name, null, null, newPermissions);
 	}
 
 	/**
@@ -79,14 +106,14 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 * 
+	 *
 	 * @param name The name of the group
-	 * @param parent The parent of this group
-	 * @param permissions Permissions this group is assigned
+	 * @param theParent The parent of this group
+	 * @param newPermissions Permissions this group is assigned
 	 */
-	public PermissionGroup(String name, PermissionGroup parent,
-			HashMap<Permission, Boolean> permissions) {
-		this(name, null, parent, permissions);
+	public PermissionGroup(String name, PermissionGroup theParent,
+			HashMap<Permission, Boolean> newPermissions) {
+		this(name, null, theParent, newPermissions);
 	}
 
 	/**
@@ -112,14 +139,14 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 * 
+	 *
 	 * @param name The name of the group
-	 * @param description The description of the group
-	 * @param permissions Permissions this group is assigned
+	 * @param theDescription The description of the group
+	 * @param newPermissions Permissions this group is assigned
 	 */
-	public PermissionGroup(String name, String description,
-			HashMap<Permission, Boolean> permissions) {
-		this(name, description, null, permissions);
+	public PermissionGroup(String name, String theDescription,
+			HashMap<Permission, Boolean> newPermissions) {
+		this(name, theDescription, null, newPermissions);
 	}
 
 	/**
@@ -150,36 +177,37 @@ public class PermissionGroup implements PermissionHolder {
 	 * not. Permissions that are not set use their default value.<br>
 	 * Example: "entity.jump" is mapped to "true"
 	 * </p>
-	 * 
+	 *
 	 * @param name The name of the group
-	 * @param description The description of the group
-	 * @param parent The parent of this group
-	 * @param permissions Permissions this group is assigned
+	 * @param theDescription The description of the group
+	 * @param theParent The parent of this group
+	 * @param newPermissions Permissions this group is assigned
 	 */
-	public PermissionGroup(String name, String description,
-			PermissionGroup parent, HashMap<Permission, Boolean> permissions) {
+	public PermissionGroup(String name, String theDescription,
+			PermissionGroup theParent,
+			HashMap<Permission, Boolean> newPermissions) {
 		if (name == null || name.isEmpty()) {
 			// TODO throw error
 			throw new Error("");
 		}
-		if (groupExists(name)) {
+		if (PermissionGroup.groupExists(name)) {
 			// TODO throw an error
 
 		}
 		this.groupName = name;
 
-		if (description == null) {
+		if (theDescription == null) {
 			this.description = "";
 		}
 		else {
-			this.description = description.isEmpty() ? "" : description;
+			this.description = theDescription.isEmpty() ? "" : theDescription;
 		}
-		if (parent != null) {
-			this.parent = parent;
+		if (theParent != null) {
+			this.parent = theParent;
 		}
 		else {
-			if (!this.equals(ROOT)) {
-				this.parent = ROOT;
+			if (!this.equals(PermissionGroup.ROOT)) {
+				this.parent = PermissionGroup.ROOT;
 			}
 			else {
 				// the root node
@@ -187,50 +215,75 @@ public class PermissionGroup implements PermissionHolder {
 			}
 		}
 		this.permissions =
-				permissions == null ? new HashMap<Permission, Boolean>()
-						: permissions;
+				newPermissions == null ? new HashMap<>() : newPermissions;
 
 		// TODO calculate permissions
-		groupsByName.put(name, this);
+		PermissionGroup.groupsByName.put(name, this);
 
+	}
+
+	private int getDepth(Permission container, Permission child, int oldDepth) {
+		if (child.getName().equals(container.getName())) {
+			return oldDepth;
+		}
+		if (container.contains(child)) {
+			for (String s : container.getChildPermissions().keySet()) {
+				if (Permission.getByName(s).contains(child)) {
+					return this.getDepth(Permission.getByName(s), child,
+							oldDepth + 1);
+				}
+			}
+
+		}
+		// It did not contain the value, but should have.
+		// make sure it is not going to be the least depth
+		return Integer.MAX_VALUE - 1;
+	}
+
+	/**
+	 * Returns the description of this group.
+	 *
+	 * @return the groups description
+	 */
+	public String getDescription() {
+		return this.description;
+	}
+
+	/**
+	 * Returns the name of this group.
+	 *
+	 * @return the groups name
+	 */
+	public String getGroupName() {
+		return this.groupName;
+	}
+
+	/**
+	 * Return the parent, if it exists. May return null.
+	 *
+	 * @return this groups parent group
+	 */
+	public PermissionGroup getParent() {
+		return this.parent;
 	}
 
 	/**
 	 * Returns true if this has a parent. If this groups parent is null, returns
 	 * false.
-	 * 
+	 *
 	 * @return true if this group has a parent group
 	 */
 	public boolean hasParent() {
-		return parent != null;
-	}
-
-	/**
-	 * Return the parent, if it exists. May return null.
-	 * 
-	 * @return this groups parent group
-	 */
-	public PermissionGroup getParent() {
-		return parent;
-	}
-
-	@Override
-	public boolean isPermissionSet(Permission perm) {
-		for (Permission permission : permissions.keySet()) {
-			if (permission.contains(perm)) {
-				return true;
-			}
-		}
-		return false;
+		return this.parent != null;
 	}
 
 	@Override
 	public boolean hasPermission(Permission perm) {
-		ArrayList<Permission> containers = new ArrayList<Permission>();
+		ArrayList<Permission> containers = new ArrayList<>();
 		boolean duplicateEntryFlag = false;
-		for (Permission firstLevel : permissions.keySet()) {
+		for (Permission firstLevel : this.permissions.keySet()) {
 			if (firstLevel.getName() == perm.getName()) {
-				return permissions.get(firstLevel);
+				return this.permissions.get(firstLevel);
 			}
 			else if (firstLevel.contains(perm)) {
 				containers.add(firstLevel);
@@ -243,7 +296,7 @@ public class PermissionGroup implements PermissionHolder {
 			int lowestVal = Integer.MAX_VALUE;
 			int currentVal = 0;
 			for (Permission p : containers) {
-				currentVal = getDepth(p, perm, 0);
+				currentVal = this.getDepth(p, perm, 0);
 				if (currentVal <= lowestVal) {
 					/*
 					 * If two values have the same depth, this will end up being
@@ -253,75 +306,25 @@ public class PermissionGroup implements PermissionHolder {
 					lowest = p;
 				}
 			}
-			if (lowest != null && permissions.containsKey(lowest)) {
-				return permissions.get(lowest);
+			if (lowest != null && this.permissions.containsKey(lowest)) {
+				return this.permissions.get(lowest);
 			}
 		}
 
 		return perm.getDefault();
 	}
 
-	private int getDepth(Permission container, Permission child, int oldDepth) {
-		if (child.getName().equals(container.getName())) {
-			return oldDepth;
-		}
-		if (container.contains(child)) {
-			for (String s : container.getChildPermissions().keySet()) {
-				if (Permission.getByName(s).contains(child)) {
-					return getDepth(Permission.getByName(s), child,
-							oldDepth + 1);
-				}
+	@Override
+	public boolean isPermissionSet(Permission perm) {
+		for (Permission permission : this.permissions.keySet()) {
+			if (permission.contains(perm)) {
+				return true;
 			}
-
 		}
-		// It did not contain the value, but should have.
-		// make sure it is not going to be the least depth
-		return Integer.MAX_VALUE - 1;
-	}
-
-	/**
-	 * Returns true if a group with the given name has been created.
-	 * 
-	 * @param name the name of the group
-	 * @return true if the group exists
-	 */
-	public static boolean groupExists(String name) {
-		return groupsByName.containsKey(name);
-	}
-
-	/**
-	 * If the group {@link #groupExists(String) exists}, returns the group. If
-	 * the group has not been created, returns null.
-	 * 
-	 * @param name the name of the group to return
-	 * @return the group, or null if no group with that name exists
-	 */
-	public static PermissionGroup getGroupByName(String name) {
-		if (groupExists(name)) {
-			return groupsByName.get(name);
-		}
-		return null;
+		return false;
 	}
 
 	@Override
 	public void recalculatePermissions() {}
-
-	/**
-	 * Returns the name of this group.
-	 * 
-	 * @return the groups name
-	 */
-	public String getGroupName() {
-		return groupName;
-	}
-
-	/**
-	 * Returns the description of this group.
-	 * 
-	 * @return the groups description
-	 */
-	public String getDescription() {
-		return description;
-	}
 
 }

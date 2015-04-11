@@ -6,7 +6,7 @@ import com.ikalagaming.entity.Entity;
 
 /**
  * Tests the functionality of the entity class.
- * 
+ *
  * @author Ches Burks
  *
  */

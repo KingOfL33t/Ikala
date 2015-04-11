@@ -5,7 +5,7 @@ import com.jme3.app.SimpleApplication;
 
 /**
  * A window that represents the main application.
- * 
+ *
  * @author Ches Burks
  *
  */
@@ -15,6 +15,6 @@ public class JME3MainWindow extends SimpleApplication {
 	public void simpleInitApp() {
 		Entity testEntity = new Entity("test");
 		testEntity.init(this);
-		rootNode.attachChild(testEntity.getRoot());
+		this.rootNode.attachChild(testEntity.getRoot());
 	}
 }

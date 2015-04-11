@@ -5,18 +5,15 @@ import com.ikalagaming.packages.PackageSettings;
 
 /**
  * The entrypoint of the program.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class Main {
-	private static final String noConsoleArg = "nogui";
-	private static final String help = "help";
-
 	/**
 	 * The entrypoint of the program. This is the main method that is run when
 	 * the game is run.
-	 * 
+	 *
 	 * @param args arguments to be passed to the program via command line
 	 */
 	public static void main(String[] args) {
@@ -24,15 +21,15 @@ public class Main {
 
 		if (args.length > 0) {
 			// it has arguments
-			if (args.length == 1 && args[0].equalsIgnoreCase(help)) {
+			if (args.length == 1 && args[0].equalsIgnoreCase(Main.help)) {
 				System.out.println("Starts the KOI server");
 				System.out.println("\nArguments:");
-				System.out.println(noConsoleArg + " - does not create "
+				System.out.println(Main.noConsoleArg + " - does not create "
 						+ "a seperate console.");
 			}
 			int i;
 			for (i = 0; i < args.length; ++i) {
-				if (args[i].equalsIgnoreCase(noConsoleArg)) {
+				if (args[i].equalsIgnoreCase(Main.noConsoleArg)) {
 					displayConsole = false;
 				}
 			}
@@ -56,5 +53,9 @@ public class Main {
 		JME3MainWindow window = new JME3MainWindow();
 		window.start();
 	}
+
+	private static final String noConsoleArg = "nogui";
+
+	private static final String help = "help";
 
 }

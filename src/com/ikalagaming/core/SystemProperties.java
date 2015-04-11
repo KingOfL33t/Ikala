@@ -5,20 +5,11 @@ import java.io.File;
 /**
  * Contains methods for fetching various system information such as the Java
  * version or the directory in which applications store data.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class SystemProperties {
-
-	/**
-	 * The type of operating system the engine is running on
-	 */
-	private static String OS;
-	/**
-	 * Equivalent to the current systems appdata folder
-	 */
-	private static String homeDirectory;
 
 	/**
 	 * Returns the home directory for the program. This is the application data
@@ -51,14 +42,14 @@ public class SystemProperties {
 	 * <p>
 	 * The users home directory is defined as
 	 * <code>System.getProperty("user.home")</code>
-	 * 
+	 *
 	 * @return the programs home directory
 	 */
 	public static String getHomeDir() {
-		if (homeDirectory == null) {
-			obtainHomeDir();
+		if (SystemProperties.homeDirectory == null) {
+			SystemProperties.obtainHomeDir();
 		}
-		return homeDirectory;
+		return SystemProperties.homeDirectory;
 	}
 
 	/**
@@ -70,23 +61,23 @@ public class SystemProperties {
 	 * <li>LINUX</li>
 	 * <li>UNKNOWN</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see #getOSActualName()
-	 * 
+	 *
 	 * @return the name of the OS
 	 */
 	public static String getOS() {
-		if (OS == null) {
-			obtainOS();
+		if (SystemProperties.OS == null) {
+			SystemProperties.obtainOS();
 		}
-		return OS;
+		return SystemProperties.OS;
 	}
 
 	/**
 	 * Returns the OS name returned by
 	 * <code>System.getProperty("os.name")</code>. Please note that this is not
 	 * the same thing as {@link #getOS()}.
-	 * 
+	 *
 	 * @see #getOS()
 	 * @return operating system name
 	 */
@@ -97,7 +88,7 @@ public class SystemProperties {
 	/**
 	 * Returns the current Operating system architecture. This is the same thing
 	 * as calling <code>System.getProperty("os.arch")</code>
-	 * 
+	 *
 	 * @return operating system architecture
 	 */
 	public static String getOSArch() {
@@ -107,7 +98,7 @@ public class SystemProperties {
 	/**
 	 * Returns the current Operating system version. This is the same thing as
 	 * calling <code>System.getProperty("os.version")</code>
-	 * 
+	 *
 	 * @return operating system version
 	 */
 	public static String getOSVersion() {
@@ -117,7 +108,7 @@ public class SystemProperties {
 	/**
 	 * Returns the Default temp file path. This is the same thing as calling
 	 * <code>System.getProperty("java.io.tmpdir")</code>
-	 * 
+	 *
 	 * @return default temp file path
 	 */
 	public static String getTmpDir() {
@@ -129,26 +120,26 @@ public class SystemProperties {
 	 * home dir string to the folder path.
 	 */
 	private static void obtainHomeDir() {
-		if (OS == null) {
-			obtainOS();
+		if (SystemProperties.OS == null) {
+			SystemProperties.obtainOS();
 		}
 		String theDir = "";
-		if (OS == "WINDOWS") {
+		if (SystemProperties.OS == "WINDOWS") {
 			theDir = System.getenv("APPDATA");
 		}
-		else if (OS == "MAC") {
+		else if (SystemProperties.OS == "MAC") {
 			theDir =
 					System.getProperty("user.home") + File.separator
 							+ "Library" + File.separator
 							+ "Application Support";
 		}
-		else if (OS == "LINUX") {
+		else if (SystemProperties.OS == "LINUX") {
 			theDir = System.getProperty("user.home");
 		}
 		else {
 			theDir = System.getProperty("user.dir");
 		}
-		homeDirectory = theDir;
+		SystemProperties.homeDirectory = theDir;
 	}
 
 	/**
@@ -169,7 +160,17 @@ public class SystemProperties {
 		else {
 			toSet = "UNKNOWN";
 		}
-		OS = toSet;
+		SystemProperties.OS = toSet;
 	}
+
+	/**
+	 * The type of operating system the engine is running on
+	 */
+	private static String OS;
+
+	/**
+	 * Equivalent to the current systems appdata folder
+	 */
+	private static String homeDirectory;
 
 }

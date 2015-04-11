@@ -1,18 +1,15 @@
 package packages.rng;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.ikalagaming.packages.rng.RngPackageMain;
 
 /**
  * Tests the RNG package.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class RngPackageTest {
 
@@ -23,13 +20,14 @@ public class RngPackageTest {
 	@Test
 	public void testLoadCycle() {
 		RngPackageMain pack = new RngPackageMain();
-		assertNotNull("rng is null", pack);
-		assertFalse("boolean is true", pack.getBoolean());
-		assertFalse("boolean is true", pack.getBoolean(1));
-		assertEquals("float not zero", 0, pack.getFloat(), 0.0);
-		assertEquals("float not zero", 0, pack.getInt(), 0.0);
-		assertEquals("float not zero", 0, pack.getIntBetween(1, 9), 0.0);
-		assertEquals("float not zero", 0, pack.getIntBetween(-81, -9), 0.0);
+		Assert.assertNotNull("rng is null", pack);
+		Assert.assertFalse("boolean is true", pack.getBoolean());
+		Assert.assertFalse("boolean is true", pack.getBoolean(1));
+		Assert.assertEquals("float not zero", 0, pack.getFloat(), 0.0);
+		Assert.assertEquals("float not zero", 0, pack.getInt(), 0.0);
+		Assert.assertEquals("float not zero", 0, pack.getIntBetween(1, 9), 0.0);
+		Assert.assertEquals("float not zero", 0, pack.getIntBetween(-81, -9),
+				0.0);
 
 		pack.onLoad();
 		pack.enable();

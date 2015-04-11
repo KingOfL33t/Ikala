@@ -5,7 +5,7 @@ import com.ikalagaming.item.ItemStack;
 /**
  * A slot in an inventory that holds an {@link ItemStack ItemStack}. This may be
  * empty.
- * 
+ *
  * @author Ches Burks
  *
  */
@@ -20,8 +20,68 @@ public class InventorySlot {
 	}
 
 	/**
+	 * Returns true if the other stack can stack with this item type, and this
+	 * stack has enough space to accommodate the other stack.
+	 *
+	 * @param other The stack to test combining with
+	 * @return True if the stacks can be combined, false otherwise
+	 */
+	public boolean canMergeWith(ItemStack other) {
+		if (!(this.itemStack.getItem().canStackWith(other.getItem()))) {
+			return false;// the items cant stack
+		}
+		if (this.itemStack.isFull()) {
+			return false;// the stack is full
+		}
+		if ((this.itemStack.getAmount() + other.getAmount()) > this.itemStack
+				.getItem().getMaxStackSize()) {
+			return false;// the total of the two is larger than the max stack
+							// size
+		}
+		return true;// they can be combined, and the stacks combined is within
+					// stack limits
+	}
+
+	/**
+	 * Try to combine this item stack with another. If there are now more items
+	 * than the maximum stack size allowed by the current item, then extra items
+	 * are returned in a stack.
+	 *
+	 * @param toAdd The stack to combine with this stack
+	 * @return A stack of overflow items
+	 */
+	public ItemStack combineItemStacks(ItemStack toAdd) {
+		// if the items are different, replace the old ones and add a new one.
+		if (!toAdd.getItem().canStackWith(this.itemStack.getItem())) {
+			ItemStack overflow = this.itemStack;
+			this.itemStack = toAdd;
+			return overflow;
+		}
+		ItemStack overflow = this.itemStack.addItems(toAdd.getAmount());
+		return overflow;
+	}
+
+	/**
+	 * Returns the pointer to the ItemStack object.
+	 *
+	 * @return The current ItemStack
+	 */
+	public ItemStack getItemStack() {
+		return this.itemStack;
+	}
+
+	/**
+	 * Returns true if the item stack is empty, false otherwise.
+	 *
+	 * @return True if this is empty, false otherwise
+	 */
+	public boolean isEmpty() {
+		return this.itemStack.isEmpty();
+	}
+
+	/**
 	 * Sets the current stack to nothing and returns the old stack if it exists.
-	 * 
+	 *
 	 * @return The old stack. This may be null.
 	 */
 	public ItemStack setEmpty() {
@@ -30,18 +90,15 @@ public class InventorySlot {
 		return oldStack;
 	}
 
-	/**
-	 * Returns true if the item stack is empty, false otherwise.
-	 * 
-	 * @return True if this is empty, false otherwise
+	/*
+	 * Then replace them and return the old ones. Return a stack containing
+	 * extra items that could not be added if adding the whole new stack results
+	 * in more than the max items being stored.
 	 */
-	public boolean isEmpty() {
-		return this.itemStack.isEmpty();
-	}
 
 	/**
 	 * Sets the ItemStack to the specified ItemStack and returns the old stack.
-	 * 
+	 *
 	 * @param newStack The stack to replace the old one
 	 * @return The stack that was replaced. This may not contain items.
 	 */
@@ -67,20 +124,11 @@ public class InventorySlot {
 	}
 
 	/**
-	 * Returns the pointer to the ItemStack object.
-	 * 
-	 * @return The current ItemStack
-	 */
-	public ItemStack getItemStack() {
-		return this.itemStack;
-	}
-
-	/**
 	 * Tries to take the requested amount of items from the stack and return it
 	 * in a new stack. If too many items are requested then it will return as
 	 * many as the stack currently has. The current stack size is reduced
 	 * appropriately. A negative or 0 value will return an empty stack.
-	 * 
+	 *
 	 * @param count The amount of items to take
 	 * @return The items that were removed, in a stack form
 	 */
@@ -98,7 +146,7 @@ public class InventorySlot {
 			 * requested then return the whole stack and empty this slot
 			 */
 			toReturn = this.itemStack;
-			setEmpty();
+			this.setEmpty();
 		}
 		else {
 			/*
@@ -111,54 +159,6 @@ public class InventorySlot {
 		}
 
 		return toReturn;
-	}
-
-	/*
-	 * Then replace them and return the old ones. Return a stack containing
-	 * extra items that could not be added if adding the whole new stack results
-	 * in more than the max items being stored.
-	 */
-
-	/**
-	 * Try to combine this item stack with another. If there are now more items
-	 * than the maximum stack size allowed by the current item, then extra items
-	 * are returned in a stack.
-	 * 
-	 * @param toAdd The stack to combine with this stack
-	 * @return A stack of overflow items
-	 */
-	public ItemStack combineItemStacks(ItemStack toAdd) {
-		// if the items are different, replace the old ones and add a new one.
-		if (!toAdd.getItem().canStackWith(this.itemStack.getItem())) {
-			ItemStack overflow = this.itemStack;
-			this.itemStack = toAdd;
-			return overflow;
-		}
-		ItemStack overflow = this.itemStack.addItems(toAdd.getAmount());
-		return overflow;
-	}
-
-	/**
-	 * Returns true if the other stack can stack with this item type, and this
-	 * stack has enough space to accommodate the other stack.
-	 * 
-	 * @param other The stack to test combining with
-	 * @return True if the stacks can be combined, false otherwise
-	 */
-	public boolean canMergeWith(ItemStack other) {
-		if (!(this.itemStack.getItem().canStackWith(other.getItem()))) {
-			return false;// the items cant stack
-		}
-		if (this.itemStack.isFull()) {
-			return false;// the stack is full
-		}
-		if ((this.itemStack.getAmount() + other.getAmount()) > this.itemStack
-				.getItem().getMaxStackSize()) {
-			return false;// the total of the two is larger than the max stack
-							// size
-		}
-		return true;// they can be combined, and the stacks combined is within
-					// stack limits
 	}
 
 }

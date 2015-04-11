@@ -6,13 +6,28 @@ import com.ikalagaming.packages.rng.RngPackageMain;
 
 /**
  * Contains logic needed for connecting various parts of the engine together.
- * 
+ *
  * @author Ches Burks
- * 
+ *
  */
 public class Game {
-	private static PackageManager packageMgr;
-	private static EventManager eventMgr;
+	/**
+	 * Returns the game's event manager.
+	 *
+	 * @return The package manager
+	 */
+	public static EventManager getEventManager() {
+		return Game.eventMgr;
+	}
+
+	/**
+	 * Returns the game's package manager.
+	 *
+	 * @return The package manager
+	 */
+	public static PackageManager getPackageManager() {
+		return Game.packageMgr;
+	}
 
 	// private static final String rootFolderName = "KnightsOfIkala";
 	// subfolder where plugins are located
@@ -38,23 +53,9 @@ public class Game {
 	 * createConfigDir(); } f = FileManager.getFile(dir); return f; }
 	 */
 
-	/**
-	 * Returns the game's package manager.
-	 * 
-	 * @return The package manager
-	 */
-	public static PackageManager getPackageManager() {
-		return packageMgr;
-	}
+	private static PackageManager packageMgr;
 
-	/**
-	 * Returns the game's event manager.
-	 * 
-	 * @return The package manager
-	 */
-	public static EventManager getEventManager() {
-		return eventMgr;
-	}
+	private static EventManager eventMgr;
 
 	/*
 	 * /** Returns the folder where plugins are stored. Packages in this folder
@@ -108,15 +109,16 @@ public class Game {
 	 * Initializes main subsystems.
 	 */
 	public void init() {
-		if (eventMgr == null) {
-			eventMgr = new EventManager();
+		if (Game.eventMgr == null) {
+			Game.eventMgr = new EventManager();
 		}
-		if (packageMgr == null) {
-			packageMgr = new PackageManager(eventMgr);
+		if (Game.packageMgr == null) {
+			Game.packageMgr = new PackageManager(Game.eventMgr);
 		}
-		packageMgr.enable();// finishes loading, also enables the event manager
+		Game.packageMgr.enable();// finishes loading, also enables the event
+									// manager
 
-		loadCorePackages();
+		this.loadCorePackages();
 		// setupDirectories();
 	}
 
@@ -124,7 +126,7 @@ public class Game {
 	 * Loads the main packages used by the game like the event system.
 	 */
 	private void loadCorePackages() {
-		packageMgr.loadPackage(new RngPackageMain());
+		Game.packageMgr.loadPackage(new RngPackageMain());
 	}
 
 	/*

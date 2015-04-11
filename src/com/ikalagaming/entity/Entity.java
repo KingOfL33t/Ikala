@@ -22,56 +22,22 @@ import com.jme3.scene.shape.Box;
  * This means that if you do not keep a reference somewhere to the object, it
  * will remove itself from the game after a short while (whenever GC decides to
  * run on the object).
- * 
+ *
  * @author Ches Burks
  *
  */
 public class Entity {
-	private static HashMap<String, IntegerTree> registeredNames =
-			new HashMap<String, IntegerTree>();
-
-	@Override
-	protected void finalize() throws Throwable {
-
-		// Detach the object from the scene
-		root.detachAllChildren();
-		if (root.getParent() != null) {
-			root.getParent().detachChild(root);
-		}
-
-		String message =
-				SafeResourceLoader.getString("ENTITY_DESTROYED",
-						resourceLocation, "Destroyed entity $NAME");
-		message = message.replaceFirst("\\$NAME", name);
-		Log log = new Log(message, LoggingLevel.FINEST, "entity");
-		Game.getEventManager().fireEvent(log);
-
-		// when objects are deleted, unregister their id
-		int dashPos = name.lastIndexOf("-");
-		int id = Integer.parseInt(name.substring(dashPos));
-		registeredNames.get(name.substring(0, dashPos)).remove(id);
-
-		String freedName =
-				SafeResourceLoader.getString("NAME_FREED", resourceLocation,
-						"Freed the entity name $NAME for re-use");
-		freedName = freedName.replaceFirst("\\$NAME", name);
-		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
-		Game.getEventManager().fireEvent(logName);
-
-		super.finalize();
-	}
-
 	private static String getValidName(String nameHint) {
 		String ret = nameHint;
 		IntegerTree tree;
 		int addition;
-		if (registeredNames.containsKey(nameHint)) {
-			tree = registeredNames.get(nameHint);
+		if (Entity.registeredNames.containsKey(nameHint)) {
+			tree = Entity.registeredNames.get(nameHint);
 			addition = tree.getSmallestUnusedInt();
 		}
 		else {
 			tree = new IntegerTree();
-			registeredNames.put(nameHint, tree);
+			Entity.registeredNames.put(nameHint, tree);
 			addition = 0;
 		}
 		try {
@@ -85,30 +51,85 @@ public class Entity {
 		return ret;
 	}
 
+	private static HashMap<String, IntegerTree> registeredNames =
+			new HashMap<>();
+
 	private Node root;
+
 	private final String name;
 	private static final String resourceLocation =
 			"com.ikalagaming.entity.resources.Entity";
 
 	/**
 	 * Creates an entity with the given name, followed by a dash and its id.
-	 * 
+	 *
 	 * @param nameHint the base name
 	 */
 	public Entity(String nameHint) {
-		name = getValidName(nameHint);
+		this.name = Entity.getValidName(nameHint);
 		String message =
 				SafeResourceLoader.getString("ENTITY_CREATED",
-						resourceLocation, "Created entity $NAME");
-		message = message.replaceFirst("\\$NAME", name);
+						Entity.resourceLocation, "Created entity $NAME");
+		message = message.replaceFirst("\\$NAME", this.name);
 		Log log = new Log(message, LoggingLevel.FINEST, "entity");
 		Game.getEventManager().fireEvent(log);
-		root = new Node(name + "-" + "rootNode");
+		this.root = new Node(this.name + "-" + "rootNode");
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+
+		// Detach the object from the scene
+		this.root.detachAllChildren();
+		if (this.root.getParent() != null) {
+			this.root.getParent().detachChild(this.root);
+		}
+
+		String message =
+				SafeResourceLoader.getString("ENTITY_DESTROYED",
+						Entity.resourceLocation, "Destroyed entity $NAME");
+		message = message.replaceFirst("\\$NAME", this.name);
+		Log log = new Log(message, LoggingLevel.FINEST, "entity");
+		Game.getEventManager().fireEvent(log);
+
+		// when objects are deleted, unregister their id
+		int dashPos = this.name.lastIndexOf("-");
+		int id = Integer.parseInt(this.name.substring(dashPos));
+		Entity.registeredNames.get(this.name.substring(0, dashPos)).remove(id);
+
+		String freedName =
+				SafeResourceLoader.getString("NAME_FREED",
+						Entity.resourceLocation,
+						"Freed the entity name $NAME for re-use");
+		freedName = freedName.replaceFirst("\\$NAME", this.name);
+		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
+		Game.getEventManager().fireEvent(logName);
+
+		super.finalize();
+	}
+
+	/**
+	 * Returns the name of this entity. Names are unique, but will be recycled
+	 * when entities are deleted.
+	 *
+	 * @return the entities name (including trailing dash and id)
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Return this entities root node.
+	 *
+	 * @return the root node for this entity
+	 */
+	public Node getRoot() {
+		return this.root;
 	}
 
 	/**
 	 * Creates a box to represent the entity.
-	 * 
+	 *
 	 * @param app the app this entity belongs to
 	 */
 	public void init(SimpleApplication app) {
@@ -121,26 +142,7 @@ public class Entity {
 		mat1.setColor("Color", ColorRGBA.Blue);
 		cube.setMaterial(mat1);
 
-		root.attachChild(cube);
-	}
-
-	/**
-	 * Returns the name of this entity. Names are unique, but will be recycled
-	 * when entities are deleted.
-	 * 
-	 * @return the entities name (including trailing dash and id)
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Return this entities root node.
-	 * 
-	 * @return the root node for this entity
-	 */
-	public Node getRoot() {
-		return root;
+		this.root.attachChild(cube);
 	}
 
 }

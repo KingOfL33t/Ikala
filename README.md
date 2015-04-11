@@ -1,3 +1,3 @@
 Ikala
 =====
-This project is still being designed. Code for the basic system is in place but subject to change. This is going to be a multiplayer video game.
+An extension of the core Ikala libraries that add functionality that is useful for games. These are intended to provide functionality to speed up game development and performance of games.

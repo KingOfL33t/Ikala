@@ -1,5 +1,6 @@
-package com.ikalagaming.entity;
+package com.ikalagaming.entity.component;
 
+import com.ikalagaming.entity.InventorySlot;
 import com.ikalagaming.item.Item;
 import com.ikalagaming.item.ItemStack;
 
@@ -9,19 +10,21 @@ import com.ikalagaming.item.ItemStack;
  * @author Ches Burks
  *
  */
-public class Inventory {
+public class Inventory extends Component {
 	/**
 	 * The array of slots that contain items in this inventory.
 	 */
 	private InventorySlot[] inventorySlots;
 
 	/**
-	 * Constructs a new Inventory with the given amount of slots.
+	 * Constructs a new Inventory with the given amount of slots and a component
+	 * type of Inventory.
 	 *
 	 * @param slots The number of slots the inventory will have
 	 */
 	public Inventory(int slots) {
 		this.inventorySlots = new InventorySlot[slots];
+		this.componentType = "Inventory";
 	}
 
 	/**

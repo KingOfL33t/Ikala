@@ -3,6 +3,7 @@ package com.ikalagaming.entity;
 import java.util.HashMap;
 
 import com.ikalagaming.core.Game;
+import com.ikalagaming.entity.component.Component;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.events.Log;
 import com.ikalagaming.util.DuplicateEntry;
@@ -47,12 +48,20 @@ public class Entity {
 			"com.ikalagaming.entity.resources.Entity";
 
 	/**
+	 * Constructs an entity with the name Entity.
+	 */
+	public Entity() {
+		this("Entity");
+	}
+
+	/**
 	 * Creates an entity with the given name, followed by a dash and its id.
 	 *
 	 * @param nameHint the base name
 	 */
 	public Entity(String nameHint) {
 		this.name = Entity.getValidName(nameHint);
+		this.components = new HashMap<>();
 		String message =
 				SafeResourceLoader.getString("ENTITY_CREATED",
 						Entity.resourceLocation, "Created entity $NAME");
@@ -60,6 +69,13 @@ public class Entity {
 		Log log = new Log(message, LoggingLevel.FINEST, "entity");
 		Game.getEventManager().fireEvent(log);
 	}
+
+	protected HashMap<String, Component> components;
+
+	/**
+	 * Initializes the entity and its components.
+	 */
+	public void init() {}
 
 	/**
 	 * Clears out itself and its children from the scene and unregisters the
@@ -78,6 +94,34 @@ public class Entity {
 		freedName = freedName.replaceFirst("\\$NAME", this.name);
 		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
 		Game.getEventManager().fireEvent(logName);
+	}
+
+	/**
+	 * Returns the Component of the specified type belonging to this entity. If
+	 * no such component exists, null is returned instead. To check if a
+	 * component exists, the {@link #hasComponent(String)} method can be used.
+	 *
+	 * @param type the type of component that should be returned.
+	 * @return the component who has a componentType that matches the supplied
+	 *         string or null if none exist
+	 */
+	public Component getComponent(String type) {
+		if (this.components.containsKey(type)) {
+			return this.components.get(type);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns true if there is a Component of the specified type that belongs
+	 * to this entity.
+	 *
+	 * @param type the type of component that should be returned.
+	 * @return true if this entity owns one of the specified components, false
+	 *         otherwise
+	 */
+	public boolean hasComponent(String type) {
+		return this.components.containsKey(type);
 	}
 
 	/**

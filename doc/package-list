@@ -1,5 +1,6 @@
 com.ikalagaming.core
 com.ikalagaming.entity
+com.ikalagaming.entity.component
 com.ikalagaming.item
 com.ikalagaming.packages.rng
 com.ikalagaming.permissions

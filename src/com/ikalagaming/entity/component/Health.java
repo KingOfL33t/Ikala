@@ -26,7 +26,7 @@ public class Health extends Component {
 	 * Constructs a Health component with default values. Minimum health is
 	 * initialized to zero, maximum to 100, and the current health to 100 (full
 	 * health). This is the same as calling {@code Health(0, 100, 100);}
-	 * 
+	 *
 	 * <p>
 	 * The component type is set to Health
 	 * </p>
@@ -40,7 +40,7 @@ public class Health extends Component {
 	 * The minimum health is initialized to zero and the current health set to
 	 * the maximum health value (full health). This is the same as calling
 	 * {@code Health(0, max, max);}
-	 * 
+	 *
 	 * <p>
 	 * The component type is set to Health
 	 * </p>
@@ -56,7 +56,7 @@ public class Health extends Component {
 	 * Constructs a Health component with the specified minimum and maximum
 	 * health values. The health is initialized to the maximum health value
 	 * (full health). This is the same as calling {@code Health(min, max, max);}
-	 * 
+	 *
 	 * <p>
 	 * The component type is set to Health
 	 * </p>
@@ -174,6 +174,12 @@ public class Health extends Component {
 	}
 
 	private void validateHealth() {
+		if (this.healthQuantity < Health.LOWEST_POSSIBLE_HEALTH) {
+			this.healthQuantity = Health.LOWEST_POSSIBLE_HEALTH;
+		}
+		if (this.healthQuantity > Health.HIGHEST_POSSIBLE_HEALTH) {
+			this.healthQuantity = Health.HIGHEST_POSSIBLE_HEALTH;
+		}
 		if (this.healthQuantity < this.minHealth) {
 			this.healthQuantity = this.minHealth;
 		}
@@ -227,7 +233,7 @@ public class Health extends Component {
 	/**
 	 * Sets the health of the entity to the given health.
 	 *
-	 * @param newHealth
+	 * @param newHealth the new health of the entity
 	 */
 	public void setHealth(final int newHealth) {
 		this.healthQuantity = newHealth;

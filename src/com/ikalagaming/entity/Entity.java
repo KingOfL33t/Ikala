@@ -6,7 +6,7 @@ import com.ikalagaming.core.Game;
 import com.ikalagaming.entity.component.Component;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.events.Log;
-import com.ikalagaming.util.DuplicateEntry;
+import com.ikalagaming.util.NameRegistry;
 import com.ikalagaming.util.SafeResourceLoader;
 
 /**
@@ -16,32 +16,7 @@ import com.ikalagaming.util.SafeResourceLoader;
  *
  */
 public class Entity {
-	private static String getValidName(String nameHint) {
-		String ret = nameHint;
-		IntegerTree tree;
-		int addition;
-		if (Entity.registeredNames.containsKey(nameHint)) {
-			tree = Entity.registeredNames.get(nameHint);
-			addition = tree.getSmallestUnusedInt();
-		}
-		else {
-			tree = new IntegerTree();
-			Entity.registeredNames.put(nameHint, tree);
-			addition = 0;
-		}
-		try {
-			tree.insert(addition);
-		}
-		catch (DuplicateEntry e) {
-			System.err.println(e.getCause());
-			e.printStackTrace(System.err);
-		}
-		ret = ret + "-" + addition;
-		return ret;
-	}
-
-	private static HashMap<String, IntegerTree> registeredNames =
-			new HashMap<>();
+	private static NameRegistry registry = new NameRegistry();
 
 	private final String name;
 	private static final String resourceLocation =
@@ -60,7 +35,7 @@ public class Entity {
 	 * @param nameHint the base name
 	 */
 	public Entity(String nameHint) {
-		this.name = Entity.getValidName(nameHint);
+		this.name = Entity.registry.registerName(nameHint);
 		this.components = new HashMap<>();
 		String message =
 				SafeResourceLoader.getString("ENTITY_CREATED",
@@ -83,9 +58,8 @@ public class Entity {
 	 */
 	public void destroy() {
 		// when objects are deleted, unregister their id
-		int dashPos = this.name.lastIndexOf("-");
-		int id = Integer.parseInt(this.name.substring(dashPos));
-		Entity.registeredNames.get(this.name.substring(0, dashPos)).remove(id);
+		final int dashPos = this.name.lastIndexOf("-");
+		Entity.registry.unregisterName(this.name.substring(0, dashPos));
 
 		String freedName =
 				SafeResourceLoader.getString("NAME_FREED",

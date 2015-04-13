@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.packages.FileConfiguration;
 import com.ikalagaming.packages.PackageSettings;
 import com.ikalagaming.packages.PackageState;
 

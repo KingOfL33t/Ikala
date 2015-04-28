@@ -1,8 +1,9 @@
 package com.ikalagaming.core;
 
+import com.ikalagaming.event.EventManager;
 import com.ikalagaming.gui.TaskManager;
 import com.ikalagaming.gui.console.Console;
-import com.ikalagaming.packages.PackageSettings;
+import com.ikalagaming.packages.PackageManager;
 
 /**
  * The entrypoint of the program.
@@ -40,17 +41,15 @@ public class Main {
 		g.init();
 
 		if (displayConsole) {
-			Console c = new Console(Game.getEventManager());
-			Game.getPackageManager().loadPackage(c);
-			if (!PackageSettings.ENABLE_ON_LOAD) {
-				if (!Game.getPackageManager().getPackage("console").isEnabled()) {
-					Game.getPackageManager().getPackage("console").enable();
+			Console c = new Console(EventManager.getInstance());
+			PackageManager.getInstance().loadPackage(c);
+			if (!PackageManager.getInstance().enableOnLoad()) {
+				if (!PackageManager.getInstance().isEnabled(c.getName())) {
+					PackageManager.getInstance().enable(c.getName());
 				}
 			}
 		}
-		TaskManager manager =
-				new TaskManager(Game.getPackageManager(),
-						Game.getEventManager());
+		TaskManager manager = new TaskManager(PackageManager.getInstance());
 		manager.setVisible(true);
 	}
 

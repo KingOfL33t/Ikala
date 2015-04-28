@@ -11,23 +11,6 @@ import com.ikalagaming.packages.rng.RngPackageMain;
  *
  */
 public class Game {
-	/**
-	 * Returns the game's event manager.
-	 *
-	 * @return The package manager
-	 */
-	public static EventManager getEventManager() {
-		return Game.eventMgr;
-	}
-
-	/**
-	 * Returns the game's package manager.
-	 *
-	 * @return The package manager
-	 */
-	public static PackageManager getPackageManager() {
-		return Game.packageMgr;
-	}
 
 	// private static final String rootFolderName = "KnightsOfIkala";
 	// subfolder where plugins are located
@@ -52,10 +35,6 @@ public class Game {
 	 * File.separator + configFolder; if (!FileManager.fileExists(dir)) {
 	 * createConfigDir(); } f = FileManager.getFile(dir); return f; }
 	 */
-
-	private static PackageManager packageMgr;
-
-	private static EventManager eventMgr;
 
 	/*
 	 * /** Returns the folder where plugins are stored. Packages in this folder
@@ -109,14 +88,10 @@ public class Game {
 	 * Initializes main subsystems.
 	 */
 	public void init() {
-		if (Game.eventMgr == null) {
-			Game.eventMgr = new EventManager();
-		}
-		if (Game.packageMgr == null) {
-			Game.packageMgr = new PackageManager(Game.eventMgr);
-		}
-		Game.packageMgr.enable();// finishes loading, also enables the event
-									// manager
+
+		EventManager.getInstance();// creates the event manager
+		PackageManager.getInstance();// creates the package manager
+		PackageManager.getInstance().onEnable();
 
 		this.loadCorePackages();
 		// setupDirectories();
@@ -126,7 +101,7 @@ public class Game {
 	 * Loads the main packages used by the game like the event system.
 	 */
 	private void loadCorePackages() {
-		Game.packageMgr.loadPackage(new RngPackageMain());
+		PackageManager.getInstance().loadPackage(new RngPackageMain());
 	}
 
 	/*

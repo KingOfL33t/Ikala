@@ -2,8 +2,8 @@ package com.ikalagaming.entity;
 
 import java.util.HashMap;
 
-import com.ikalagaming.core.Game;
 import com.ikalagaming.entity.component.Component;
+import com.ikalagaming.event.EventManager;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.events.Log;
 import com.ikalagaming.util.NameRegistry;
@@ -42,7 +42,7 @@ public class Entity {
 						Entity.resourceLocation, "Created entity $NAME");
 		message = message.replaceFirst("\\$NAME", this.name);
 		Log log = new Log(message, LoggingLevel.FINEST, "entity");
-		Game.getEventManager().fireEvent(log);
+		EventManager.getInstance().fireEvent(log);
 	}
 
 	protected HashMap<String, Component> components;
@@ -67,7 +67,7 @@ public class Entity {
 						"Freed the entity name $NAME for re-use");
 		freedName = freedName.replaceFirst("\\$NAME", this.name);
 		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
-		Game.getEventManager().fireEvent(logName);
+		EventManager.getInstance().fireEvent(logName);
 	}
 
 	/**

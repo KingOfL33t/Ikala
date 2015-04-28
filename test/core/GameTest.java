@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.ikalagaming.core.Game;
+import com.ikalagaming.packages.PackageManager;
 
 /**
  * Used for testing the Game class.
@@ -23,10 +24,7 @@ public class GameTest {
 		Game g = new Game();
 		g.init();
 		Assert.assertNotNull("Game is null", g);
-		Assert.assertNotNull("Package manager is null",
-				Game.getPackageManager());
-		Assert.assertNotNull("Event manager is null", Game.getEventManager());
-		Assert.assertNotNull("Logging is null", Game.getPackageManager()
+		Assert.assertNotNull("Logging is null", PackageManager.getInstance()
 				.getPackage("logging"));
 	}
 

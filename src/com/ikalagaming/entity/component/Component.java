@@ -20,14 +20,14 @@ public class Component {
 	 * Constructs a new component with the type Component
 	 */
 	public Component() {
-		componentType = "Component";
+		this.componentType = "Component";
 	}
 
 	/**
 	 * Returns the type of this component. Each different component should have
 	 * a different componentType so that they do not have a collision and get
 	 * confused for each other.
-	 * 
+	 *
 	 * @return the string representing what component this is
 	 */
 	public String getType() {

@@ -138,7 +138,7 @@ public class Entity {
 	 * Calls the effect's {@link Effect#tick(Entity) tick} method using this
 	 * entity as a target.
 	 *
-	 * @param effect
+	 * @param effect the effect to apply
 	 */
 	public void applyEffect(Effect effect) {
 		effect.tick(this);

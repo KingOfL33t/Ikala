@@ -24,7 +24,14 @@ public class Inventory extends Component {
 	 */
 	public Inventory(int slots) {
 		this.inventorySlots = new InventorySlot[slots];
-		this.componentType = "Inventory";
+	}
+
+	/**
+	 * Returns "Inventory"
+	 */
+	@Override
+	public String getType() {
+		return "Inventory";
 	}
 
 	/**

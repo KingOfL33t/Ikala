@@ -10,18 +10,6 @@ package com.ikalagaming.entity.component;
  *
  */
 public class Component {
-	/**
-	 * The type of this component. Each unique subclass/type of component should
-	 * have a different name.
-	 */
-	protected String componentType;
-
-	/**
-	 * Constructs a new component with the type Component
-	 */
-	public Component() {
-		this.componentType = "Component";
-	}
 
 	/**
 	 * Returns the type of this component. Each different component should have
@@ -31,6 +19,6 @@ public class Component {
 	 * @return the string representing what component this is
 	 */
 	public String getType() {
-		return this.componentType;
+		return "Component";
 	}
 }

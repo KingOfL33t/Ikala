@@ -1,8 +1,10 @@
 package com.ikalagaming.entity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.ikalagaming.entity.component.Component;
+import com.ikalagaming.entity.effects.Effect;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.logging.LoggingLevel;
 import com.ikalagaming.logging.events.Log;
@@ -21,6 +23,7 @@ public class Entity {
 	private final String name;
 	private static final String resourceLocation =
 			"com.ikalagaming.entity.resources.Entity";
+	private ArrayList<Effect> currentEffects;
 
 	/**
 	 * Constructs an entity with the name Entity.
@@ -37,6 +40,7 @@ public class Entity {
 	public Entity(String nameHint) {
 		this.name = Entity.registry.registerName(nameHint);
 		this.components = new HashMap<>();
+		this.currentEffects = new ArrayList<>();
 		String message =
 				SafeResourceLoader.getString("ENTITY_CREATED",
 						Entity.resourceLocation, "Created entity $NAME");
@@ -99,6 +103,28 @@ public class Entity {
 	}
 
 	/**
+	 * Adds the specified component to this entity if it does not already have
+	 * one.
+	 *
+	 * @param toAdd the component to add
+	 */
+	public void addComponent(Component toAdd) {
+		if (this.components.containsKey(toAdd.getType())) {
+			return;
+		}
+		this.components.put(toAdd.getType(), toAdd);
+	}
+
+	/**
+	 * Removes the specified component from this entity.
+	 *
+	 * @param type the type of component to remove
+	 */
+	public void removeComponent(String type) {
+		this.components.remove(type);
+	}
+
+	/**
 	 * Returns the name of this entity. Names are unique, but will be recycled
 	 * when entities are deleted.
 	 *
@@ -106,6 +132,16 @@ public class Entity {
 	 */
 	public String getName() {
 		return this.name;
+	}
+
+	/**
+	 * Calls the effect's {@link Effect#tick(Entity) tick} method using this
+	 * entity as a target.
+	 *
+	 * @param effect
+	 */
+	public void applyEffect(Effect effect) {
+		effect.tick(this);
 	}
 
 }

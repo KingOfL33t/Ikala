@@ -12,34 +12,51 @@ public class Health extends Component {
 	private int maxHealth;
 	private int minHealth;
 	private boolean immortal;
+
 	/**
-	 * No entity may ever have a health value greater than this number.
+	 * No entity may ever have a health value greater than this number ({@value}
+	 * )
 	 */
 	public static final int HIGHEST_POSSIBLE_HEALTH = 2000000000;
 
 	/**
-	 * No entity may ever have a health value lower than this number.
+	 * No entity may ever have a health value lower than this number ({@value} )
 	 */
 	public static final int LOWEST_POSSIBLE_HEALTH = -2000000000;
 
 	/**
+	 * The value that is default for minimum health ({@value} )
+	 */
+	public static final int DEFAULT_MIN_HEALTH = 0;
+
+	/**
+	 * The value that is default for minimum health ({@value} )
+	 */
+	public static final int DEFAULT_MAX_HEALTH = 100;
+
+	/**
 	 * Constructs a Health component with default values. Minimum health is
-	 * initialized to zero, maximum to 100, and the current health to 100 (full
-	 * health). This is the same as calling {@code Health(0, 100, 100);}
+	 * initialized to {@value #DEFAULT_MIN_HEALTH}, maximum to
+	 * {@value #DEFAULT_MAX_HEALTH}, and the current health to
+	 * {@value #DEFAULT_MAX_HEALTH} (full health). This is the same as calling
+	 * {@code Health(} {@value #DEFAULT_MIN_HEALTH},
+	 * {@value #DEFAULT_MAX_HEALTH} , {@value #DEFAULT_MAX_HEALTH} {@code );}
 	 *
 	 * <p>
 	 * The component type is set to Health
 	 * </p>
 	 */
 	public Health() {
-		this(0, 100, 100);
+		this(Health.DEFAULT_MIN_HEALTH, Health.DEFAULT_MAX_HEALTH,
+				Health.DEFAULT_MAX_HEALTH);
 	}
 
 	/**
 	 * Constructs a Health component with the specified maximum health value.
-	 * The minimum health is initialized to zero and the current health set to
-	 * the maximum health value (full health). This is the same as calling
-	 * {@code Health(0, max, max);}
+	 * The minimum health is initialized to {@value #DEFAULT_MIN_HEALTH} and the
+	 * current health set to the maximum health value (full health). This is the
+	 * same as calling {@code Health(} {@value #DEFAULT_MIN_HEALTH}
+	 * {@code , max, max);}
 	 *
 	 * <p>
 	 * The component type is set to Health
@@ -48,8 +65,13 @@ public class Health extends Component {
 	 * @param max the maximum allowed health. The health cannot go above this.
 	 * @see #Health(int, int, int)
 	 */
-	public Health(int max) {
-		this(0, max, max);
+	public Health(final int max) {
+		// this(smaller number, bigger number, bigger number)
+		this(max > Health.DEFAULT_MIN_HEALTH ? Health.DEFAULT_MIN_HEALTH : max,
+				max > Health.DEFAULT_MIN_HEALTH ? max
+						: Health.DEFAULT_MIN_HEALTH,
+				max > Health.DEFAULT_MIN_HEALTH ? max
+						: Health.DEFAULT_MIN_HEALTH);
 	}
 
 	/**
@@ -66,8 +88,10 @@ public class Health extends Component {
 	 * @param max the maximum allowed health. The health cannot go above this.
 	 * @see #Health(int, int, int)
 	 */
-	public Health(int min, int max) {
-		this(min, max, max);
+	public Health(final int min, final int max) {
+		// this(smaller number, bigger number, bigger number)
+		this(min < max ? min : max, min < max ? max : min, min < max ? max
+				: min);
 	}
 
 	/**
@@ -91,12 +115,12 @@ public class Health extends Component {
 	 * @param max the maximum allowed health. The health cannot go above this.
 	 * @param initial what value the health should start at
 	 */
-	public Health(int min, int max, int initial) {
+	public Health(final int min, final int max, final int initial) {
 		int theMax = max;
 		int theMin = min;
 		int init = initial;
 
-		if (max >= min) {
+		if (max < min) {
 			theMax = min;
 			theMin = max;
 		}
@@ -121,71 +145,17 @@ public class Health extends Component {
 		this.minHealth = theMin;
 		this.maxHealth = theMax;
 
-		if (init > theMax || init < theMin) {
+		if (init > theMax) {
 			this.healthQuantity = theMax;
+		}
+		else if (init < theMin) {
+			this.healthQuantity = theMin;
 		}
 		else {
 			this.healthQuantity = init;
 		}
-		this.componentType = "Health";
-	}
 
-	/**
-	 * Returns the current health of the entity.
-	 *
-	 * @return the health
-	 */
-	public int getHealth() {
-		return this.healthQuantity;
-	}
-
-	/**
-	 * Returns true if this object is immortal. If it is immortal, it is unable
-	 * to be healed or damaged, and never considered dead.
-	 *
-	 * @return true if this entity is immortal.
-	 */
-	public boolean isImmortal() {
-		return this.immortal;
-	}
-
-	/**
-	 * Sets the immortality state of this entity. If it is immortal, it is
-	 * unable to be healed or damaged, and never considered dead.
-	 *
-	 * @param isNowImmortal if the entity should now be immortal or not
-	 */
-	public void setImmortal(boolean isNowImmortal) {
-		this.immortal = isNowImmortal;
-	}
-
-	/**
-	 * Returns true if the entity has no health. More specifically, if the
-	 * current health is equal to the minimum health. If the entity is set as
-	 * immortal, it will return false regardless of health.
-	 *
-	 * @return true if the entity has no health left, false if it is alive
-	 */
-	public boolean isDead() {
-		if (this.isImmortal()) {
-			return false;
-		}
-		return this.healthQuantity == this.minHealth;
-	}
-
-	private void validateHealth() {
-		if (this.healthQuantity < Health.LOWEST_POSSIBLE_HEALTH) {
-			this.healthQuantity = Health.LOWEST_POSSIBLE_HEALTH;
-		}
-		if (this.healthQuantity > Health.HIGHEST_POSSIBLE_HEALTH) {
-			this.healthQuantity = Health.HIGHEST_POSSIBLE_HEALTH;
-		}
-		if (this.healthQuantity < this.minHealth) {
-			this.healthQuantity = this.minHealth;
-		}
-		if (this.healthQuantity > this.maxHealth) {
-			this.healthQuantity = this.maxHealth;
-		}
+		this.immortal = false;
 	}
 
 	/**
@@ -210,6 +180,55 @@ public class Health extends Component {
 	}
 
 	/**
+	 * Returns the current health of the entity.
+	 *
+	 * @return the health
+	 */
+	public int getHealth() {
+		return this.healthQuantity;
+	}
+
+	/**
+	 * Returns the percentage of health the entity is currently at. This will be
+	 * a float with a value somewhere between 0.0f and 1.0f, with 0 being dead
+	 * and 1 being at full health.
+	 *
+	 * @return the percent of full health this entity currently has
+	 */
+	public float getHealthPercentage() {
+		final float top = this.healthQuantity - this.minHealth;
+		final float bottom = this.maxHealth - this.minHealth;
+		return top / bottom;
+	}
+
+	/**
+	 * Returns the maximum allowed health. The health cannot go above this.
+	 *
+	 * @return the maximum health this entity can have
+	 */
+	public int getMaxHealth() {
+		return this.maxHealth;
+	}
+
+	/**
+	 * Returns the the minimum allowed health. When the health is equal to this,
+	 * the entity is dead.
+	 *
+	 * @return the minimum health this entity can have
+	 */
+	public int getMinHealth() {
+		return this.minHealth;
+	}
+
+	/**
+	 * Returns "Health"
+	 */
+	@Override
+	public String getType() {
+		return "Health";
+	}
+
+	/**
 	 * Heals the entity by the specified amount. This will not increase the
 	 * health above the maximum health. If the amount to heal is negative, the
 	 * damage method will be called with an equivalent positive value.
@@ -231,6 +250,31 @@ public class Health extends Component {
 	}
 
 	/**
+	 * Returns true if the entity has no health. More specifically, if the
+	 * current health is equal to the minimum health. If the entity is set as
+	 * immortal, it will return false regardless of health. If min and max
+	 * health are the same, it will report as dead.
+	 *
+	 * @return true if the entity has no health left, false if it is alive
+	 */
+	public boolean isDead() {
+		if (this.isImmortal()) {
+			return false;
+		}
+		return this.healthQuantity == this.minHealth;
+	}
+
+	/**
+	 * Returns true if this object is immortal. If it is immortal, it is unable
+	 * to be healed or damaged, and never considered dead. Defaults to off.
+	 *
+	 * @return true if this entity is immortal.
+	 */
+	public boolean isImmortal() {
+		return this.immortal;
+	}
+
+	/**
 	 * Sets the health of the entity to the given health.
 	 *
 	 * @param newHealth the new health of the entity
@@ -241,22 +285,13 @@ public class Health extends Component {
 	}
 
 	/**
-	 * Returns the maximum allowed health. The health cannot go above this.
+	 * Sets the immortality state of this entity. If it is immortal, it is
+	 * unable to be healed or damaged, and never considered dead.
 	 *
-	 * @return the maximum health this entity can have
+	 * @param isNowImmortal if the entity should now be immortal or not
 	 */
-	public int getMaxHealth() {
-		return this.maxHealth;
-	}
-
-	/**
-	 * Returns the the minimum allowed health. When the health is equal to this,
-	 * the entity is dead.
-	 *
-	 * @return the minimum health this entity can have
-	 */
-	public int getMinHealth() {
-		return this.minHealth;
+	public void setImmortal(boolean isNowImmortal) {
+		this.immortal = isNowImmortal;
 	}
 
 	/**
@@ -300,17 +335,12 @@ public class Health extends Component {
 		this.validateHealth();
 	}
 
-	/**
-	 * Returns the percentage of health the entity is currently at. This will be
-	 * a float with a value somewhere between 0.0f and 100.0f, with 0 being dead
-	 * and 100 being at full health.
-	 *
-	 * @return the percent of full health this entity currently has
-	 */
-	public float getHealthPercentage() {
-		final float top = this.healthQuantity - this.minHealth;
-		final float bottom = this.maxHealth - this.minHealth;
-		final float fraction = top / bottom;
-		return fraction * 100;
+	private void validateHealth() {
+		if (this.healthQuantity < this.minHealth) {
+			this.healthQuantity = this.minHealth;
+		}
+		if (this.healthQuantity > this.maxHealth) {
+			this.healthQuantity = this.maxHealth;
+		}
 	}
 }

@@ -6,7 +6,7 @@ package com.ikalagaming.entity;
  * @author Ches Burks
  *
  */
-public interface CurrencyHolder {
+public interface ICurrencyHolder {
 	/**
 	 * Add the given amount to the currency.
 	 *
@@ -36,20 +36,20 @@ public interface CurrencyHolder {
 	public void setCurrency(int amount);
 
 	/**
-	 * Move currency from the given {@link CurrencyHolder} to this one. This
+	 * Move currency from the given {@link ICurrencyHolder} to this one. This
 	 * removes currency from the other and adds it to this one.
 	 *
 	 * @param other The currencyHolder to remove from
 	 * @param amount How much to transfer
 	 */
-	public void transferCurrencyFrom(CurrencyHolder other, int amount);
+	public void transferCurrencyFrom(ICurrencyHolder other, int amount);
 
 	/**
-	 * Move currency from this {@link CurrencyHolder} to the supplied one. This
+	 * Move currency from this {@link ICurrencyHolder} to the supplied one. This
 	 * removes currency from this and adds it to the other one.
 	 *
 	 * @param other The currencyHolder to add to
 	 * @param amount How much to transfer
 	 */
-	public void transferCurrencyTo(CurrencyHolder other, int amount);
+	public void transferCurrencyTo(ICurrencyHolder other, int amount);
 }

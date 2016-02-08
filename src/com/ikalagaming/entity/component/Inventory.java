@@ -27,14 +27,6 @@ public class Inventory extends Component {
 	}
 
 	/**
-	 * Returns "Inventory"
-	 */
-	@Override
-	public String getType() {
-		return "Inventory";
-	}
-
-	/**
 	 * Adds the item to the first available {@link InventorySlot InventorySlot},
 	 * if possible.
 	 *
@@ -95,6 +87,14 @@ public class Inventory extends Component {
 	 */
 	public InventorySlot getSlot(int index) {
 		return this.inventorySlots[index];
+	}
+
+	/**
+	 * Returns "Inventory"
+	 */
+	@Override
+	public String getType() {
+		return "Inventory";
 	}
 
 	/**

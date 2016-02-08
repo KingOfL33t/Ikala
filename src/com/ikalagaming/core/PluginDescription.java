@@ -19,6 +19,8 @@ import com.ikalagaming.permissions.Permission;
  *
  */
 public class PluginDescription {
+	private static final ThreadLocal<Yaml> YAML = new ThreadLocal<>();
+
 	private static List<String> makePluginNameList(final Map<?, ?> map,
 			final String key) throws InvalidDescriptionException {
 		final Object value = map.get(key);
@@ -42,7 +44,6 @@ public class PluginDescription {
 		return pluginNameList;
 	}
 
-	private static final ThreadLocal<Yaml> YAML = new ThreadLocal<>();
 	String rawName = null;
 	private String name = null;
 	private String main = null;

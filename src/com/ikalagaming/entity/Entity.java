@@ -20,10 +20,12 @@ import com.ikalagaming.util.SafeResourceLoader;
 public class Entity {
 	private static NameRegistry registry = new NameRegistry();
 
-	private final String name;
 	private static final String resourceLocation =
 			"com.ikalagaming.entity.resources.Entity";
+	private final String name;
 	private ArrayList<Effect> currentEffects;
+
+	protected HashMap<String, Component> components;
 
 	/**
 	 * Constructs an entity with the name Entity.
@@ -49,12 +51,28 @@ public class Entity {
 		EventManager.getInstance().fireEvent(log);
 	}
 
-	protected HashMap<String, Component> components;
+	/**
+	 * Adds the specified component to this entity if it does not already have
+	 * one.
+	 *
+	 * @param toAdd the component to add
+	 */
+	public void addComponent(Component toAdd) {
+		if (this.components.containsKey(toAdd.getType())) {
+			return;
+		}
+		this.components.put(toAdd.getType(), toAdd);
+	}
 
 	/**
-	 * Initializes the entity and its components.
+	 * Calls the effect's {@link Effect#tick(Entity) tick} method using this
+	 * entity as a target.
+	 *
+	 * @param effect the effect to apply
 	 */
-	public void init() {}
+	public void applyEffect(Effect effect) {
+		effect.tick(this);
+	}
 
 	/**
 	 * Clears out itself and its children from the scene and unregisters the
@@ -91,6 +109,16 @@ public class Entity {
 	}
 
 	/**
+	 * Returns the name of this entity. Names are unique, but will be recycled
+	 * when entities are deleted.
+	 *
+	 * @return the entities name (including trailing dash and id)
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
 	 * Returns true if there is a Component of the specified type that belongs
 	 * to this entity.
 	 *
@@ -103,17 +131,9 @@ public class Entity {
 	}
 
 	/**
-	 * Adds the specified component to this entity if it does not already have
-	 * one.
-	 *
-	 * @param toAdd the component to add
+	 * Initializes the entity and its components.
 	 */
-	public void addComponent(Component toAdd) {
-		if (this.components.containsKey(toAdd.getType())) {
-			return;
-		}
-		this.components.put(toAdd.getType(), toAdd);
-	}
+	public void init() {}
 
 	/**
 	 * Removes the specified component from this entity.
@@ -122,26 +142,6 @@ public class Entity {
 	 */
 	public void removeComponent(String type) {
 		this.components.remove(type);
-	}
-
-	/**
-	 * Returns the name of this entity. Names are unique, but will be recycled
-	 * when entities are deleted.
-	 *
-	 * @return the entities name (including trailing dash and id)
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * Calls the effect's {@link Effect#tick(Entity) tick} method using this
-	 * entity as a target.
-	 *
-	 * @param effect the effect to apply
-	 */
-	public void applyEffect(Effect effect) {
-		effect.tick(this);
 	}
 
 }

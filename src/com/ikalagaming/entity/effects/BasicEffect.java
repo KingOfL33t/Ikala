@@ -13,21 +13,6 @@ import com.ikalagaming.entity.component.Health;
  */
 public class BasicEffect {
 	/**
-	 * Does one damage to an entity if it has a Health component.
-	 *
-	 * @param target the target entity
-	 */
-	public static void damage(Entity target) {
-		target.applyEffect((entity) -> {
-			if (!entity.hasComponent("Health")) {
-				return;
-			}
-			Health health = (Health) entity.getComponent("Health");
-			health.damage(1);
-		});
-	}
-
-	/**
 	 * Creates a new Effect that applies the given damage to an entity, and
 	 * returns it.
 	 *
@@ -44,5 +29,20 @@ public class BasicEffect {
 			health.damage(damage);
 		};
 		return newEffect::accept;
+	}
+
+	/**
+	 * Does one damage to an entity if it has a Health component.
+	 *
+	 * @param target the target entity
+	 */
+	public static void damage(Entity target) {
+		target.applyEffect((entity) -> {
+			if (!entity.hasComponent("Health")) {
+				return;
+			}
+			Health health = (Health) entity.getComponent("Health");
+			health.damage(1);
+		});
 	}
 }

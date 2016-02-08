@@ -8,31 +8,31 @@ package com.ikalagaming.entity.component;
  *
  */
 public class Health extends Component {
-	private int healthQuantity;
-	private int maxHealth;
-	private int minHealth;
-	private boolean immortal;
-
 	/**
 	 * No entity may ever have a health value greater than this number ({@value}
 	 * )
 	 */
 	public static final int HIGHEST_POSSIBLE_HEALTH = 2000000000;
-
 	/**
 	 * No entity may ever have a health value lower than this number ({@value} )
 	 */
 	public static final int LOWEST_POSSIBLE_HEALTH = -2000000000;
-
 	/**
 	 * The value that is default for minimum health ({@value} )
 	 */
 	public static final int DEFAULT_MIN_HEALTH = 0;
-
 	/**
 	 * The value that is default for minimum health ({@value} )
 	 */
 	public static final int DEFAULT_MAX_HEALTH = 100;
+
+	private int healthQuantity;
+
+	private int maxHealth;
+
+	private int minHealth;
+
+	private boolean immortal;
 
 	/**
 	 * Constructs a Health component with default values. Minimum health is

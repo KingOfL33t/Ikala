@@ -15,20 +15,6 @@ import com.ikalagaming.entity.component.Health;
 public class TestBasicEffects {
 
 	/**
-	 * Tests the damage method
-	 */
-	@Test
-	public void damage() {
-		Entity bob = new Entity("Bob");
-		bob.addComponent(new Health(0, 100));
-		Assert.assertNotNull(bob.getComponent("Health"));
-		Health bobsHealth = (Health) bob.getComponent("Health");
-		int lastHealth = bobsHealth.getHealth();
-		bob.applyEffect(BasicEffect::damage);
-		Assert.assertEquals(bobsHealth.getHealth(), lastHealth - 1, 0);
-	}
-
-	/**
 	 * Tests the Effect returned by the customDamage method
 	 */
 	public void customDamage() {
@@ -41,5 +27,19 @@ public class TestBasicEffects {
 		bob.applyEffect(BasicEffect.customDamage(bob, damageAmount));
 		Assert.assertEquals(bobsHealth.getHealth(), lastHealth - damageAmount,
 				0);
+	}
+
+	/**
+	 * Tests the damage method
+	 */
+	@Test
+	public void damage() {
+		Entity bob = new Entity("Bob");
+		bob.addComponent(new Health(0, 100));
+		Assert.assertNotNull(bob.getComponent("Health"));
+		Health bobsHealth = (Health) bob.getComponent("Health");
+		int lastHealth = bobsHealth.getHealth();
+		bob.applyEffect(BasicEffect::damage);
+		Assert.assertEquals(bobsHealth.getHealth(), lastHealth - 1, 0);
 	}
 }

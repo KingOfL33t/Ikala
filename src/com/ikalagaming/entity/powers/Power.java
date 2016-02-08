@@ -3,8 +3,6 @@ package com.ikalagaming.entity.powers;
 import com.ikalagaming.entity.Entity;
 
 public interface Power {
-	public String getName();
-
 	/**
 	 * Applies this effect to the given entity. May be called repeatedly.
 	 * Effects may include damaging or healing the entity, affecting their
@@ -16,6 +14,8 @@ public interface Power {
 	public void applyEffect(Entity target);
 
 	public boolean doesTick();
+
+	public String getName();
 
 	public long getTickTime();
 

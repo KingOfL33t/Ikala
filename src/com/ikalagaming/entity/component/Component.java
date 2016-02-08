@@ -9,7 +9,7 @@ package com.ikalagaming.entity.component;
  * @author Ches Burks
  *
  */
-public class Component {
+public abstract class Component {
 
 	/**
 	 * Returns the type of this component. Each different component should have
@@ -18,7 +18,5 @@ public class Component {
 	 *
 	 * @return the string representing what component this is
 	 */
-	public String getType() {
-		return "Component";
-	}
+	public abstract String getType();
 }

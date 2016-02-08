@@ -1,1 +1,7 @@
+com.ikalagaming.core
 com.ikalagaming.entity
+com.ikalagaming.entity.component
+com.ikalagaming.entity.effects
+com.ikalagaming.entity.powers
+com.ikalagaming.item
+entity

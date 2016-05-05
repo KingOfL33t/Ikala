@@ -46,7 +46,6 @@ public class Main {
 		// initialize the systems
 		EventManager.getInstance();// creates the event manager
 		PackageManager.getInstance();// creates the package manager
-		PackageManager.getInstance().onEnable();
 
 		if (displayConsole) {
 			Console c = new Console(EventManager.getInstance());

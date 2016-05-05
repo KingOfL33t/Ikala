@@ -2,6 +2,7 @@ package com.ikalagaming.entity;
 
 /**
  * An interface for entities that own currency and can perform transactions.
+ * Implementations of this should make sure to account for thread safety.
  *
  * @author Ches Burks
  *

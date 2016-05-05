@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 import com.ikalagaming.entity.component.Component;
 import com.ikalagaming.entity.effects.Effect;
-import com.ikalagaming.event.EventManager;
-import com.ikalagaming.logging.LoggingLevel;
-import com.ikalagaming.logging.events.Log;
+import com.ikalagaming.logging.Logging;
 import com.ikalagaming.util.NameRegistry;
 import com.ikalagaming.util.SafeResourceLoader;
 
@@ -47,8 +45,7 @@ public class Entity {
 				SafeResourceLoader.getString("ENTITY_CREATED",
 						Entity.resourceLocation, "Created entity $NAME");
 		message = message.replaceFirst("\\$NAME", this.name);
-		Log log = new Log(message, LoggingLevel.FINEST, "entity");
-		EventManager.getInstance().fireEvent(log);
+		Logging.finest("entity", message);
 	}
 
 	/**
@@ -88,8 +85,7 @@ public class Entity {
 						Entity.resourceLocation,
 						"Freed the entity name $NAME for re-use");
 		freedName = freedName.replaceFirst("\\$NAME", this.name);
-		Log logName = new Log(freedName, LoggingLevel.FINEST, "entity");
-		EventManager.getInstance().fireEvent(logName);
+		Logging.finest("entity", freedName);
 	}
 
 	/**

@@ -8,6 +8,12 @@ package com.ikalagaming.entity.component;
  *
  */
 public class Health extends Component {
+
+	/**
+	 * The name of the component returned by {@link #getType()}. ( {@value} )
+	 */
+	public static final String TYPE_NAME = "Health";
+
 	/**
 	 * No entity may ever have a health value greater than this number ({@value}
 	 * )
@@ -221,11 +227,11 @@ public class Health extends Component {
 	}
 
 	/**
-	 * Returns "Health"
+	 * Returns {@link #TYPE_NAME}.
 	 */
 	@Override
 	public String getType() {
-		return "Health";
+		return Health.TYPE_NAME;
 	}
 
 	/**
@@ -343,4 +349,5 @@ public class Health extends Component {
 			this.healthQuantity = this.maxHealth;
 		}
 	}
+
 }

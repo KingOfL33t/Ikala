@@ -1,7 +1,10 @@
-package com.ikalagaming.entity.component;
+package com.ikalagaming.entity.component.test;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.ikalagaming.entity.component.Health;
+import com.ikalagaming.entity.component.InvalidInputException;
 
 /**
  * Tests for the Health component

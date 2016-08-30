@@ -1,4 +1,4 @@
-package entity;
+package com.ikalagaming.entity.test;
 
 import org.junit.Test;
 

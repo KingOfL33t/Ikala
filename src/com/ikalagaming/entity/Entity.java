@@ -1,10 +1,8 @@
 package com.ikalagaming.entity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.ikalagaming.entity.component.Component;
-import com.ikalagaming.entity.effects.Effect;
 import com.ikalagaming.logging.Logging;
 import com.ikalagaming.util.NameRegistry;
 import com.ikalagaming.util.SafeResourceLoader;
@@ -21,7 +19,6 @@ public class Entity {
 	private static final String resourceLocation =
 			"com.ikalagaming.entity.resources.Entity";
 	private final String name;
-	private ArrayList<Effect> currentEffects;
 
 	protected HashMap<String, Component> components;
 
@@ -40,7 +37,6 @@ public class Entity {
 	public Entity(String nameHint) {
 		this.name = Entity.registry.registerName(nameHint);
 		this.components = new HashMap<>();
-		this.currentEffects = new ArrayList<>();
 		String message =
 				SafeResourceLoader.getString("ENTITY_CREATED",
 						Entity.resourceLocation, "Created entity $NAME");
@@ -59,16 +55,6 @@ public class Entity {
 			return;
 		}
 		this.components.put(toAdd.getType(), toAdd);
-	}
-
-	/**
-	 * Calls the effect's {@link Effect#tick(Entity) tick} method using this
-	 * entity as a target.
-	 *
-	 * @param effect the effect to apply
-	 */
-	public void applyEffect(Effect effect) {
-		effect.tick(this);
 	}
 
 	/**

@@ -11,6 +11,12 @@ import com.ikalagaming.item.ItemStack;
  *
  */
 public class Inventory extends Component {
+
+	/**
+	 * The name of the component returned by {@link #getType()}. ( {@value} )
+	 */
+	public static final String TYPE_NAME = "Inventory";
+
 	/**
 	 * The array of slots that contain items in this inventory.
 	 */
@@ -66,7 +72,6 @@ public class Inventory extends Component {
 				break;
 			}
 		}
-
 	}
 
 	/**
@@ -90,11 +95,11 @@ public class Inventory extends Component {
 	}
 
 	/**
-	 * Returns "Inventory"
+	 * Returns {@link #TYPE_NAME}.
 	 */
 	@Override
 	public String getType() {
-		return "Inventory";
+		return Inventory.TYPE_NAME;
 	}
 
 	/**

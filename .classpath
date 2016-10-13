@@ -9,9 +9,9 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Ikala/thirdparty/brownies-collections-0.9.8-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="thirdparty/ICore.jar" sourcepath="thirdparty/ICore.jar">
+	<classpathentry kind="lib" path="thirdparty/ICore.jar" sourcepath="thirdparty/ICore-source.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Ikala/thirdparty/ICore-javadoc.jar!/javadoc"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Ikala/thirdparty/ICore-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

@@ -68,7 +68,7 @@ public class Effects extends Component {
 	/**
 	 * When an effect is activated, apply it to the
 	 * 
-	 * @param event
+	 * @param event The effect that was activated
 	 */
 	@EventHandler
 	public void onEffectActivated(EffectActivated event) {

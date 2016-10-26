@@ -23,6 +23,17 @@ public class Player extends Entity implements ICurrencyHolder {
 	 * Constructs a player and gives it some essential components.
 	 */
 	public Player() {
+		this("Player");
+	}
+
+	/**
+	 * Constructs a new player with the given name, followed by a dash and its
+	 * id.
+	 * 
+	 * @param nameHint the base name
+	 */
+	public Player(final String nameHint) {
+		super(nameHint);
 		this.addComponent(new Health());
 		this.addComponent(new Inventory(INVENTORY_SIZE));
 	}

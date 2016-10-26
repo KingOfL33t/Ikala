@@ -1,6 +1,7 @@
 package com.ikalagaming.entity;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.ikalagaming.entity.component.Component;
 import com.ikalagaming.logging.Logging;
@@ -22,6 +23,8 @@ public class Entity {
 
 	protected HashMap<String, Component> components;
 
+	private ReentrantLock componentLock;
+
 	/**
 	 * Constructs an entity with the name Entity.
 	 */
@@ -35,6 +38,7 @@ public class Entity {
 	 * @param nameHint the base name
 	 */
 	public Entity(String nameHint) {
+		this.componentLock = new ReentrantLock();
 		this.name = Entity.registry.registerName(nameHint);
 		this.components = new HashMap<>();
 		String message =
@@ -51,10 +55,16 @@ public class Entity {
 	 * @param toAdd the component to add
 	 */
 	public void addComponent(Component toAdd) {
-		if (this.components.containsKey(toAdd.getType())) {
-			return;
+		this.componentLock.lock();
+		try {
+			if (this.components.containsKey(toAdd.getType())) {
+				return;
+			}
+			this.components.put(toAdd.getType(), toAdd);
 		}
-		this.components.put(toAdd.getType(), toAdd);
+		finally {
+			this.componentLock.unlock();
+		}
 	}
 
 	/**
@@ -84,10 +94,16 @@ public class Entity {
 	 *         string or null if none exist
 	 */
 	public Component getComponent(String type) {
-		if (this.components.containsKey(type)) {
-			return this.components.get(type);
+		Component ret;
+
+		this.componentLock.lock();
+		try {
+			ret = this.components.get(type);
 		}
-		return null;
+		finally {
+			this.componentLock.unlock();
+		}
+		return ret;
 	}
 
 	/**
@@ -108,8 +124,16 @@ public class Entity {
 	 * @return true if this entity owns one of the specified components, false
 	 *         otherwise
 	 */
-	public boolean hasComponent(String type) {
-		return this.components.containsKey(type);
+	public boolean hasComponent(final String type) {
+		boolean result = false;
+		this.componentLock.lock();
+		try {
+			result = this.components.containsKey(type);
+		}
+		finally {
+			this.componentLock.unlock();
+		}
+		return result;
 	}
 
 	/**
@@ -122,8 +146,14 @@ public class Entity {
 	 *
 	 * @param type the type of component to remove
 	 */
-	public void removeComponent(String type) {
-		this.components.remove(type);
+	public void removeComponent(final String type) {
+		this.componentLock.lock();
+		try {
+			this.components.remove(type);
+		}
+		finally {
+			this.componentLock.unlock();
+		}
 	}
 
 }

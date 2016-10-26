@@ -1,11 +1,9 @@
 com.ikalagaming.core
 com.ikalagaming.entity
 com.ikalagaming.entity.component
-com.ikalagaming.entity.component.test
 com.ikalagaming.entity.effects
 com.ikalagaming.entity.events
 com.ikalagaming.entity.powers
-com.ikalagaming.entity.test
 com.ikalagaming.item
 com.ikalagaming.server
 com.ikalagaming.server.events

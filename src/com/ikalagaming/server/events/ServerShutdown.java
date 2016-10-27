@@ -3,7 +3,7 @@ package com.ikalagaming.server.events;
 import com.ikalagaming.event.Event;
 
 /**
- * The server has been booted up, but is not done setting up.
+ * The server has shut down.
  *
  * @author Ches Burks
  *

@@ -26,6 +26,11 @@
 			<exclude name="com/ikalagaming/package-info.java"/>
 			<exclude name="com/ikalagaming/**/package-info.java"/>
 		</javac>
+		<copy verbose="${verbose}" todir="${build}" preservelastmodified="false">
+			<fileset dir="${src}">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy> 
 	</target>
 
 	<target name="javadoc"

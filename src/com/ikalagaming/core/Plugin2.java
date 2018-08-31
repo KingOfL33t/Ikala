@@ -6,14 +6,14 @@ import java.util.Set;
 import com.ikalagaming.event.Listener;
 
 /**
- * A package that is loaded from an external source.
+ * A plugin that is loaded from an external source.
  *
  * @author Ches Burks
  *
  */
-public class Plugin implements IPlugin {
+public class Plugin2 implements IPlugin {
 
-	private String packageName = "null-plugin";
+	private String pluginName = "null-plugin";
 	private final double version = 0.1;
 	private FileConfiguration config;
 	private PluginDescription description;
@@ -35,7 +35,7 @@ public class Plugin implements IPlugin {
 
 	@Override
 	public String getName() {
-		return this.packageName;
+		return this.pluginName;
 	}
 
 	@Override

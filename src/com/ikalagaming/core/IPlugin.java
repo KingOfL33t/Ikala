@@ -1,15 +1,15 @@
 package com.ikalagaming.core;
 
-import com.ikalagaming.packages.Package;
+import com.ikalagaming.plugins.Plugin;
 
 /**
- * An interface that extends the package interface. Contains methods for
+ * An interface that extends the plugin interface. Contains methods for
  * handling descriptions and configuration of plugins.
  *
  * @author Ches Burks
  *
- */
-public interface IPlugin extends Package {
+ */	
+public interface IPlugin extends Plugin {
 	/**
 	 * Returns the FileConfiguration for the plugin.
 	 *

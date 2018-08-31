@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.packages.Package;
+import com.ikalagaming.plugins.Plugin;
 
 /**
  * A database of effects that are known to the game.
@@ -13,12 +13,12 @@ import com.ikalagaming.packages.Package;
  * @author Ches Burks
  *
  */
-public class EffectDatabase implements Package, Listener {
+public class EffectDatabase implements Plugin, Listener {
 
 	/**
-	 * The human readable name of the package.
+	 * The human readable name of the plugin.
 	 */
-	private static final String packageName = "Effect Database";
+	private static final String pluginName = "Effect Database";
 	/**
 	 * The current iteration of this power database.
 	 */
@@ -39,7 +39,7 @@ public class EffectDatabase implements Package, Listener {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return EffectDatabase.packageName;
+		return EffectDatabase.pluginName;
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class EffectDatabase implements Package, Listener {
 	}
 
 	/**
-	 * Returns true if an effect exists with the specified name. If this package
+	 * Returns true if an effect exists with the specified name. If this plugin
 	 * is not loaded/enabled, it will always return false.
 	 * 
 	 * @param name the name of the effect
@@ -85,14 +85,14 @@ public class EffectDatabase implements Package, Listener {
 			return false;
 		}
 		if (this.effects == null) {
-			return false;// This package might not be loaded
+			return false;// This plugin might not be loaded
 		}
 		return this.effects.containsKey(name);
 	}
 
 	/**
 	 * Returns the effect with the given name if one exists. If name is null,
-	 * this package is not loaded/enabled, or no known effect has that name, it
+	 * this plugin is not loaded/enabled, or no known effect has that name, it
 	 * returns null.
 	 * 
 	 * @param name the name of the effect
@@ -105,7 +105,7 @@ public class EffectDatabase implements Package, Listener {
 			return null;
 		}
 		if (this.effects == null) {
-			return null;// This package might not be loaded
+			return null;// This plugin might not be loaded
 		}
 		if (!this.effects.containsKey(name)) {
 			return null;

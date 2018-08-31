@@ -4,14 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ikalagaming.event.Listener;
-import com.ikalagaming.packages.Package;
+import com.ikalagaming.plugins.Plugin;
 
-public class PowerDatabase implements Package, Listener {
+public class PowerDatabase implements Plugin, Listener {
 
 	/**
-	 * The human readable name of the package.
+	 * The human readable name of the plugin.
 	 */
-	private static final String packageName = "Power Database";
+	private static final String pluginName = "Power Database";
 	/**
 	 * The current iteration of this power database.
 	 */
@@ -30,7 +30,7 @@ public class PowerDatabase implements Package, Listener {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return PowerDatabase.packageName;
+		return PowerDatabase.pluginName;
 	}
 
 	@Override

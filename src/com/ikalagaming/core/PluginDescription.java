@@ -158,7 +158,7 @@ public class PluginDescription {
 	 * The fully qualified name of the main method for the plugin. This includes
 	 * the class name. The format should follow the
 	 * {@link ClassLoader#loadClass(String)} syntax. Typically this will be the
-	 * class that implements {@link Plugin}.
+	 * class that implements {@link Plugin2}.
 	 *
 	 * @return the absolute path to the main method of the plugin
 	 */

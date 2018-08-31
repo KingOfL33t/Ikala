@@ -3,7 +3,7 @@ package com.ikalagaming.core;
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.gui.TaskManager;
 import com.ikalagaming.gui.console.Console;
-import com.ikalagaming.packages.PackageManager;
+import com.ikalagaming.plugins.PluginManager;
 import com.ikalagaming.server.ServerController;
 import com.ikalagaming.server.events.ServerStarted;
 
@@ -45,23 +45,23 @@ public class Main {
 
 		// initialize the systems
 		EventManager.getInstance();// creates the event manager
-		PackageManager.getInstance();// creates the package manager
+		PluginManager.getInstance();// creates the plugin manager
 
 		if (displayConsole) {
 			Console c = new Console(EventManager.getInstance());
-			PackageManager.getInstance().loadPackage(c);
-			if (!PackageManager.getInstance().enableOnLoad()) {
-				if (!PackageManager.getInstance().isEnabled(c.getName())) {
-					PackageManager.getInstance().enable(c.getName());
+			PluginManager.getInstance().loadPlugin(c);
+			if (!PluginManager.getInstance().enableOnLoad()) {
+				if (!PluginManager.getInstance().isEnabled(c.getName())) {
+					PluginManager.getInstance().enable(c.getName());
 				}
 			}
 		}
-		TaskManager manager = new TaskManager(PackageManager.getInstance());
+		TaskManager manager = new TaskManager(PluginManager.getInstance());
 		manager.setVisible(true);
 
 		ServerController servController = new ServerController();
-		PackageManager.getInstance().loadPackage(servController);
-		PackageManager.getInstance().enable(servController);
+		PluginManager.getInstance().loadPlugin(servController);
+		PluginManager.getInstance().enable(servController);
 		EventManager.getInstance().fireEvent(new ServerStarted());
 	}
 

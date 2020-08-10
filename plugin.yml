@@ -1,0 +1,6 @@
+name: Ikala
+version: 0.0.1
+description: Basic game development libraries
+authors: [maceris]
+main: com.ikalagaming.core.Main
+prefix: ikala

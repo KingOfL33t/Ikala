@@ -4,7 +4,7 @@
 	<property name="src" location="src"/>
 	<property name="build" location="bin"/>
 	<property name="test" location="test"/>
-	<property name="dist" location="jars"/>
+	<property name="dist" location="dist"/>
 	<property name="doc" location="doc"/>
 	<property name="packages" value="com.ikalagaming.*"/>
 	

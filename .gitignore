@@ -3,4 +3,7 @@ wiki/
 wiki/*
 /nbproject/private/
 /build/
-/dist/
+doc/
+doc/*
+dist/
+dist/*

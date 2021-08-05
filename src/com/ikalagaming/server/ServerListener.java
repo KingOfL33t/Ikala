@@ -26,21 +26,18 @@ public class ServerListener implements Listener {
 
 	@EventHandler
 	public void onPluginCommand(PluginCommandSent event) {
-		if (!event.getTo().equals(this.server.getName())) {
-			return;
-		}
 		if (event.getCommand().equalsIgnoreCase("shutdown")) {
 			// TODO check permissions
-			EventManager.getInstance().fireEvent(new ServerShutdown());
+			new ServerShutdown().fire();;
 		}
 
 	}
 
 	@EventHandler
 	public void onServerShutdown(ServerShutdown event) {
-		PluginManager.getInstance().unloadPlugin(this.powerDatabase);
+		PluginManager.getInstance().unloadPlugin(this.powerDatabase.getName());
 		this.powerDatabase = null;// dereference
-		PluginManager.getInstance().unloadPlugin(this.server);
+		PluginManager.getInstance().unloadPlugin(this.server.PLUGIN_NAME);
 		this.server = null;
 		// TODO unload plugins
 		EventManager.getInstance().unregisterEventListeners(this);
@@ -50,7 +47,7 @@ public class ServerListener implements Listener {
 	public void onServerStarted(ServerStarted event) {
 		// TODO load plugins
 		this.powerDatabase = new PowerDatabase();
-		PluginManager.getInstance().loadPlugin(this.powerDatabase);
-		PluginManager.getInstance().enable(this.powerDatabase);
+		//PluginManager.getInstance().loadPlugin(this.powerDatabase.getName());
+		PluginManager.getInstance().enable(this.powerDatabase.getName());
 	}
 }

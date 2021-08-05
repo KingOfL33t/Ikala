@@ -2,7 +2,6 @@ package com.ikalagaming.core;
 
 import com.ikalagaming.event.EventManager;
 import com.ikalagaming.gui.TaskManager;
-import com.ikalagaming.gui.console.Console;
 import com.ikalagaming.plugins.PluginManager;
 import com.ikalagaming.server.ServerController;
 import com.ikalagaming.server.events.ServerStarted;
@@ -33,7 +32,7 @@ public class Main {
 				System.out.println("Starts the KOI server");
 				System.out.println("\nArguments:");
 				System.out.println(Main.noConsoleArg + " - does not create "
-						+ "a seperate console.");
+					+ "a seperate console.");
 			}
 			int i;
 			for (i = 0; i < args.length; ++i) {
@@ -47,21 +46,12 @@ public class Main {
 		EventManager.getInstance();// creates the event manager
 		PluginManager.getInstance();// creates the plugin manager
 
-		if (displayConsole) {
-			Console c = new Console(EventManager.getInstance());
-			PluginManager.getInstance().loadPlugin(c);
-			if (!PluginManager.getInstance().enableOnLoad()) {
-				if (!PluginManager.getInstance().isEnabled(c.getName())) {
-					PluginManager.getInstance().enable(c.getName());
-				}
-			}
-		}
 		TaskManager manager = new TaskManager(PluginManager.getInstance());
 		manager.setVisible(true);
 
 		ServerController servController = new ServerController();
-		PluginManager.getInstance().loadPlugin(servController);
-		PluginManager.getInstance().enable(servController);
+		// PluginManager.getInstance().loadPlugin(servController.PLUGIN_NAME);
+		PluginManager.getInstance().enable(servController.PLUGIN_NAME);
 		EventManager.getInstance().fireEvent(new ServerStarted());
 	}
 

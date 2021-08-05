@@ -1,12 +1,13 @@
 package com.ikalagaming.entity;
 
-import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.ikalagaming.entity.component.Component;
-import com.ikalagaming.logging.Logging;
 import com.ikalagaming.util.NameRegistry;
 import com.ikalagaming.util.SafeResourceLoader;
+
+import lombok.CustomLog;
+
+import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * An entity that can be represented in the game world which has a unique name.
@@ -14,11 +15,12 @@ import com.ikalagaming.util.SafeResourceLoader;
  * @author Ches Burks
  *
  */
+@CustomLog(topic = "Entity")
 public class Entity {
 	private static NameRegistry registry = new NameRegistry();
 
 	private static final String resourceLocation =
-			"com.ikalagaming.entity.resources.Entity";
+		"com.ikalagaming.entity.resources.Entity";
 	private final String name;
 
 	protected HashMap<String, Component> components;
@@ -41,11 +43,10 @@ public class Entity {
 		this.componentLock = new ReentrantLock();
 		this.name = Entity.registry.registerName(nameHint);
 		this.components = new HashMap<>();
-		String message =
-				SafeResourceLoader.getString("ENTITY_CREATED",
-						Entity.resourceLocation, "Created entity $NAME");
+		String message = SafeResourceLoader.getString("ENTITY_CREATED",
+			Entity.resourceLocation, "Created entity $NAME");
 		message = message.replaceFirst("\\$NAME", this.name);
-		Logging.finest("entity", message);
+		log.finest(message);
 	}
 
 	/**
@@ -76,12 +77,10 @@ public class Entity {
 		final int dashPos = this.name.lastIndexOf("-");
 		Entity.registry.unregisterName(this.name.substring(0, dashPos));
 
-		String freedName =
-				SafeResourceLoader.getString("NAME_FREED",
-						Entity.resourceLocation,
-						"Freed the entity name $NAME for re-use");
+		String freedName = SafeResourceLoader.getString("NAME_FREED",
+			Entity.resourceLocation, "Freed the entity name $NAME for re-use");
 		freedName = freedName.replaceFirst("\\$NAME", this.name);
-		Logging.finest("entity", freedName);
+		log.finest(freedName);
 	}
 
 	/**

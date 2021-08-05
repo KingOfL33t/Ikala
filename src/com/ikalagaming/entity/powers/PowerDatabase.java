@@ -6,7 +6,8 @@ import java.util.Set;
 import com.ikalagaming.event.Listener;
 import com.ikalagaming.plugins.Plugin;
 
-public class PowerDatabase implements Plugin, Listener {
+//TODO move this to a new project
+public class PowerDatabase extends Plugin implements Listener {
 
 	/**
 	 * The human readable name of the plugin.
@@ -27,13 +28,11 @@ public class PowerDatabase implements Plugin, Listener {
 		return this.listeners;
 	}
 
-	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return PowerDatabase.pluginName;
 	}
 
-	@Override
 	public double getVersion() {
 		return PowerDatabase.version;
 	}

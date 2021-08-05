@@ -13,7 +13,8 @@ import com.ikalagaming.plugins.Plugin;
  * @author Ches Burks
  *
  */
-public class EffectDatabase implements Plugin, Listener {
+//TODO move this to a new project
+public class EffectDatabase extends Plugin implements Listener {
 
 	/**
 	 * The human readable name of the plugin.
@@ -36,13 +37,11 @@ public class EffectDatabase implements Plugin, Listener {
 		return this.listeners;
 	}
 
-	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return EffectDatabase.pluginName;
 	}
 
-	@Override
 	public double getVersion() {
 		return EffectDatabase.version;
 	}

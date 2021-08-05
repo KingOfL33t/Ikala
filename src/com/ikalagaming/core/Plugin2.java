@@ -28,40 +28,6 @@ public class Plugin2 implements IPlugin {
 		return this.description;
 	}
 
-	@Override
-	public Set<Listener> getListeners() {
-		return new HashSet<>();
-	}
-
-	@Override
-	public String getName() {
-		return this.pluginName;
-	}
-
-	@Override
-	public double getVersion() {
-		return this.version;
-	}
-
-	@Override
-	public boolean onDisable() {
-		return true;
-	}
-
-	@Override
-	public boolean onEnable() {
-		return true;
-	}
-
-	@Override
-	public boolean onLoad() {
-		return true;
-	}
-
-	@Override
-	public boolean onUnload() {
-		return true;
-	}
 
 	@Override
 	public void reloadConfig() {

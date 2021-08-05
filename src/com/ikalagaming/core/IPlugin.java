@@ -1,15 +1,13 @@
 package com.ikalagaming.core;
 
-import com.ikalagaming.plugins.Plugin;
-
 /**
- * An interface that extends the plugin interface. Contains methods for
- * handling descriptions and configuration of plugins.
+ * Contains methods for handling descriptions and configuration of plugins.
  *
  * @author Ches Burks
  *
- */	
-public interface IPlugin extends Plugin {
+ */
+// TODO should this be it's own plugin? In Ikala-Core?
+public interface IPlugin {
 	/**
 	 * Returns the FileConfiguration for the plugin.
 	 *
@@ -19,9 +17,12 @@ public interface IPlugin extends Plugin {
 
 	/**
 	 * Returns a PluginDescription for the plugin.
+	 * 
+	 * @deprecated Replaced by Plugin Info.
 	 *
 	 * @return the description for the plugin
 	 */
+	@Deprecated
 	public PluginDescription getDescription();
 
 	/**

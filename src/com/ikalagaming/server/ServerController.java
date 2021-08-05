@@ -14,9 +14,8 @@ import com.ikalagaming.plugins.PluginManager;
  * @author Ches Burks
  *
  */
-public class ServerController implements Plugin {
-	private static final String pluginName = "Server Controller";
-	private static final double version = 0.1;
+public class ServerController extends Plugin {
+	public static final String PLUGIN_NAME = "Server-Controller";
 	private HashSet<Listener> listeners;
 	private ServerListener listener = new ServerListener(this);
 
@@ -27,16 +26,6 @@ public class ServerController implements Plugin {
 			this.listeners.add(this.listener);
 		}
 		return this.listeners;
-	}
-
-	@Override
-	public String getName() {
-		return ServerController.pluginName;
-	}
-
-	@Override
-	public double getVersion() {
-		return ServerController.version;
 	}
 
 	@Override
@@ -51,7 +40,7 @@ public class ServerController implements Plugin {
 
 	@Override
 	public boolean onLoad() {
-		PluginManager.getInstance().registerCommand("shutdown", this);
+		//PluginManager.getInstance().registerCommand("shutdown", this);
 		return true;
 	}
 
